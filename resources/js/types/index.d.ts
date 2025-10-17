@@ -1,6 +1,14 @@
 import { InertiaLinkProps } from '@inertiajs/vue3';
 import type { LucideIcon } from 'lucide-vue-next';
 
+export interface Branding {
+    siteTitle: string;
+    sidebarTitle: string;
+    sidebarIconUrl?: string | null;
+    faviconUrl?: string | null;
+    appleTouchIconUrl?: string | null;
+}
+
 export interface Auth {
     user: User;
 }
@@ -24,6 +32,7 @@ export type AppPageProps<
     quote: { message: string; author: string };
     auth: Auth;
     sidebarOpen: boolean;
+    branding: Branding;
 };
 
 export interface User {

@@ -2,8 +2,10 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\SiteSetting;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -38,14 +40,23 @@ class HandleInertiaRequests extends Middleware
     {
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
 
+        $settings = SiteSetting::query()->first();
+
         return [
             ...parent::share($request),
-            'name' => config('app.name'),
+            'name' => $settings?->site_title ?? config('app.name'),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
                 'user' => $request->user(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'branding' => [
+                'siteTitle' => $settings?->site_title ?? config('app.name', 'Laravel'),
+                'sidebarTitle' => $settings?->sidebar_title ?? 'Laravel Starter Kit',
+                'sidebarIconUrl' => $settings?->sidebar_icon_path ? Storage::url($settings->sidebar_icon_path) : null,
+                'faviconUrl' => $settings?->favicon_path ? Storage::url($settings->favicon_path) : null,
+                'appleTouchIconUrl' => $settings?->apple_touch_icon_path ? Storage::url($settings->apple_touch_icon_path) : null,
+            ],
         ];
     }
 }

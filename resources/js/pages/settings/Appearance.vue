@@ -2,6 +2,7 @@
 import { Head } from '@inertiajs/vue3';
 
 import AppearanceTabs from '@/components/AppearanceTabs.vue';
+import AppearanceBrandingForm from '@/components/AppearanceBrandingForm.vue';
 import HeadingSmall from '@/components/HeadingSmall.vue';
 import { type BreadcrumbItem } from '@/types';
 
@@ -28,6 +29,7 @@ const breadcrumbItems: BreadcrumbItem[] = [
                     description="Update your account's appearance settings"
                 />
                 <AppearanceTabs />
+                <AppearanceBrandingForm />
             </div>
         </SettingsLayout>
     </AppLayout>
