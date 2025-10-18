@@ -56,35 +56,35 @@ use Illuminate\Support\Facades\DB;
 
 
 // FUNGSI LAMA - CEK STRUKTUR TABEL (dikomen untuk backup)
-echo "Mengecek struktur tabel saat ini...\n\n";
+// echo "Mengecek struktur tabel saat ini...\n\n";
 
-try {
-    // Cek struktur tabel new_terms_negative_0click
-    echo "=== STRUKTUR TABEL new_terms_negative_0click ===\n";
-    $columns = DB::select("DESCRIBE new_terms_negative_0click");
-    foreach ($columns as $column) {
-        echo "- {$column->Field}: {$column->Type} " . 
-             ($column->Null === 'YES' ? 'NULL' : 'NOT NULL') . 
-             ($column->Default ? " DEFAULT {$column->Default}" : '') . "\n";
-    }
+// try {
+//     // Cek struktur tabel new_terms_negative_0click
+//     echo "=== STRUKTUR TABEL new_terms_negative_0click ===\n";
+//     $columns = DB::select("DESCRIBE new_terms_negative_0click");
+//     foreach ($columns as $column) {
+//         echo "- {$column->Field}: {$column->Type} " . 
+//              ($column->Null === 'YES' ? 'NULL' : 'NOT NULL') . 
+//              ($column->Default ? " DEFAULT {$column->Default}" : '') . "\n";
+//     }
     
-    echo "\n=== STRUKTUR TABEL new_frasa_negative ===\n";
-    $columns2 = DB::select("DESCRIBE new_frasa_negative");
-    foreach ($columns2 as $column) {
-        echo "- {$column->Field}: {$column->Type} " . 
-             ($column->Null === 'YES' ? 'NULL' : 'NOT NULL') . 
-             ($column->Default ? " DEFAULT {$column->Default}" : '') . "\n";
-    }
+//     echo "\n=== STRUKTUR TABEL new_frasa_negative ===\n";
+//     $columns2 = DB::select("DESCRIBE new_frasa_negative");
+//     foreach ($columns2 as $column) {
+//         echo "- {$column->Field}: {$column->Type} " . 
+//              ($column->Null === 'YES' ? 'NULL' : 'NOT NULL') . 
+//              ($column->Default ? " DEFAULT {$column->Default}" : '') . "\n";
+//     }
     
-    echo "\n=== STATUS MIGRATION ===\n";
-    $migrations = DB::table('migrations')->orderBy('batch', 'desc')->get();
-    foreach ($migrations as $migration) {
-        echo "Batch {$migration->batch}: {$migration->migration}\n";
-    }
+//     echo "\n=== STATUS MIGRATION ===\n";
+//     $migrations = DB::table('migrations')->orderBy('batch', 'desc')->get();
+//     foreach ($migrations as $migration) {
+//         echo "Batch {$migration->batch}: {$migration->migration}\n";
+//     }
     
-} catch (Exception $e) {
-    echo "❌ Error: " . $e->getMessage() . "\n";
-}
+// } catch (Exception $e) {
+//     echo "❌ Error: " . $e->getMessage() . "\n";
+// }
 
 
 /*
@@ -126,3 +126,33 @@ try {
     echo "❌ Error: " . $e->getMessage() . "\n";
 }
 */
+
+// Cek tabel site_settings dan data yang ada
+echo "\n=== STRUKTUR TABEL site_settings ===\n";
+try {
+    $siteSettingsColumns = DB::select("DESCRIBE site_settings");
+    foreach ($siteSettingsColumns as $column) {
+        echo "- {$column->Field}: {$column->Type} " . 
+                ($column->Null === 'YES' ? 'NULL' : 'NOT NULL') . 
+                ($column->Default ? " DEFAULT {$column->Default}" : '') . "\n";
+    }
+    
+    echo "\n=== DATA TABEL site_settings ===\n";
+    $siteSettings = DB::table('site_settings')->get();
+    if ($siteSettings->isEmpty()) {
+        echo "❌ Tidak ada data di tabel site_settings\n";
+    } else {
+        foreach ($siteSettings as $setting) {
+            echo "- ID: {$setting->id}\n";
+            echo "- Site Title: " . ($setting->site_title ?? 'NULL') . "\n";
+            echo "- Sidebar Title: " . ($setting->sidebar_title ?? 'NULL') . "\n";
+            echo "- Sidebar Icon: " . ($setting->sidebar_icon_path ?? 'NULL') . "\n";
+            echo "- Favicon: " . ($setting->favicon_path ?? 'NULL') . "\n";
+            echo "- Apple Touch Icon: " . ($setting->apple_touch_icon_path ?? 'NULL') . "\n";
+            echo "- Created: {$setting->created_at}\n";
+            echo "- Updated: {$setting->updated_at}\n\n";
+        }
+    }
+} catch (Exception $siteSettingsError) {
+    echo "❌ Tabel site_settings tidak ditemukan atau error: " . $siteSettingsError->getMessage() . "\n";
+}

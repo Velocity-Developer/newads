@@ -46,7 +46,7 @@ class NewTermsNegative0Click extends Model
      */
     public function frasa(): HasMany
     {
-        return $this->hasMany(NewFrasaNegative::class, 'parent_term_id');
+        return $this->hasMany(NewFrasaNegative::class, 'parent_term_id', 'id');
     }
     
     /**

@@ -28,6 +28,15 @@ function submit() {
 
 <template>
   <div class="space-y-6">
+    <!-- Debug info -->
+    <div class="p-4 bg-gray-100 rounded-md text-sm">
+      <strong>Debug Info:</strong><br>
+      Site Title: {{ branding?.siteTitle || 'Not set' }}<br>
+      Sidebar Title: {{ branding?.sidebarTitle || 'Not set' }}<br>
+      Form Site Title: {{ form.site_title }}<br>
+      Form Sidebar Title: {{ form.sidebar_title }}
+    </div>
+
     <div class="space-y-2">
       <label class="text-sm font-medium">General site title</label>
       <Input type="text" v-model="form.site_title" placeholder="My Awesome App" />
@@ -41,16 +50,25 @@ function submit() {
     <div class="space-y-2">
       <label class="text-sm font-medium">Sidebar icon (png/jpg/svg)</label>
       <Input type="file" accept=".png,.jpg,.jpeg,.svg" @change="(e: any) => (form.sidebar_icon = e.target.files?.[0] ?? null)" />
+      <div v-if="branding?.sidebarIconUrl" class="text-xs text-gray-500">
+        Current: <a :href="branding.sidebarIconUrl" target="_blank" class="text-blue-500">View current icon</a>
+      </div>
     </div>
 
     <div class="space-y-2">
       <label class="text-sm font-medium">Website favicon (ico/png/svg)</label>
       <Input type="file" accept=".ico,.png,.svg" @change="(e: any) => (form.favicon = e.target.files?.[0] ?? null)" />
+      <div v-if="branding?.faviconUrl" class="text-xs text-gray-500">
+        Current: <a :href="branding.faviconUrl" target="_blank" class="text-blue-500">View current favicon</a>
+      </div>
     </div>
 
     <div class="space-y-2">
       <label class="text-sm font-medium">Apple touch icon (png/jpg/svg)</label>
       <Input type="file" accept=".png,.jpg,.jpeg,.svg" @change="(e: any) => (form.apple_touch_icon = e.target.files?.[0] ?? null)" />
+      <div v-if="branding?.appleTouchIconUrl" class="text-xs text-gray-500">
+        Current: <a :href="branding.appleTouchIconUrl" target="_blank" class="text-blue-500">View current icon</a>
+      </div>
     </div>
 
     <div>

@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Log;
 class NotificationService
 {
     private ?string $botToken;
-    private ?string $chatId;
+    private array|string|null $chatId;
     private string $baseUrl;
 
     public function __construct()
@@ -29,23 +29,34 @@ class NotificationService
         }
 
         try {
-            $response = Http::timeout(10)->post("{$this->baseUrl}/sendMessage", [
-                'chat_id' => $this->chatId,
-                'text' => $message,
-                'parse_mode' => 'HTML',
-                'disable_web_page_preview' => $disablePreview,
-            ]);
+            $chatIds = is_array($this->chatId) ? $this->chatId : [$this->chatId];
+            $allSuccessful = true;
 
-            if ($response->successful()) {
-                Log::info('Telegram notification sent successfully');
-                return true;
-            } else {
-                Log::error('Telegram API error', [
-                    'status' => $response->status(),
-                    'response' => $response->body()
+            foreach ($chatIds as $chatId) {
+                if (empty($chatId)) {
+                    continue;
+                }
+
+                $response = Http::timeout(10)->post("{$this->baseUrl}/sendMessage", [
+                    'chat_id' => $chatId,
+                    'text' => $message,
+                    'parse_mode' => 'HTML',
+                    'disable_web_page_preview' => $disablePreview,
                 ]);
-                return false;
+
+                if ($response->successful()) {
+                    Log::info('Telegram notification sent successfully', ['chat_id' => $chatId]);
+                } else {
+                    Log::error('Telegram API error', [
+                        'chat_id' => $chatId,
+                        'status' => $response->status(),
+                        'response' => $response->body()
+                    ]);
+                    $allSuccessful = false;
+                }
             }
+
+            return $allSuccessful;
 
         } catch (\Exception $e) {
             Log::error('Failed to send Telegram notification', [
