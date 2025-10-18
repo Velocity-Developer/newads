@@ -43,30 +43,21 @@ class TermsController extends Controller
         // Statistics
         $stats = [
             'total' => NewTermsNegative0Click::count(),
-            'ai_positive' => NewTermsNegative0Click::where('hasil_cek_ai', 'positive')->count(),
-            'ai_negative' => NewTermsNegative0Click::where('hasil_cek_ai', 'negative')->count(),
-            'ai_pending' => NewTermsNegative0Click::where('hasil_cek_ai', 'pending')->count(),
-            'google_success' => NewTermsNegative0Click::where('status_input_google', 'success')->count(),
-            'google_failed' => NewTermsNegative0Click::where('status_input_google', 'failed')->count(),
-            'google_pending' => NewTermsNegative0Click::where('status_input_google', 'pending')->count(),
-            'telegram_sent' => NewTermsNegative0Click::where('notif_telegram', 'sent')->count(),
-            'telegram_failed' => NewTermsNegative0Click::where('notif_telegram', 'failed')->count(),
-            'telegram_pending' => NewTermsNegative0Click::where('notif_telegram', 'pending')->count(),
+            'ai_positive' => NewTermsNegative0Click::where('hasil_cek_ai', 'relevan')->count(),
+            'ai_negative' => NewTermsNegative0Click::where('hasil_cek_ai', 'negatif')->count(),
+            'ai_null' => NewTermsNegative0Click::whereNull('hasil_cek_ai')->count(),
+            'google_success' => NewTermsNegative0Click::where('status_input_google', 'sukses')->count(),
+            'google_failed' => NewTermsNegative0Click::where('status_input_google', 'gagal')->count(),
+            'google_error' => NewTermsNegative0Click::where('status_input_google', 'error')->count(),
+            'telegram_sent' => NewTermsNegative0Click::where('notif_telegram', 'sukses')->count(),
+            'telegram_failed' => NewTermsNegative0Click::where('notif_telegram', 'gagal')->count(),
+            'telegram_null' => NewTermsNegative0Click::whereNull('notif_telegram')->count(),
         ];
 
         return Inertia::render('Terms/Index', [
             'terms' => $terms,
             'stats' => $stats,
             'filters' => $request->only(['search', 'ai_result', 'google_status', 'telegram_notif', 'sort_by', 'sort_order']),
-        ]);
-    }
-
-    public function show(NewTermsNegative0Click $term)
-    {
-        $term->load('frasa');
-        
-        return Inertia::render('Terms/Show', [
-            'term' => $term,
         ]);
     }
 }

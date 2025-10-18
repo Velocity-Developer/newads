@@ -71,10 +71,10 @@ class NotificationService
      */
     public function notifyNegativeKeywordSuccess(string $keyword, string $matchType = 'EXACT'): bool
     {
-        $message = "✅ <b>Negative Keyword Added</b>\n\n";
+        $message = "✅ <b>Kata Kunci Negatif Ditambahkan</b>\n\n";
         $message .= "🔑 <b>Keyword:</b> {$keyword}\n";
         $message .= "📝 <b>Match Type:</b> {$matchType}\n";
-        $message .= "⏰ <b>Time:</b> " . now()->format('Y-m-d H:i:s');
+        $message .= "⏰ <b>Waktu:</b> " . now()->format('Y-m-d H:i:s');
 
         return $this->sendMessage($message);
     }
@@ -84,11 +84,11 @@ class NotificationService
      */
     public function notifyNegativeKeywordFailure(string $keyword, string $error, int $retryCount = 0): bool
     {
-        $message = "❌ <b>Negative Keyword Failed</b>\n\n";
+        $message = "❌ <b>Penambahan Kata Kunci Negatif Gagal</b>\n\n";
         $message .= "🔑 <b>Keyword:</b> {$keyword}\n";
         $message .= "❗ <b>Error:</b> {$error}\n";
         $message .= "🔄 <b>Retry Count:</b> {$retryCount}\n";
-        $message .= "⏰ <b>Time:</b> " . now()->format('Y-m-d H:i:s');
+        $message .= "⏰ <b>Waktu:</b> " . now()->format('Y-m-d H:i:s');
 
         return $this->sendMessage($message);
     }
@@ -98,12 +98,12 @@ class NotificationService
      */
     public function notifyBatchResults(string $operation, int $successful, int $failed, int $total): bool
     {
-        $message = "📊 <b>{$operation} - Batch Results</b>\n\n";
-        $message .= "✅ <b>Successful:</b> {$successful}\n";
-        $message .= "❌ <b>Failed:</b> {$failed}\n";
+        $message = "📊 <b>{$operation} - Hasil Proses Batch</b>\n\n";
+        $message .= "✅ <b>Berhasil:</b> {$successful}\n";
+        $message .= "❌ <b>Gagal:</b> {$failed}\n";
         $message .= "📈 <b>Total:</b> {$total}\n";
         $message .= "📊 <b>Success Rate:</b> " . round(($successful / max($total, 1)) * 100, 1) . "%\n";
-        $message .= "⏰ <b>Time:</b> " . now()->format('Y-m-d H:i:s');
+        $message .= "⏰ <b>Waktu:</b> " . now()->format('Y-m-d H:i:s');
 
         return $this->sendMessage($message);
     }
@@ -113,10 +113,10 @@ class NotificationService
      */
     public function notifyNewTermsFetched(int $newTerms, int $totalFetched): bool
     {
-        $message = "🔍 <b>New Search Terms Fetched</b>\n\n";
+        $message = "🔍 <b>Search Terms Baru Diambil</b>\n\n";
         $message .= "🆕 <b>New Terms:</b> {$newTerms}\n";
         $message .= "📊 <b>Total Fetched:</b> {$totalFetched}\n";
-        $message .= "⏰ <b>Time:</b> " . now()->format('Y-m-d H:i:s');
+        $message .= "⏰ <b>Waktu:</b> " . now()->format('Y-m-d H:i:s');
 
         return $this->sendMessage($message);
     }
@@ -126,12 +126,12 @@ class NotificationService
      */
     public function notifyAiAnalysisResults(int $analyzed, int $negative, int $relevant): bool
     {
-        $message = "🤖 <b>AI Analysis Completed</b>\n\n";
+        $message = "🤖 <b>Analisis AI Selesai</b>\n\n";
         $message .= "📊 <b>Analyzed:</b> {$analyzed}\n";
         $message .= "❌ <b>Negative:</b> {$negative}\n";
         $message .= "✅ <b>Relevant:</b> {$relevant}\n";
         $message .= "📈 <b>Negative Rate:</b> " . round(($negative / max($analyzed, 1)) * 100, 1) . "%\n";
-        $message .= "⏰ <b>Time:</b> " . now()->format('Y-m-d H:i:s');
+        $message .= "⏰ <b>Waktu:</b> " . now()->format('Y-m-d H:i:s');
 
         return $this->sendMessage($message);
     }
@@ -141,10 +141,10 @@ class NotificationService
      */
     public function notifySystemError(string $operation, string $error): bool
     {
-        $message = "🚨 <b>System Error</b>\n\n";
+        $message = "🚨 <b>Error Sistem</b>\n\n";
         $message .= "⚙️ <b>Operation:</b> {$operation}\n";
         $message .= "❗ <b>Error:</b> {$error}\n";
-        $message .= "⏰ <b>Time:</b> " . now()->format('Y-m-d H:i:s');
+        $message .= "⏰ <b>Waktu:</b> " . now()->format('Y-m-d H:i:s');
 
         return $this->sendMessage($message);
     }

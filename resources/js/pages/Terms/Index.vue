@@ -14,9 +14,9 @@ import { computed, ref } from 'vue';
 interface Term {
     id: number;
     terms: string;
-    hasil_cek_ai: 'positive' | 'negative' | 'pending';
-    status_input_google: 'success' | 'failed' | 'pending';
-    notif_telegram: 'sent' | 'failed' | 'pending';
+    hasil_cek_ai: 'relevan' | 'negative' | null;
+    status_input_google: 'sukses' | 'gagal' | 'error' | null;
+    notif_telegram: 'sukses' | 'gagal' | null;
     retry_count: number;
     created_at: string;
     updated_at: string;
@@ -25,15 +25,14 @@ interface Term {
 
 interface Stats {
     total: number;
-    ai_positive: number;
+    ai_relevan: number;
     ai_negative: number;
-    ai_pending: number;
-    google_success: number;
-    google_failed: number;
-    google_pending: number;
-    telegram_sent: number;
-    telegram_failed: number;
-    telegram_pending: number;
+    ai_null: number;
+    google_sukses: number;
+    google_gagal: number;
+    google_error: number;
+    telegram_sukses: number;
+    telegram_gagal: number;
 }
 
 interface Props {
@@ -114,27 +113,28 @@ const clearFilters = () => {
 // Badge variants for different statuses
 const getAiBadgeVariant = (status: string) => {
     switch (status) {
-        case 'positive': return 'default';
+        case null: return 'outline';
+        case 'relevan': return 'success';
         case 'negative': return 'destructive';
-        case 'pending': return 'secondary';
         default: return 'secondary';
     }
 };
 
 const getGoogleBadgeVariant = (status: string) => {
     switch (status) {
-        case 'success': return 'default';
-        case 'failed': return 'destructive';
-        case 'pending': return 'secondary';
+        case null: return 'outline';
+        case 'sukses': return 'success';
+        case 'gagal': return 'destructive';
+        case 'error': return 'destructive';
         default: return 'secondary';
     }
 };
 
 const getTelegramBadgeVariant = (status: string) => {
     switch (status) {
-        case 'sent': return 'default';
-        case 'failed': return 'destructive';
-        case 'pending': return 'secondary';
+        case null: return 'outline';
+        case 'sukses': return 'success';
+        case 'gagal': return 'destructive';
         default: return 'secondary';
     }
 };
@@ -156,58 +156,6 @@ const formatDate = (dateString: string) => {
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-6">
-            <!-- Statistics Dashboard -->
-            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card>
-                    <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle class="text-sm font-medium">Total Terms</CardTitle>
-                        <TrendingUp class="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div class="text-2xl font-bold">{{ stats.total.toLocaleString() }}</div>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle class="text-sm font-medium">AI Analysis</CardTitle>
-                        <CheckCircle class="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div class="text-2xl font-bold text-green-600">{{ stats.ai_positive }}</div>
-                        <p class="text-xs text-muted-foreground">
-                            {{ stats.ai_negative }} negative, {{ stats.ai_pending }} pending
-                        </p>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle class="text-sm font-medium">Google Ads</CardTitle>
-                        <TrendingUp class="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div class="text-2xl font-bold text-blue-600">{{ stats.google_success }}</div>
-                        <p class="text-xs text-muted-foreground">
-                            {{ stats.google_failed }} failed, {{ stats.google_pending }} pending
-                        </p>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle class="text-sm font-medium">Telegram Notifications</CardTitle>
-                        <AlertCircle class="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div class="text-2xl font-bold text-purple-600">{{ stats.telegram_sent }}</div>
-                        <p class="text-xs text-muted-foreground">
-                            {{ stats.telegram_failed }} failed, {{ stats.telegram_pending }} pending
-                        </p>
-                    </CardContent>
-                </Card>
-            </div>
-
             <!-- Filters Section -->
             <Card>
                 <CardHeader>
@@ -242,9 +190,9 @@ const formatDate = (dateString: string) => {
                                 class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 <option value="">All AI Results</option>
-                                <option value="positive">Positive</option>
+                                <option value="relevan">Relevan</option>
                                 <option value="negative">Negative</option>
-                                <option value="pending">Pending</option>
+                                <option value="null">Null</option>
                             </select>
                         </div>
 
@@ -257,9 +205,10 @@ const formatDate = (dateString: string) => {
                                 class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 <option value="">All Google Status</option>
-                                <option value="success">Success</option>
-                                <option value="failed">Failed</option>
-                                <option value="pending">Pending</option>
+                                <option value="sukses">Sukses</option>
+                                <option value="gagal">Gagal</option>
+                                <option value="error">Error</option>
+                                <option value="null">Null</option>
                             </select>
                         </div>
 
@@ -272,9 +221,9 @@ const formatDate = (dateString: string) => {
                                 class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 <option value="">All Telegram Status</option>
-                                <option value="sent">Sent</option>
-                                <option value="failed">Failed</option>
-                                <option value="pending">Pending</option>
+                                <option value="sukses">Sukses</option>
+                                <option value="gagal">Gagal</option>
+                                <option value="null">Null</option>
                             </select>
                         </div>
                     </div>
@@ -304,17 +253,20 @@ const formatDate = (dateString: string) => {
                         <table class="w-full border-collapse">
                             <thead>
                                 <tr class="border-b">
+                                    <th class="text-left p-2 font-medium">ID Terms</th>
                                     <th class="text-left p-2 font-medium">Terms</th>
                                     <th class="text-left p-2 font-medium">AI Result</th>
                                     <th class="text-left p-2 font-medium">Google Ads</th>
-                                    <th class="text-left p-2 font-medium">Telegram</th>
+                                    <th class="text-left p-2 font-medium">Notif Telegram</th>
                                     <th class="text-left p-2 font-medium">Retry Count</th>
                                     <th class="text-left p-2 font-medium">Created</th>
-                                    <th class="text-left p-2 font-medium">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr v-for="term in terms.data" :key="term.id" class="border-b hover:bg-muted/50">
+                                    <td class="p-2">
+                                        <div class="font-medium">{{ term.id }}</div>
+                                    </td>
                                     <td class="p-2">
                                         <div class="font-medium">{{ term.terms }}</div>
                                         <div v-if="term.frasa_negatives_count" class="text-sm text-muted-foreground">
@@ -343,15 +295,6 @@ const formatDate = (dateString: string) => {
                                         <span class="text-sm text-muted-foreground">
                                             {{ formatDate(term.created_at) }}
                                         </span>
-                                    </td>
-                                    <td class="p-2">
-                                        <Link
-                                            :href="`/terms/${term.id}`"
-                                            class="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
-                                        >
-                                            <Eye class="h-4 w-4" />
-                                            View
-                                        </Link>
                                     </td>
                                 </tr>
                             </tbody>
