@@ -110,19 +110,19 @@ class TestNegativeKeywordsSystemCommand extends Command
 
             // Test relationships
             $testTerm = NewTermsNegative0Click::create([
-                'terms' => 'test search term',
-                'hasil_cek_ai' => 'pending',
-                'status_input_google' => 'pending',
+                'terms' => 'test term for system check',
+                'hasil_cek_ai' => null,
+                'status_input_google' => null,
                 'retry_count' => 0,
-                'notif_telegram' => false
+                'notif_telegram' => null
             ]);
 
             $testPhrase = NewFrasaNegative::create([
                 'frasa' => 'test phrase',
                 'parent_term_id' => $testTerm->id,
-                'status_input_google' => 'pending',
+                'status_input_google' => null,
                 'retry_count' => 0,
-                'notif_telegram' => false
+                'notif_telegram' => null
             ]);
 
             if ($testTerm->phrases()->count() > 0 && $testPhrase->parentTerm) {

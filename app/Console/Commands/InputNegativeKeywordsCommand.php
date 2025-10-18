@@ -70,8 +70,8 @@ class InputNegativeKeywordsCommand extends Command
                     if ($success) {
                         // Update status to success
                         $term->update([
-                            'status_input_google' => 'success',
-                            'notif_telegram' => false
+                            'status_input_google' => NewTermsNegative0Click::STATUS_BERHASIL,
+                            'notif_telegram' => NewTermsNegative0Click::NOTIF_BERHASIL
                         ]);
                         
                         $successCount++;
@@ -81,7 +81,7 @@ class InputNegativeKeywordsCommand extends Command
                         // Update status to failed and increment retry
                         $term->incrementRetry();
                         $term->update([
-                            'status_input_google' => 'failed'
+                            'status_input_google' => NewTermsNegative0Click::STATUS_GAGAL
                         ]);
                         
                         $failedCount++;
@@ -94,7 +94,7 @@ class InputNegativeKeywordsCommand extends Command
                     // Update status to failed and increment retry
                     $term->incrementRetry();
                     $term->update([
-                        'status_input_google' => 'failed'
+                        'status_input_google' => NewTermsNegative0Click::STATUS_GAGAL
                     ]);
                     
                     $failedCount++;

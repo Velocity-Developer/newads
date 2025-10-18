@@ -24,6 +24,10 @@ This will create:
 - `new_terms_negative_0click` - Stores zero-click search terms
 - `new_frasa_negative` - Stores individual phrases extracted from terms
 
+**Database Schema Updates:**
+- `notif_telegram` field is now an ENUM with values: 'sukses', 'gagal' (previously boolean)
+- This field tracks Telegram notification status for each record
+
 ### 2. Environment Configuration
 
 Copy the environment variables from `.env.example` to your `.env` file and configure:

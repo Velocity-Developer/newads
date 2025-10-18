@@ -62,24 +62,24 @@ class Kernel extends ConsoleKernel
         // Weekly cleanup of old processed records (older than 30 days)
         $schedule->call(function () {
             \App\Models\NewTermsNegative0Click::where('created_at', '<', now()->subDays(30))
-                ->where('status_input_google', 'success')
+                ->where('status_input_google', \App\Models\NewTermsNegative0Click::STATUS_BERHASIL)
                 ->delete();
                 
             \App\Models\NewFrasaNegative::where('created_at', '<', now()->subDays(30))
-                ->where('status_input_google', 'success')
+                ->where('status_input_google', \App\Models\NewFrasaNegative::STATUS_BERHASIL)
                 ->delete();
         })->weekly()->sundays()->at('02:00');
         
         // Retry failed operations every hour
         $schedule->call(function () {
             // Reset retry count for failed items that can be retried
-            \App\Models\NewTermsNegative0Click::where('status_input_google', 'failed')
+            \App\Models\NewTermsNegative0Click::where('status_input_google', \App\Models\NewTermsNegative0Click::STATUS_GAGAL)
                 ->where('retry_count', '<', 3)
-                ->update(['status_input_google' => 'pending']);
+                ->update(['status_input_google' => null]);
                 
-            \App\Models\NewFrasaNegative::where('status_input_google', 'failed')
+            \App\Models\NewFrasaNegative::where('status_input_google', \App\Models\NewFrasaNegative::STATUS_GAGAL)
                 ->where('retry_count', '<', 3)
-                ->update(['status_input_google' => 'pending']);
+                ->update(['status_input_google' => null]);
         })->hourly();
     }
 

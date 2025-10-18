@@ -35,7 +35,7 @@ Sistem ini secara otomatis:
 - **Match Type**: `EXACT`
 - **Retry Logic**: Maksimal 3x, setelah itu status = `error`
 - **Output**: 
-  - Update `status_input_google` (`berhasil`/`gagal`/`error`)
+  - Update `status_input_google` (`sukses`/`gagal`/`error`)
   - Kirim notifikasi Telegram
   - Insert ke `new_frasa_negative` (pecah per kata, skip jika frasa sudah ada)
 
@@ -57,9 +57,9 @@ CREATE TABLE new_terms_negative_0click (
     updated_at TIMESTAMP NULL,
     terms VARCHAR(500) NOT NULL UNIQUE,
     hasil_cek_ai ENUM('relevan', 'negatif') NULL,
-    status_input_google ENUM('berhasil', 'gagal', 'error') NULL,
+    status_input_google ENUM('sukses', 'gagal', 'error') NULL,
     retry_count INT DEFAULT 0,
-    notif_telegram BOOLEAN DEFAULT FALSE,
+    notif_telegram ENUM('sukses', 'gagal') NULL,
     INDEX idx_ai_status (hasil_cek_ai, status_input_google),
     INDEX idx_created_at (created_at)
 );
@@ -73,9 +73,9 @@ CREATE TABLE new_frasa_negative (
     updated_at TIMESTAMP NULL,
     frasa VARCHAR(255) NOT NULL UNIQUE,
     parent_term_id BIGINT UNSIGNED NULL,
-    status_input_google ENUM('berhasil', 'gagal', 'error') NULL,
+    status_input_google ENUM('sukses', 'gagal', 'error') NULL,
     retry_count INT DEFAULT 0,
-    notif_telegram BOOLEAN DEFAULT FALSE,
+    notif_telegram ENUM('sukses', 'gagal') NULL,
     FOREIGN KEY (parent_term_id) REFERENCES new_terms_negative_0click(id),
     INDEX idx_status (status_input_google),
     INDEX idx_frasa (frasa)

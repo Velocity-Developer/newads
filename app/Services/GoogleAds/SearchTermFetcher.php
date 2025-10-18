@@ -188,7 +188,7 @@ class SearchTermFetcher
                     'hasil_cek_ai' => null,
                     'status_input_google' => null,
                     'retry_count' => 0,
-                    'notif_telegram' => false,
+                    'notif_telegram' => null,
                 ]);
                 
                 $stored++;

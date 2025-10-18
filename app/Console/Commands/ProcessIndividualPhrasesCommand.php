@@ -46,7 +46,7 @@ class ProcessIndividualPhrasesCommand extends Command
             $batchSize = (int) $this->option('batch-size');
             
             // Get successfully processed terms that haven't been broken down into phrases yet
-            $terms = NewTermsNegative0Click::where('status_input_google', 'success')
+            $terms = NewTermsNegative0Click::where('status_input_google', NewTermsNegative0Click::STATUS_BERHASIL)
                 ->whereDoesntHave('phrases')
                 ->limit($batchSize)
                 ->get();
@@ -89,12 +89,12 @@ class ProcessIndividualPhrasesCommand extends Command
                         
                         if (!$existingPhrase) {
                             NewFrasaNegative::create([
-                                'frasa' => $phrase,
-                                'parent_term_id' => $term->id,
-                                'status_input_google' => 'pending',
-                                'retry_count' => 0,
-                                'notif_telegram' => false
-                            ]);
+                            'frasa' => $frasa,
+                            'parent_term_id' => $term->id,
+                            'status_input_google' => null,
+                            'retry_count' => 0,
+                            'notif_telegram' => null
+                        ]);
                             
                             $phrasesCreated++;
                         }
@@ -148,8 +148,8 @@ class ProcessIndividualPhrasesCommand extends Command
                 if ($success) {
                     // Update status to success
                     $phrase->update([
-                        'status_input_google' => 'success',
-                        'notif_telegram' => false
+                        'status_input_google' => NewFrasaNegative::STATUS_BERHASIL,
+                        'notif_telegram' => NewFrasaNegative::NOTIF_BERHASIL
                     ]);
                     
                     $successCount++;
@@ -159,7 +159,7 @@ class ProcessIndividualPhrasesCommand extends Command
                     // Update status to failed and increment retry
                     $phrase->incrementRetry();
                     $phrase->update([
-                        'status_input_google' => 'failed'
+                        'status_input_google' => NewFrasaNegative::STATUS_GAGAL
                     ]);
                     
                     $failedCount++;
@@ -172,7 +172,7 @@ class ProcessIndividualPhrasesCommand extends Command
                 // Update status to failed and increment retry
                 $phrase->incrementRetry();
                 $phrase->update([
-                    'status_input_google' => 'failed'
+                    'status_input_google' => NewFrasaNegative::STATUS_GAGAL
                 ]);
                 
                 $failedCount++;

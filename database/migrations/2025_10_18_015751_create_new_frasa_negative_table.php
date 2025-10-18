@@ -16,9 +16,9 @@ return new class extends Migration
             $table->timestamps();
             $table->string('frasa', 255)->unique();
             $table->unsignedBigInteger('parent_term_id')->nullable();
-            $table->enum('status_input_google', ['berhasil', 'gagal', 'error'])->nullable();
+            $table->enum('status_input_google', ['sukses', 'gagal', 'error'])->nullable();
             $table->integer('retry_count')->default(0);
-            $table->boolean('notif_telegram')->default(false);
+            $table->enum('notif_telegram', ['sukses', 'gagal'])->nullable()->comment('Status notifikasi Telegram: sukses/gagal');
             
             // Foreign key constraint
             $table->foreign('parent_term_id')->references('id')->on('new_terms_negative_0click')->onDelete('cascade');

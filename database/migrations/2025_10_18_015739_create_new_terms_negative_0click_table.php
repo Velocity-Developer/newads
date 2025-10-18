@@ -16,9 +16,9 @@ return new class extends Migration
             $table->timestamps();
             $table->string('terms', 500)->unique();
             $table->enum('hasil_cek_ai', ['relevan', 'negatif'])->nullable();
-            $table->enum('status_input_google', ['berhasil', 'gagal', 'error'])->nullable();
+            $table->enum('status_input_google', ['sukses', 'gagal', 'error'])->nullable();
             $table->integer('retry_count')->default(0);
-            $table->boolean('notif_telegram')->default(false);
+            $table->enum('notif_telegram', ['sukses', 'gagal'])->nullable()->comment('Status notifikasi Telegram: sukses/gagal');
             
             // Indexes for performance
             $table->index(['hasil_cek_ai', 'status_input_google'], 'idx_ai_status');

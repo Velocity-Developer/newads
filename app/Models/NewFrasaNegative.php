@@ -5,6 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * Model untuk menyimpan frasa negative keywords yang diekstrak dari search terms
+ * 
+ * @property string $frasa Frasa negative keyword yang diekstrak
+ * @property int $parent_term_id ID dari parent term di tabel new_terms_negative_0click
+ * @property string|null $status_input_google Status input ke Google Ads: 'sukses', 'gagal', atau 'error'
+ * @property int $retry_count Jumlah percobaan ulang (maksimal 3)
+ * @property string|null $notif_telegram Status notifikasi Telegram: 'sukses' atau 'gagal'
+ */
 class NewFrasaNegative extends Model
 {
     protected $table = 'new_frasa_negative';
@@ -18,10 +27,17 @@ class NewFrasaNegative extends Model
     ];
     
     protected $casts = [
-        'notif_telegram' => 'boolean',
         'retry_count' => 'integer',
         'parent_term_id' => 'integer',
     ];
+    
+    // Konstanta untuk enum values
+    const STATUS_BERHASIL = 'sukses';
+    const STATUS_GAGAL = 'gagal';
+    const STATUS_ERROR = 'error';
+    
+    const NOTIF_BERHASIL = 'sukses';
+    const NOTIF_GAGAL = 'gagal';
     
     /**
      * Get the parent term that owns this frasa.
@@ -37,7 +53,7 @@ class NewFrasaNegative extends Model
     public function canRetry(): bool
     {
         return $this->retry_count < 3 && 
-               in_array($this->status_input_google, [null, 'gagal']);
+               in_array($this->status_input_google, [null, self::STATUS_GAGAL]);
     }
     
     /**
@@ -48,7 +64,7 @@ class NewFrasaNegative extends Model
         $this->increment('retry_count');
         
         if ($this->retry_count >= 3) {
-            $this->update(['status_input_google' => 'error']);
+            $this->update(['status_input_google' => self::STATUS_ERROR]);
         }
     }
     
@@ -77,7 +93,7 @@ class NewFrasaNegative extends Model
      */
     public function scopeNeedsGoogleAdsInput($query)
     {
-        return $query->whereIn('status_input_google', [null, 'gagal'])
+        return $query->whereIn('status_input_google', [null, self::STATUS_GAGAL])
                     ->where('retry_count', '<', 3);
     }
     
