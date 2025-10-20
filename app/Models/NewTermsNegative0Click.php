@@ -75,8 +75,7 @@ class NewTermsNegative0Click extends Model
      */
     public function scopeNeedsAiAnalysis($query)
     {
-        return $query->whereNull('hasil_cek_ai')
-                    ->whereIn('status_input_google', [null, self::STATUS_GAGAL]);
+        return $query->whereNull('hasil_cek_ai');
     }
     
     /**

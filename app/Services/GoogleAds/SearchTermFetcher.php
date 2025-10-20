@@ -43,7 +43,7 @@ class SearchTermFetcher
     /**
      * Fetch zero-click search terms from Google Ads.
      */
-    public function fetchZeroClickTerms(): array
+    public function fetchZeroClickTerms(int $limit = 100): array
     {
         $config = $this->getConfig();
         
@@ -58,6 +58,7 @@ class SearchTermFetcher
                 metrics.clicks = 0 
                 AND search_term_view.status = 'NONE'
                 AND segments.date DURING LAST_30_DAYS
+            LIMIT {$limit}
         ";
         
         try {

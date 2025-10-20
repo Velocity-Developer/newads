@@ -8,7 +8,7 @@ import { Search, Filter, Download, Calendar, FileSpreadsheet } from 'lucide-vue-
 import { ref, watch } from 'vue';
 
 interface Filters {
-    // search?: string;
+    search?: string;
     // ai_result?: string;
     // google_status?: string;
     // telegram_notif?: string;
@@ -34,7 +34,7 @@ const getButtonVariant = (status: string) => {
 };
 
 // Reactive filters
-// const searchQuery = ref(props.filters.search || '');
+const searchQuery = ref(props.filters.search || '');
 // const aiResultFilter = ref(props.filters.ai_result || '');
 // const googleStatusFilter = ref(props.filters.google_status || '');
 // const telegramNotifFilter = ref(props.filters.telegram_notif || '');
@@ -47,7 +47,7 @@ const dateTo = ref(props.filters.date_to || '');
 const applyFilters = () => {
     const params: Record<string, any> = {};
     
-    // if (searchQuery.value) params.search = searchQuery.value;
+    if (searchQuery.value) params.search = searchQuery.value;
     // if (aiResultFilter.value) params.ai_result = aiResultFilter.value;
     // if (googleStatusFilter.value) params.google_status = googleStatusFilter.value;
     // if (telegramNotifFilter.value) params.telegram_notif = telegramNotifFilter.value;
@@ -64,7 +64,7 @@ const applyFilters = () => {
 
 // Clear filters
 const clearFilters = () => {
-    // searchQuery.value = '';
+    searchQuery.value = '';
     // aiResultFilter.value = '';
     // googleStatusFilter.value = '';
     // telegramNotifFilter.value = '';
@@ -83,7 +83,7 @@ const clearFilters = () => {
 const exportToExcel = () => {
     const params: Record<string, any> = { export: 'excel' };
     
-    // if (searchQuery.value) params.search = searchQuery.value;
+    if (searchQuery.value) params.search = searchQuery.value;
     // if (aiResultFilter.value) params.ai_result = aiResultFilter.value;
     // if (googleStatusFilter.value) params.google_status = googleStatusFilter.value;
     // if (telegramNotifFilter.value) params.telegram_notif = telegramNotifFilter.value;
@@ -112,9 +112,9 @@ const exportToExcel = () => {
         </CardHeader>
         <CardContent class="space-y-4">
             <!-- First Row: Search, AI Result, Google Status, Telegram -->
-            <!-- <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4"> -->
+            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <!-- Search -->
-                <!-- <div class="space-y-2">
+                <div class="space-y-2">
                     <Label for="search">Search Terms</Label>
                     <div class="relative">
                         <Search class="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -126,7 +126,7 @@ const exportToExcel = () => {
                             @keyup.enter="applyFilters"
                         />
                     </div>
-                </div> -->
+                </div>
 
                 <!-- AI Result Filter -->
                 <!-- <div class="space-y-2">
@@ -173,7 +173,7 @@ const exportToExcel = () => {
                         <option value="null">Null</option>
                     </select>
                 </div> -->
-            <!-- </div> -->
+            </div>
 
             <!-- Second Row: Date Range -->
             <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

@@ -44,10 +44,24 @@ class AnalyzeTermsWithAICommand extends Command
         try {
             $batchSize = (int) $this->option('batch-size');
             
+            // Debug: Check total records first
+            $totalRecords = NewTermsNegative0Click::count();
+            $this->info("Total records in database: {$totalRecords}");
+            
+            // Debug: Check records with null hasil_cek_ai
+            $nullAiCount = NewTermsNegative0Click::whereNull('hasil_cek_ai')->count();
+            $this->info("Records with null hasil_cek_ai: {$nullAiCount}");
+            
+            // Debug: Check records with status_input_google conditions
+            $statusCount = NewTermsNegative0Click::whereIn('status_input_google', [null, 'gagal'])->count();
+            $this->info("Records with status_input_google null or gagal: {$statusCount}");
+            
             // Get terms that need AI analysis
             $terms = NewTermsNegative0Click::needsAiAnalysis()
                 ->limit($batchSize)
                 ->get();
+                
+            $this->info("Records matching needsAiAnalysis scope: {$terms->count()}");
             
             if ($terms->isEmpty()) {
                 $this->info('No terms found that need AI analysis.');
@@ -68,10 +82,10 @@ class AnalyzeTermsWithAICommand extends Command
                     
                     // Update the term with AI result
                     $term->update([
-                        'hasil_cek_ai' => $result ? 'positive' : 'negative'
+                        'hasil_cek_ai' => $result ? 'relevan' : 'negatif'
                     ]);
                     
-                    if ($result) {
+                    if (!$result) { // Count negative terms (terms that should be negative keywords)
                         $positiveCount++;
                     }
                     
@@ -80,17 +94,15 @@ class AnalyzeTermsWithAICommand extends Command
                 } catch (Exception $e) {
                     $this->error("Error analyzing term '{$term->terms}': " . $e->getMessage());
                     
-                    // Mark as failed for retry
-                    $term->update([
-                        'hasil_cek_ai' => 'failed'
-                    ]);
+                    // For failed analysis, we'll leave hasil_cek_ai as null so it can be retried
+                    // Don't update the field to maintain retry capability
                 }
             }
             
             $this->info("Analysis completed. Analyzed: {$analyzedCount}, Positive for negative keywords: {$positiveCount}");
             
             // Send Telegram notification
-            $this->notificationService->sendAiAnalysisResult($analyzedCount, $positiveCount);
+            $this->notificationService->notifyAiAnalysisResults($analyzedCount, $positiveCount, $analyzedCount - $positiveCount);
             
             return 0;
             
@@ -98,7 +110,7 @@ class AnalyzeTermsWithAICommand extends Command
             $this->error("Error during AI analysis: " . $e->getMessage());
             
             // Send error notification
-            $this->notificationService->sendSystemError(
+            $this->notificationService->notifySystemError(
                 'AI Terms Analysis',
                 $e->getMessage()
             );

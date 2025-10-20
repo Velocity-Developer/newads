@@ -108,14 +108,16 @@ class TestNegativeKeywordsSystemCommand extends Command
                 $this->line('✅ Models instantiated successfully');
             }
 
-            // Test relationships
-            $testTerm = NewTermsNegative0Click::create([
-                'terms' => 'test term for system check',
-                'hasil_cek_ai' => null,
-                'status_input_google' => null,
-                'retry_count' => 0,
-                'notif_telegram' => null
-            ]);
+            // Test relationships - use updateOrCreate to avoid duplicate error
+            $testTerm = NewTermsNegative0Click::updateOrCreate(
+                ['terms' => 'test term for system check'],
+                [
+                    'hasil_cek_ai' => null,
+                    'status_input_google' => null,
+                    'retry_count' => 0,
+                    'notif_telegram' => null
+                ]
+            );
 
             $testPhrase = NewFrasaNegative::create([
                 'frasa' => 'test phrase',
@@ -125,7 +127,7 @@ class TestNegativeKeywordsSystemCommand extends Command
                 'notif_telegram' => null
             ]);
 
-            if ($testTerm->phrases()->count() > 0 && $testPhrase->parentTerm) {
+            if ($testTerm->frasa()->count() > 0 && $testPhrase->parentTerm) {
                 $results['relationships'] = true;
                 $this->line('✅ Model relationships working');
             }
@@ -222,7 +224,7 @@ class TestNegativeKeywordsSystemCommand extends Command
             }
 
             // Test connection
-            if ($this->notificationService->testConnection()) {
+            if ($this->notificationService->testService()) {
                 $results['connection'] = true;
                 $this->line('✅ Telegram connection test passed');
             } else {

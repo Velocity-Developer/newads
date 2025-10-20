@@ -15,7 +15,7 @@ class TermAnalyzer
     public function __construct()
     {
         $this->apiKey = config('services.openai.api_key', env('OPENAI_API_KEY'));
-        $this->model = config('services.openai.model', env('OPENAI_MODEL', 'gpt-4'));
+        $this->model = config('services.openai.model', env('OPENAI_MODEL', 'gpt-5'));
     }
 
     /**
