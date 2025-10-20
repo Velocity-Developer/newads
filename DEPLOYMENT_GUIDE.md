@@ -39,7 +39,10 @@ GOOGLE_ADS_CLIENT_SECRET=your_client_secret
 GOOGLE_ADS_DEVELOPER_TOKEN=your_developer_token
 GOOGLE_ADS_CUSTOMER_ID=your_customer_id
 GOOGLE_ADS_CAMPAIGN_ID=your_campaign_id
+GOOGLE_ADS_REFRESH_TOKEN_PATH=D:\path\to\your\project\storage\app\private\google_ads\refresh_token.txt
 ```
+
+**Important**: You need to generate a refresh token before the system can work. See the "Google Ads Authentication Setup" section below.
 
 #### OpenAI Configuration
 ```env
@@ -64,14 +67,50 @@ NEGATIVE_KEYWORDS_AI_ENABLED=true
 NEGATIVE_KEYWORDS_TELEGRAM_ENABLED=true
 ```
 
-### 3. Service Configuration
+### 3. Google Ads Authentication Setup
+
+Before testing the system, you need to generate a refresh token for Google Ads API authentication.
+
+#### Step 1: Generate Refresh Token
+Run the provided script to generate a refresh token:
+```bash
+php generate_refresh_token.php
+```
+
+This script will:
+1. Generate an authorization URL for Google OAuth2
+2. Prompt you to login with your Google account
+3. Ask for consent to access Google Ads
+4. Exchange the authorization code for a refresh token
+5. Save the token to `storage/app/private/google_ads/refresh_token.txt`
+6. Provide instructions to update your `.env` file
+
+#### Step 2: Update Environment File
+After running the script, update your `.env` file with the token path:
+```env
+GOOGLE_ADS_REFRESH_TOKEN_PATH=D:\your\project\path\storage\app\private\google_ads\refresh_token.txt
+```
+
+#### Step 3: Verify Authentication
+Test the authentication setup:
+```bash
+# Test configuration and token
+php artisan test:google-ads-connection --dry-run
+
+# Test actual API connection
+php artisan test:google-ads-connection
+```
+
+### 4. Service Configuration
 
 #### Google Ads API Setup
 1. Create a Google Ads API project in Google Cloud Console
 2. Enable the Google Ads API
-3. Create OAuth 2.0 credentials
-4. Generate a developer token
-5. Configure the credentials in your `.env` file
+3. Create OAuth 2.0 credentials (Web application type)
+4. Add authorized redirect URIs: `urn:ietf:wg:oauth:2.0:oob`
+5. Generate a developer token from Google Ads account
+6. Configure the credentials in your `.env` file
+7. **Generate refresh token using the provided script** (see Authentication Setup section above)
 
 #### OpenAI API Setup
 1. Sign up for OpenAI API access
@@ -86,12 +125,35 @@ NEGATIVE_KEYWORDS_TELEGRAM_ENABLED=true
 
 ### 4. Testing the System
 
+#### Comprehensive Testing
 Run the comprehensive test command:
 ```bash
 php artisan negative-keywords:test-system
 ```
 
-Test individual components:
+#### Step-by-Step Testing
+Test the system components in order:
+
+1. **Test Configuration**:
+```bash
+php artisan test:google-ads-connection --dry-run
+```
+
+2. **Test Google Ads Connection**:
+```bash
+php artisan test:google-ads-connection
+```
+
+3. **Test Data Fetching (Safe Mode)**:
+```bash
+# Test with small sample
+php artisan safe:test-fetch --limit=3 --sample
+
+# Test with filtering
+php artisan safe:test-fetch --limit=5 --filter
+```
+
+4. **Test Individual Components**:
 ```bash
 # Test database
 php artisan negative-keywords:test-system --component=database
@@ -99,12 +161,18 @@ php artisan negative-keywords:test-system --component=database
 # Test Google Ads integration
 php artisan negative-keywords:test-system --component=google-ads
 
-# Test AI service
+# Test AI integration
 php artisan negative-keywords:test-system --component=ai
 
-# Test Telegram notifications
+# Test Telegram integration
 php artisan negative-keywords:test-system --component=telegram
 ```
+
+#### Available Testing Tools
+- **TestGoogleAdsConnectionCommand** - Tests API connection and configuration
+- **SafeTestFetchCommand** - Tests data fetching without database storage
+- **SearchTermFetcher::testConnection()** - Read-only connection test method
+- **SearchTermFetcher::testFetchZeroClickTerms()** - Limited fetch test method
 
 ### 5. Manual Testing
 

@@ -137,8 +137,21 @@ GOOGLE_ADS_CLIENT_SECRET=your_client_secret
 GOOGLE_ADS_DEVELOPER_TOKEN=your_developer_token
 GOOGLE_ADS_CUSTOMER_ID=your_customer_id
 GOOGLE_ADS_CAMPAIGN_ID=your_campaign_id
-GOOGLE_ADS_REFRESH_TOKEN_PATH=storage/app/private/google_ads/refresh_token.txt
+GOOGLE_ADS_REFRESH_TOKEN_PATH=D:\adsvelo\storage\app\private\google_ads\refresh_token.txt
 ```
+
+### Google Ads Authentication Setup
+Untuk mendapatkan refresh token, jalankan script khusus:
+```bash
+php generate_refresh_token.php
+```
+
+Script ini akan:
+1. Generate authorization URL untuk Google OAuth2
+2. Meminta user untuk login dan memberikan consent
+3. Menukar authorization code dengan refresh token
+4. Menyimpan refresh token ke file yang ditentukan
+5. Memberikan instruksi untuk update .env file
 
 ### AI Integration (GPT-5)
 ```env
@@ -184,7 +197,19 @@ TELEGRAM_CHAT_ID=your_chat_id
 
 ### Manual Testing Commands
 ```bash
-# Test fetch terms
+# Test koneksi Google Ads API
+php artisan test:google-ads-connection
+
+# Test koneksi dengan dry-run (tanpa API call)
+php artisan test:google-ads-connection --dry-run
+
+# Test fetch search terms secara aman
+php artisan safe:test-fetch --limit=5 --sample
+
+# Test fetch dengan filter tertentu
+php artisan safe:test-fetch --limit=10 --filter
+
+# Test fetch terms (original command)
 php artisan negative-keywords:fetch-terms --dry-run
 
 # Test AI analysis
@@ -194,22 +219,62 @@ php artisan negative-keywords:analyze-terms --limit=10
 php artisan negative-keywords:input-keywords --dry-run
 ```
 
+### Testing Tools yang Tersedia
+1. **TestGoogleAdsConnectionCommand** - Test koneksi API dan konfigurasi
+2. **SafeTestFetchCommand** - Test fetch data tanpa menyimpan ke database
+3. **SearchTermFetcher::testConnection()** - Method untuk test koneksi read-only
+4. **SearchTermFetcher::testFetchZeroClickTerms()** - Method untuk test fetch dengan limit
+
 ## Deployment Checklist
 
 1. ✅ Setup environment variables
 2. ✅ Run migrations
-3. ✅ Setup Google Ads refresh token
-4. ✅ Test API connections (Google Ads, OpenAI, Telegram)
-5. ✅ Configure cron scheduler
-6. ✅ Setup monitoring & alerting
-7. ✅ Test end-to-end workflow
+3. ✅ Generate Google Ads refresh token menggunakan `php generate_refresh_token.php`
+4. ✅ Update .env dengan path refresh token
+5. ✅ Test API connections (Google Ads, OpenAI, Telegram)
+6. ✅ Test koneksi Google Ads: `php artisan test:google-ads-connection`
+7. ✅ Test fetch data: `php artisan safe:test-fetch --limit=5 --sample`
+8. ✅ Configure cron scheduler
+9. ✅ Setup monitoring & alerting
+10. ✅ Test end-to-end workflow
+
+### Langkah Testing Bertahap
+```bash
+# 1. Test konfigurasi dasar
+php artisan test:google-ads-connection --dry-run
+
+# 2. Test koneksi API
+php artisan test:google-ads-connection
+
+# 3. Test fetch data kecil
+php artisan safe:test-fetch --limit=3 --sample
+
+# 4. Test dengan filter
+php artisan safe:test-fetch --limit=5 --filter
+
+# 5. Test full workflow (jika semua OK)
+php artisan negative-keywords:fetch-terms --dry-run
+```
 
 ## Troubleshooting
 
 ### Google Ads API Issues
-- Cek quota dan rate limits
-- Validasi refresh token
-- Cek permission campaign
+- **Authentication Error**: Jalankan `php generate_refresh_token.php` untuk generate ulang token
+- **Invalid Refresh Token**: Cek path file di `GOOGLE_ADS_REFRESH_TOKEN_PATH`
+- **API Quota Exceeded**: Cek quota dan rate limits di Google Cloud Console
+- **Permission Denied**: Validasi permission campaign dan customer ID
+- **Connection Test**: Gunakan `php artisan test:google-ads-connection` untuk diagnosa
+
+### Testing & Debugging
+- **Dry Run Mode**: Gunakan `--dry-run` flag untuk test tanpa eksekusi
+- **Safe Testing**: Gunakan `php artisan safe:test-fetch` untuk test tanpa database
+- **Limited Testing**: Gunakan `--limit` parameter untuk test dengan data kecil
+- **Sample Mode**: Gunakan `--sample` untuk melihat contoh data yang diambil
+
+### File & Permission Issues
+- **Refresh Token Path**: Pastikan direktori `storage/app/private/google_ads/` dapat ditulis
+- **Token File Missing**: Jalankan script generate refresh token
+- **Permission Error**: Cek permission file dan direktori storage
 
 ### AI Analysis Issues
 - Monitor OpenAI API quota
