@@ -24,7 +24,7 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
-        title: 'Terms Management',
+        title: 'Terms Negative',
         href: '/terms',
         icon: List,
     },

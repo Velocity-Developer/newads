@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\NewTermsNegative0Click;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\TermsExport;
 
 class TermsController extends Controller
 {
@@ -32,13 +34,28 @@ class TermsController extends Controller
             $query->where('notif_telegram', $request->telegram_notif);
         }
 
+        // Apply date range filter
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
         // Sorting
         $sortBy = $request->get('sort_by', 'created_at');
         $sortOrder = $request->get('sort_order', 'desc');
         $query->orderBy($sortBy, $sortOrder);
 
+        // Handle Excel export
+        if ($request->get('export') === 'excel') {
+            return Excel::download(new TermsExport($query), 'terms-' . date('Y-m-d') . '.xlsx');
+        }
+
         // Pagination
-        $terms = $query->paginate(15)->withQueryString();
+        $perPage = $request->get('per_page', 15);
+        $terms = $query->paginate($perPage)->withQueryString();
 
         // Statistics
         $stats = [
@@ -57,7 +74,7 @@ class TermsController extends Controller
         return Inertia::render('Terms/Index', [
             'terms' => $terms,
             'stats' => $stats,
-            'filters' => $request->only(['search', 'ai_result', 'google_status', 'telegram_notif', 'sort_by', 'sort_order']),
+            'filters' => $request->only(['search', 'ai_result', 'google_status', 'telegram_notif', 'date_from', 'date_to', 'per_page', 'sort_by', 'sort_order']),
         ]);
     }
 }

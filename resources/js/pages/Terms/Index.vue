@@ -1,15 +1,9 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
-import { Search, Filter, Eye, TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-vue-next';
-import { computed, ref } from 'vue';
 import TermsFilters from '@/components/TermsFilters.vue';
 
 interface Term {
@@ -24,17 +18,7 @@ interface Term {
     frasa_negatives_count?: number;
 }
 
-interface Stats {
-    total: number;
-    ai_relevan: number;
-    ai_negative: number;
-    ai_null: number;
-    google_sukses: number;
-    google_gagal: number;
-    google_error: number;
-    telegram_sukses: number;
-    telegram_gagal: number;
-}
+
 
 interface Props {
     terms: {
@@ -51,7 +35,6 @@ interface Props {
             active: boolean;
         }>;
     };
-    stats: Stats;
     filters: {
         search?: string;
         ai_result?: string;
@@ -66,7 +49,7 @@ const props = defineProps<Props>();
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Terms Management',
+        title: 'Terms Negative Management',
         href: '/terms',
     },
 ];
@@ -74,18 +57,18 @@ const breadcrumbs: BreadcrumbItem[] = [
 // Badge variants for different statuses
 const getAiBadgeVariant = (status: string) => {
     switch (status) {
-        case null: return 'outline';
+        case null: return '';
         case 'relevan': return 'success';
-        case 'negative': return 'destructive';
+        case 'negatif': return 'destructive';
         default: return 'secondary';
     }
 };
 
 const getGoogleBadgeVariant = (status: string) => {
     switch (status) {
-        case null: return 'outline';
+        case null: return '';
         case 'sukses': return 'success';
-        case 'gagal': return 'destructive';
+        case 'gagal': return 'dark';
         case 'error': return 'destructive';
         default: return 'secondary';
     }
@@ -93,7 +76,7 @@ const getGoogleBadgeVariant = (status: string) => {
 
 const getTelegramBadgeVariant = (status: string) => {
     switch (status) {
-        case null: return 'outline';
+        case null: return '';
         case 'sukses': return 'success';
         case 'gagal': return 'destructive';
         default: return 'secondary';
@@ -110,10 +93,35 @@ const formatDate = (dateString: string) => {
         minute: '2-digit'
     });
 };
+
+// Change per page function
+const changePerPage = (event: Event) => {
+    const target = event.target as HTMLSelectElement;
+    const perPage = parseInt(target.value);
+    
+    // Get current filters from URL
+    const currentParams = new URLSearchParams(window.location.search);
+    const params: Record<string, any> = {};
+    
+    // Preserve existing filters
+    for (const [key, value] of currentParams.entries()) {
+        if (key !== 'page') { // Reset to page 1 when changing per_page
+            params[key] = value;
+        }
+    }
+    
+    // Add per_page parameter
+    params.per_page = perPage;
+    
+    router.get('/terms', params, {
+        preserveState: true,
+        preserveScroll: true,
+    });
+};
 </script>
 
 <template>
-    <Head title="Terms Management" />
+    <Head title="Terms Negative Management" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-6">
@@ -124,22 +132,40 @@ const formatDate = (dateString: string) => {
             <Card>
                 <CardHeader>
                     <CardTitle>Terms Data</CardTitle>
-                    <CardDescription>
-                        Showing {{ terms.from }} to {{ terms.to }} of {{ terms.total }} terms
-                    </CardDescription>
+                    
+                    <!-- Per Page Selector -->
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm text-muted-foreground">Items per page:</span>
+                            <select
+                                :value="terms.per_page"
+                                @change="changePerPage($event)"
+                                class="flex h-8 w-20 rounded-md border border-input bg-background px-2 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                            >
+                                <option value="10">10</option>
+                                <option value="15">15</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </div>
+                        <div class="text-sm text-muted-foreground">
+                            Showing {{ terms.from }} to {{ terms.to }} of {{ terms.total }} results
+                        </div>
+                    </div>
                 </CardHeader>
                 <CardContent>
                     <div class="overflow-x-auto">
                         <table class="w-full border-collapse">
-                            <thead>
+                            <thead class="bg-muted/50">
                                 <tr class="border-b">
-                                    <th class="text-left p-2 font-medium">ID Terms</th>
+                                    <th class="text-left p-2 font-medium">ID</th>
                                     <th class="text-left p-2 font-medium">Terms</th>
                                     <th class="text-left p-2 font-medium">AI Result</th>
-                                    <th class="text-left p-2 font-medium">Google Ads</th>
+                                    <th class="text-left p-2 font-medium">Input Google Ads</th>
                                     <th class="text-left p-2 font-medium">Notif Telegram</th>
                                     <th class="text-left p-2 font-medium">Retry Count</th>
-                                    <th class="text-left p-2 font-medium">Created</th>
+                                    <th class="text-left p-2 font-medium">Created At</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -182,7 +208,7 @@ const formatDate = (dateString: string) => {
                     </div>
 
                     <!-- Pagination -->
-                    <div v-if="terms.last_page > 1" class="flex items-center justify-between mt-4">
+                    <div v-if="terms.last_page > 1" class="flex items-center justify-center gap-4 mt-4">
                         <div class="text-sm text-muted-foreground">
                             Page {{ terms.current_page }} of {{ terms.last_page }}
                         </div>
