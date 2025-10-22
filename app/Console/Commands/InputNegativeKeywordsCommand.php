@@ -39,6 +39,9 @@ class InputNegativeKeywordsCommand extends Command
      */
     public function handle()
     {
+        $this->warn('Google Ads integration is disabled; skipping negative keyword input.');
+        return 0;
+
         $this->info('Starting to input negative keywords to Google Ads...');
         
         try {
@@ -104,13 +107,13 @@ class InputNegativeKeywordsCommand extends Command
             $this->info("Input completed. Success: {$successCount}, Failed: {$failedCount}");
             
             // Send Telegram notifications
-            if ($successCount > 0) {
-                $this->notificationService->sendNegativeKeywordSuccess($successCount);
-            }
+            // if ($successCount > 0) {
+            //     $this->notificationService->sendNegativeKeywordSuccess($successCount);
+            // }
             
-            if ($failedCount > 0) {
-                $this->notificationService->sendNegativeKeywordFailed($failedCount);
-            }
+            // if ($failedCount > 0) {
+            //     $this->notificationService->sendNegativeKeywordFailed($failedCount);
+            // }
             
             return 0;
             
@@ -118,10 +121,10 @@ class InputNegativeKeywordsCommand extends Command
             $this->error("Error during Google Ads input: " . $e->getMessage());
             
             // Send error notification
-            $this->notificationService->sendSystemError(
-                'Google Ads Input',
-                $e->getMessage()
-            );
+            // $this->notificationService->sendSystemError(
+            //     'Google Ads Input',
+            //     $e->getMessage()
+            // );
             
             return 1;
         }

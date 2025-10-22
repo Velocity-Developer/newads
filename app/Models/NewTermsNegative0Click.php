@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Model untuk menyimpan search terms zero-click dari Google Ads
@@ -16,6 +17,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class NewTermsNegative0Click extends Model
 {
+    use SoftDeletes;
+
     protected $table = 'new_terms_negative_0click';
     
     protected $fillable = [
@@ -40,7 +43,7 @@ class NewTermsNegative0Click extends Model
     
     const NOTIF_BERHASIL = 'sukses';
     const NOTIF_GAGAL = 'gagal';
-    
+
     /**
      * Get the frasa records associated with this term.
      */
@@ -57,7 +60,7 @@ class NewTermsNegative0Click extends Model
         return $this->retry_count < 3 && 
                in_array($this->status_input_google, [null, self::STATUS_GAGAL]);
     }
-    
+
     /**
      * Increment retry count.
      */

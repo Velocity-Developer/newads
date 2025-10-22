@@ -5,11 +5,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import TermsFilters from '@/components/TermsFilters.vue';
+import { Button } from '@/components/ui/button';
 
 interface Term {
     id: number;
     terms: string;
-    hasil_cek_ai: 'relevan' | 'negative' | null;
+    hasil_cek_ai: 'relevan' | 'negatif' | null;
     status_input_google: 'sukses' | 'gagal' | 'error' | null;
     notif_telegram: 'sukses' | 'gagal' | null;
     retry_count: number;
@@ -57,65 +58,70 @@ const breadcrumbs: BreadcrumbItem[] = [
 // Badge variants for different statuses
 const getAiBadgeVariant = (status: string) => {
     switch (status) {
-        case null: return '';
-        case 'relevan': return 'success';
-        case 'negatif': return 'destructive';
-        default: return 'secondary';
+        case 'relevan':
+            return 'default';
+        case 'negatif':
+            return 'destructive';
+        default:
+            return 'secondary';
     }
 };
 
 const getGoogleBadgeVariant = (status: string) => {
     switch (status) {
-        case null: return '';
-        case 'sukses': return 'success';
-        case 'gagal': return 'dark';
-        case 'error': return 'destructive';
-        default: return 'secondary';
+        case 'sukses':
+            return 'default';
+        case 'gagal':
+        case 'error':
+            return 'destructive';
+        default:
+            return 'secondary';
     }
 };
 
 const getTelegramBadgeVariant = (status: string) => {
     switch (status) {
-        case null: return '';
-        case 'sukses': return 'success';
-        case 'gagal': return 'destructive';
-        default: return 'secondary';
+        case 'sukses':
+            return 'default';
+        case 'gagal':
+            return 'destructive';
+        default:
+            return 'secondary';
     }
 };
 
-// Format date
 const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('id-ID', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
+    const date = new Date(dateString);
+    return date.toLocaleString();
 };
 
-// Change per page function
 const changePerPage = (event: Event) => {
     const target = event.target as HTMLSelectElement;
     const perPage = parseInt(target.value);
-    
-    // Get current filters from URL
-    const currentParams = new URLSearchParams(window.location.search);
-    const params: Record<string, any> = {};
-    
-    // Preserve existing filters
-    for (const [key, value] of currentParams.entries()) {
-        if (key !== 'page') { // Reset to page 1 when changing per_page
-            params[key] = value;
-        }
-    }
-    
+    const params: Record<string, any> = { ...props.filters };
+
     // Add per_page parameter
     params.per_page = perPage;
     
     router.get('/terms', params, {
         preserveState: true,
         preserveScroll: true,
+    });
+};
+
+const deleteTerm = (term: Term) => {
+    if (!confirm(`Hapus term "${term.terms}"? Data frasa terkait tidak akan dihapus.`)) {
+        return;
+    }
+
+    router.delete(`/terms/${term.id}`, {
+        preserveScroll: true,
+        onSuccess: () => {
+            // reload current page
+            router.get('/terms', { ...props.filters, per_page: props.terms.per_page }, {
+                preserveScroll: true,
+            });
+        },
     });
 };
 </script>
@@ -166,6 +172,7 @@ const changePerPage = (event: Event) => {
                                     <th class="text-left p-2 font-medium">Notif Telegram</th>
                                     <th class="text-left p-2 font-medium">Retry Count</th>
                                     <th class="text-left p-2 font-medium">Created At</th>
+                                    <th class="text-left p-2 font-medium">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -202,6 +209,11 @@ const changePerPage = (event: Event) => {
                                             {{ formatDate(term.created_at) }}
                                         </span>
                                     </td>
+                                    <td class="p-2">
+                                        <Button variant="destructive" size="sm" @click="deleteTerm(term)">
+                                            Delete
+                                        </Button>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -217,13 +229,14 @@ const changePerPage = (event: Event) => {
                                 v-for="link in terms.links"
                                 :key="link.label"
                                 :href="link.url || '#'"
-                                :class="[
-                                    'px-3 py-1 text-sm border rounded',
-                                    link.active
-                                        ? 'bg-primary text-primary-foreground border-primary'
-                                        : 'bg-background hover:bg-muted border-input',
-                                    !link.url ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-                                ]"
+                                class="px-3 py-1 rounded border text-sm"
+                                :class="{
+                                    'bg-primary text-primary-foreground border-primary': link.active,
+                                    'bg-background text-foreground border-input': !link.active,
+                                    'opacity-50 pointer-events-none': !link.url,
+                                }"
+                                preserve-scroll
+                                preserve-state
                                 v-html="link.label"
                             />
                         </div>

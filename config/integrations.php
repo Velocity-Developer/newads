@@ -28,4 +28,9 @@ return [
         'telegram_chat' => env('GREETING_ADS_TELEGRAM_CHAT'),
         'telegram_notif' => env('GREETING_ADS_TELEGRAM_NOTIF', 'off'), // 'on' or 'off'
     ],
+
+    'velocity_ads' => [
+        'api_url' => env('VELOCITY_ADS_API_URL', 'https://api.velocitydeveloper.com/new/adsfetch/fetch_terms_negative0click_secure.php'),
+        'api_token' => 'Bearer ' . env('VELOCITY_ADS_API_TOKEN'),
+    ],
 ];

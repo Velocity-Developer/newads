@@ -13,6 +13,9 @@ class TestGoogleAdsConnectionCommand extends Command
 
     public function handle()
     {
+        $this->warn('Google Ads connection test is disabled; integration removed.');
+        return 0;
+
         $this->info('🔍 Testing Google Ads API Connection...');
         $this->newLine();
 

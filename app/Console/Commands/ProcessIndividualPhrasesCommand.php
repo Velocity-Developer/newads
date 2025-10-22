@@ -124,10 +124,10 @@ class ProcessIndividualPhrasesCommand extends Command
             $this->error("Error during phrase processing: " . $e->getMessage());
             
             // Send error notification
-            $this->notificationService->sendSystemError(
-                'Process Individual Phrases',
-                $e->getMessage()
-            );
+            // $this->notificationService->sendSystemError(
+            //     'Process Individual Phrases',
+            //     $e->getMessage()
+            // );
             
             return 1;
         }
@@ -182,13 +182,13 @@ class ProcessIndividualPhrasesCommand extends Command
         $this->info("Phrase processing completed. Success: {$successCount}, Failed: {$failedCount}");
         
         // Send Telegram notifications
-        if ($successCount > 0) {
-            $this->notificationService->sendNegativeKeywordSuccess($successCount, 'phrases');
-        }
+        // if ($successCount > 0) {
+        //     $this->notificationService->sendNegativeKeywordSuccess($successCount, 'phrases');
+        // }
         
-        if ($failedCount > 0) {
-            $this->notificationService->sendNegativeKeywordFailed($failedCount, 'phrases');
-        }
+        // if ($failedCount > 0) {
+        //     $this->notificationService->sendNegativeKeywordFailed($failedCount, 'phrases');
+        // }
         
         return 0;
     }

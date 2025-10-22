@@ -21,7 +21,7 @@ class FetchZeroClickTermsCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Fetch zero-click search terms from Google Ads and store them for analysis';
+    protected $description = 'Fetch zero-click search terms from External Ads API and store them for analysis';
 
     protected $searchTermFetcher;
     protected $notificationService;
@@ -38,7 +38,7 @@ class FetchZeroClickTermsCommand extends Command
      */
     public function handle()
     {
-        $this->info('Starting to fetch zero-click terms from Google Ads...');
+        $this->info('Starting to fetch zero-click terms from External Ads API...');
         
         try {
             $limit = (int) $this->option('limit');
@@ -57,7 +57,7 @@ class FetchZeroClickTermsCommand extends Command
             $this->info("Successfully fetched and stored {$storedCount} zero-click terms.");
             
             // Send Telegram notification
-            $this->notificationService->sendNewTermsFetched($storedCount);
+            // $this->notificationService->notifyNewTermsFetched($storedCount, count($terms));
             
             return 0;
             
@@ -65,10 +65,10 @@ class FetchZeroClickTermsCommand extends Command
             $this->error("Error fetching zero-click terms: " . $e->getMessage());
             
             // Send error notification
-            $this->notificationService->sendSystemError(
-                'Fetch Zero-Click Terms',
-                $e->getMessage()
-            );
+            // $this->notificationService->notifySystemError(
+            //     'Fetch Zero-Click Terms',
+            //     $e->getMessage()
+            // );
             
             return 1;
         }

@@ -102,7 +102,7 @@ class AnalyzeTermsWithAICommand extends Command
             $this->info("Analysis completed. Analyzed: {$analyzedCount}, Positive for negative keywords: {$positiveCount}");
             
             // Send Telegram notification
-            $this->notificationService->notifyAiAnalysisResults($analyzedCount, $positiveCount, $analyzedCount - $positiveCount);
+            // $this->notificationService->notifyAiAnalysisResults($analyzedCount, $positiveCount, $analyzedCount - $positiveCount);
             
             return 0;
             
@@ -110,10 +110,10 @@ class AnalyzeTermsWithAICommand extends Command
             $this->error("Error during AI analysis: " . $e->getMessage());
             
             // Send error notification
-            $this->notificationService->notifySystemError(
-                'AI Terms Analysis',
-                $e->getMessage()
-            );
+            // $this->notificationService->notifySystemError(
+            //     'AI Terms Analysis',
+            //     $e->getMessage()
+            // );
             
             return 1;
         }
