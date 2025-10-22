@@ -1,29 +1,29 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router, usePage } from '@inertiajs/vue3';
-import TermsFilters from '@/components/TermsFilters.vue';
-import { Button } from '@/components/ui/button';
+import { Head, Link, router } from '@inertiajs/vue3';
+import FrasaFilters from '@/components/FrasaFilters.vue';
 
-interface Term {
+interface FrasaItem {
     id: number;
-    terms: string;
-    hasil_cek_ai: 'relevan' | 'negatif' | null;
+    frasa: string;
+    parent_term_id: number;
+    parent_term?: {
+        id: number;
+        terms: string;
+    } | null;
     status_input_google: 'sukses' | 'gagal' | 'error' | null;
     notif_telegram: 'sukses' | 'gagal' | null;
     retry_count: number;
     created_at: string;
     updated_at: string;
-    frasa_negatives_count?: number;
 }
 
-
-
 interface Props {
-    terms: {
-        data: Term[];
+    frasa: {
+        data: FrasaItem[];
         current_page: number;
         last_page: number;
         per_page: number;
@@ -38,7 +38,6 @@ interface Props {
     };
     filters: {
         search?: string;
-        ai_result?: string;
         google_status?: string;
         telegram_notif?: string;
         sort_by?: string;
@@ -49,23 +48,8 @@ interface Props {
 const props = defineProps<Props>();
 
 const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Terms Negative Management',
-        href: '/terms',
-    },
+    { title: 'Frasa Negative Management', href: '/frasa' },
 ];
-
-// Badge variants for different statuses
-const getAiBadgeVariant = (status: string) => {
-    switch (status) {
-        case 'relevan':
-            return 'default';
-        case 'negatif':
-            return 'destructive';
-        default:
-            return 'secondary';
-    }
-};
 
 const getGoogleBadgeVariant = (status: string) => {
     switch (status) {
@@ -99,52 +83,27 @@ const changePerPage = (event: Event) => {
     const target = event.target as HTMLSelectElement;
     const perPage = parseInt(target.value);
     const params: Record<string, any> = { ...props.filters };
-
-    // Add per_page parameter
     params.per_page = perPage;
-    
-    router.get('/terms', params, {
-        preserveState: true,
-        preserveScroll: true,
-    });
+    router.get('/frasa', params, { preserveState: true, preserveScroll: true });
 };
-
-// const deleteTerm = (term: Term) => {
-//     if (!confirm(`Hapus term "${term.terms}"? Data frasa terkait tidak akan dihapus.`)) {
-//         return;
-//     }
-
-//     router.delete(`/terms/${term.id}`, {
-//         preserveScroll: true,
-//         onSuccess: () => {
-//             // reload current page
-//             router.get('/terms', { ...props.filters, per_page: props.terms.per_page }, {
-//                 preserveScroll: true,
-//             });
-//         },
-//     });
-// };
 </script>
 
 <template>
-    <Head title="Terms Negative Management" />
+    <Head title="Frasa Negative Management" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-6">
-            <!-- Filters Section -->
-            <TermsFilters :filters="filters" />
+            <FrasaFilters :filters="filters" />
 
-            <!-- Terms Table -->
             <Card>
                 <CardHeader>
-                    <CardTitle>Terms Data</CardTitle>
-                    
-                    <!-- Per Page Selector -->
+                    <CardTitle>Frasa Data</CardTitle>
+
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
                             <span class="text-sm text-muted-foreground">Items per page:</span>
                             <select
-                                :value="terms.per_page"
+                                :value="frasa.per_page"
                                 @change="changePerPage($event)"
                                 class="flex h-8 w-20 rounded-md border border-input bg-background px-2 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                             >
@@ -156,7 +115,7 @@ const changePerPage = (event: Event) => {
                             </select>
                         </div>
                         <div class="text-sm text-muted-foreground">
-                            Showing {{ terms.from }} to {{ terms.to }} of {{ terms.total }} results
+                            Showing {{ frasa.from }} to {{ frasa.to }} of {{ frasa.total }} results
                         </div>
                     </div>
                 </CardHeader>
@@ -166,67 +125,54 @@ const changePerPage = (event: Event) => {
                             <thead class="bg-muted/50">
                                 <tr class="border-b">
                                     <th class="text-left p-2 font-medium">ID</th>
-                                    <th class="text-left p-2 font-medium">Terms</th>
-                                    <th class="text-left p-2 font-medium">AI Result</th>
+                                    <th class="text-left p-2 font-medium">Frasa</th>
+                                    <th class="text-left p-2 font-medium">Parent Term</th>
                                     <th class="text-left p-2 font-medium">Input Google Ads</th>
                                     <th class="text-left p-2 font-medium">Notif Telegram</th>
                                     <th class="text-left p-2 font-medium">Retry Count</th>
                                     <th class="text-left p-2 font-medium">Created At</th>
-                                    <!-- <th class="text-left p-2 font-medium">Actions</th> -->
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="term in terms.data" :key="term.id" class="border-b hover:bg-muted/50">
+                                <tr v-for="item in frasa.data" :key="item.id" class="border-b hover:bg-muted/50">
                                     <td class="p-2">
-                                        <div class="font-medium">{{ term.id }}</div>
+                                        <div class="font-medium">{{ item.id }}</div>
                                     </td>
                                     <td class="p-2">
-                                        <div class="font-medium">{{ term.terms }}</div>
-                                        <div v-if="term.frasa_negatives_count" class="text-sm text-muted-foreground">
-                                            {{ term.frasa_negatives_count }} negative phrases
+                                        <div class="font-medium">{{ item.frasa }}</div>
+                                    </td>
+                                    <td class="p-2">
+                                        <div class="text-sm">
+                                            <span v-if="item.parent_term">{{ item.parent_term.terms }}</span>
+                                            <span v-else class="text-muted-foreground">-</span>
                                         </div>
                                     </td>
                                     <td class="p-2">
-                                        <Badge :variant="getAiBadgeVariant(term.hasil_cek_ai)">
-                                            {{ term.hasil_cek_ai }}
+                                        <Badge :variant="getGoogleBadgeVariant(item.status_input_google)">
+                                            {{ item.status_input_google }}
                                         </Badge>
                                     </td>
                                     <td class="p-2">
-                                        <Badge :variant="getGoogleBadgeVariant(term.status_input_google)">
-                                            {{ term.status_input_google }}
+                                        <Badge :variant="getTelegramBadgeVariant(item.notif_telegram)">
+                                            {{ item.notif_telegram }}
                                         </Badge>
                                     </td>
                                     <td class="p-2">
-                                        <Badge :variant="getTelegramBadgeVariant(term.notif_telegram)">
-                                            {{ term.notif_telegram }}
-                                        </Badge>
+                                        <span class="text-sm">{{ item.retry_count }}</span>
                                     </td>
                                     <td class="p-2">
-                                        <span class="text-sm">{{ term.retry_count }}</span>
+                                        <span class="text-sm text-muted-foreground">{{ formatDate(item.created_at) }}</span>
                                     </td>
-                                    <td class="p-2">
-                                        <span class="text-sm text-muted-foreground">
-                                            {{ formatDate(term.created_at) }}
-                                        </span>
-                                    </td>
-                                    <!-- <td class="p-2">
-                                        <Button variant="destructive" size="sm" @click="deleteTerm(term)">
-                                            Delete
-                                        </Button>
-                                    </td> -->
                                 </tr>
                             </tbody>
                         </table>
                     </div>
 
-                    <!-- Pagination -->
-                    <div v-if="terms.last_page > 1" class="flex items-center justify-center gap-4 mt-4">
-                        <div class="text-sm text-muted-foreground">
-                            Page {{ terms.current_page }} of {{ terms.last_page }}
-                        </div>
+                    <div v-if="frasa.last_page > 1" class="flex items-center justify-center gap-4 mt-4">
+                        <div class="text-sm text-muted-foreground">Page {{ frasa.current_page }} of {{ frasa.last_page }}</div>
                         <div class="flex gap-2">
                             <Link
-                                v-for="link in terms.links"
+                                v-for="link in frasa.links"
                                 :key="link.label"
                                 :href="link.url || '#'"
                                 class="px-3 py-1 rounded border text-sm"

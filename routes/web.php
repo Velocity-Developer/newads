@@ -11,6 +11,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/terms', [TermsController::class, 'index'])->name('terms.index');
     Route::get('/terms/{term}', [TermsController::class, 'show'])->name('terms.show');
     Route::delete('/terms/{id}', [TermsController::class, 'destroy'])->name('terms.destroy');
+
+    // Frasa Negative page
+    \App\Http\Controllers\FrasaController::class;
+    Route::get('/frasa', [\App\Http\Controllers\FrasaController::class, 'index'])->name('frasa.index');
 });
 
 // Restore dashboard route

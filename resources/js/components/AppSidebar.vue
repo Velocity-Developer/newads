@@ -28,6 +28,11 @@ const mainNavItems: NavItem[] = [
         href: '/terms',
         icon: List,
     },
+    {
+        title: 'Frasa Negative',
+        href: '/frasa',
+        icon: List,
+    },
 ];
 
 const footerNavItems: NavItem[] = [];
