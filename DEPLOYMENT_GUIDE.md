@@ -32,15 +32,6 @@ This will create:
 
 Copy the environment variables from `.env.example` to your `.env` file and configure:
 
-#### Google Ads Configuration
-```env
-GOOGLE_ADS_CLIENT_ID=your_client_id
-GOOGLE_ADS_CLIENT_SECRET=your_client_secret
-GOOGLE_ADS_DEVELOPER_TOKEN=your_developer_token
-GOOGLE_ADS_CUSTOMER_ID=your_customer_id
-GOOGLE_ADS_CAMPAIGN_ID=your_campaign_id
-GOOGLE_ADS_REFRESH_TOKEN_PATH=D:\path\to\your\project\storage\app\private\google_ads\refresh_token.txt
-```
 
 **Important**: You need to generate a refresh token before the system can work. See the "Google Ads Authentication Setup" section below.
 
@@ -84,12 +75,6 @@ This script will:
 4. Exchange the authorization code for a refresh token
 5. Save the token to `storage/app/private/google_ads/refresh_token.txt`
 6. Provide instructions to update your `.env` file
-
-#### Step 2: Update Environment File
-After running the script, update your `.env` file with the token path:
-```env
-GOOGLE_ADS_REFRESH_TOKEN_PATH=D:\your\project\path\storage\app\private\google_ads\refresh_token.txt
-```
 
 #### Step 3: Verify Authentication
 Test the authentication setup:

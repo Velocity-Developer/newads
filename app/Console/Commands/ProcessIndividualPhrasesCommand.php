@@ -45,9 +45,9 @@ class ProcessIndividualPhrasesCommand extends Command
         try {
             $batchSize = (int) $this->option('batch-size');
             
-            // Get successfully processed terms that haven't been broken down into phrases yet
-            $terms = NewTermsNegative0Click::where('status_input_google', NewTermsNegative0Click::STATUS_BERHASIL)
-                ->whereDoesntHave('phrases')
+            // Ambil terms dengan AI hasil negatif yang belum dipecah menjadi frasa
+            $terms = NewTermsNegative0Click::where('hasil_cek_ai', NewTermsNegative0Click::HASIL_AI_NEGATIF)
+                ->whereDoesntHave('frasa')
                 ->limit($batchSize)
                 ->get();
             
@@ -89,12 +89,12 @@ class ProcessIndividualPhrasesCommand extends Command
                         
                         if (!$existingPhrase) {
                             NewFrasaNegative::create([
-                            'frasa' => $frasa,
-                            'parent_term_id' => $term->id,
-                            'status_input_google' => null,
-                            'retry_count' => 0,
-                            'notif_telegram' => null
-                        ]);
+                                'frasa' => $phrase,
+                                'parent_term_id' => $term->id,
+                                'status_input_google' => null,
+                                'retry_count' => 0,
+                                'notif_telegram' => null
+                            ]);
                             
                             $phrasesCreated++;
                         }

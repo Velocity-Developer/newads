@@ -1,19 +1,6 @@
 <?php
 
 return [
-    'google_ads' => [
-        'client_id' => env('GOOGLE_ADS_CLIENT_ID'),
-        'client_secret' => env('GOOGLE_ADS_CLIENT_SECRET'),
-        'developer_token' => env('GOOGLE_ADS_DEVELOPER_TOKEN'),
-        'customer_id' => env('GOOGLE_ADS_CUSTOMER_ID'),
-        'campaign_id' => env('GOOGLE_ADS_CAMPAIGN_ID'),
-        // Gunakan path dari .env jika ada, kalau tidak pakai default di storage private
-        'refresh_token_path' => env(
-            'GOOGLE_ADS_REFRESH_TOKEN_PATH',
-            storage_path('app/private/google_ads/refresh_token.txt')
-        ),
-    ],
-
     'telegram' => [
         'bot_token' => env('TELEGRAM_BOT_TOKEN'),
         // Dukungan multi chat ID via comma-separated list di .env: "12345,67890"
