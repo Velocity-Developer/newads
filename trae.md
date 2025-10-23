@@ -91,3 +91,113 @@ php artisan negative-keywords:process-phrases --batch-size=10
 - 401 API eksternal: Pastikan `VELOCITY_ADS_API_TOKEN` terisi token mentah dan `VELOCITY_ADS_API_URL` benar.
 - "No zero-click terms found": Periksa payload API (biasanya berada di `data.search_terms`) dan pastikan ada item yang lolos validasi serta tidak termasuk kata yang dikecualikan.
 - Konfigurasi tidak terbaca: Jalankan `php artisan config:clear` sebelum pengujian.
+
+# Proyek NewAds — Workflow di Trae
+
+Dokumen ini merangkum alur kerja pengembangan dan build paket produksi, termasuk opsi packaging ZIP dan variasi build.
+
+## Ringkasan
+- Build menggunakan command `build:production-structure` yang membentuk struktur `dist/laravel` dan `dist/public_html`.
+- Setelah struktur terbentuk, sistem membuat ZIP otomatis. ZIP bisa disimpan di `dist/zip/` dan dapat dikonfigurasi namanya.
+- Build “full” dapat menyertakan `vendor` dan `storage`; proses packaging melakukan pruning konten tidak esensial supaya ukuran tetap kecil.
+
+## Pengembangan
+- Jalankan server pengembangan:
+```bash
+composer dev
+```
+
+- Atau jalankan server secara manual:
+```bash
+php artisan serve --host 127.0.0.1 --port 8000
+```
+
+## Build & Packaging
+- Full build (vendor + storage) langsung menjadi ZIP dan menghapus folder `dist` setelah ZIP dibuat:
+```bash
+composer run build:production-full
+```
+
+- Build standar (tanpa vendor/storage), ZIP-only:
+```bash
+composer run build:production
+```
+
+- Build dengan vendor saja (tanpa storage), ZIP-only:
+```bash
+composer run build:production-with-vendor
+```
+
+- Build minimal (exclude non-esensial), ZIP-only:
+```bash
+composer run build:production-full-minimal
+```
+
+Catatan: Skrip di atas menjalankan `@php artisan build:production-structure --zip --zip-only --zip-output=production.zip` di belakang layar. Jika perlu variasi manual, kamu bisa menjalankan artisan command sendiri.
+
+## Opsi Command Build (Artisan)
+Command: `php artisan build:production-structure`
+
+Opsi umum:
+- `--include-vendor`: sertakan folder `vendor` dalam build.
+- `--include-storage`: sertakan folder `storage` dalam build.
+- `--minimal`: build minimal (exclude beberapa file non-esensial).
+- `--development`: build pengembangan (biasanya untuk debugging).
+
+Opsi ZIP:
+- `--zip`: buat artefak ZIP.
+- `--zip-only`: hapus folder `dist/laravel` dan `dist/public_html` setelah ZIP dibuat.
+- `--zip-output=production.zip`: nama file ZIP output.
+- `--zip-dir=zip`: subfolder di `dist` untuk menyimpan ZIP (default: `zip` → `dist/zip/production.zip`).
+- `--max-compress`: gunakan kompresi ZIP maksimum (lebih kecil, sedikit lebih lambat).
+
+Contoh lengkap:
+```bash
+php artisan build:production-structure --include-vendor --include-storage --zip --zip-only --zip-output=production.zip --zip-dir=release --max-compress
+```
+
+## Struktur Output
+- Folder kerja: `dist/`
+  - `dist/laravel/` → aplikasi Laravel (app, bootstrap, config, routes, dll)
+  - `dist/public_html/` → dokumen root untuk web server (index.php, .htaccess, assets)
+  - ZIP: `dist/zip/production.zip` (atau `dist/<zip-dir>/<nama-zip>` jika diset)
+
+## Ukuran & Pruning
+- Saat `--include-storage` aktif, build akan memotong konten runtime berat:
+  - `storage/logs`, `storage/framework/cache`, `storage/framework/sessions`, `storage/framework/testing` dibuat kosong (stub `.gitkeep`).
+- Saat packaging, konten non-esensial di `vendor` difilter:
+  - `tests`, `docs`, `examples`, `benchmarks`, repo metadata (`.git`, `.github`, dsb.), file tooling (`phpunit.xml`, `psalm.xml`, dsb.)
+- Untuk ukuran lebih kecil lagi:
+  - Jalankan di server: `composer install --no-dev --optimize-autoloader --classmap-authoritative`.
+
+## Troubleshooting
+- Error “The `--zip` option does not exist.” → Pastikan command `BuildProductionStructure` sudah punya opsi ZIP seperti di atas.
+- `composer.json` tidak valid → jalankan validasi:
+```bash
+composer validate
+```
+- ZIP tidak muncul di `dist/zip/` → pastikan gunakan `--zip` dan `--zip-dir` sesuai kebutuhan.
+
+## Deployment Singkat
+- Jika ZIP menyertakan `vendor`:
+```bash
+php artisan key:generate
+```
+```bash
+php artisan migrate --force
+```
+- Jika ZIP tidak menyertakan `vendor`:
+```bash
+composer install --no-dev --optimize-autoloader --classmap-authoritative
+```
+```bash
+php artisan key:generate
+```
+```bash
+php artisan migrate --force
+```
+```bash
+php artisan storage:link
+```
+
+Pastikan `APP_ENV=production` dan `APP_DEBUG=false` di `.env`. Atur permission `storage` dan `bootstrap/cache` agar bisa ditulis oleh web server.
