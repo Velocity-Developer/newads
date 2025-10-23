@@ -95,7 +95,7 @@
             "@php artisan config:cache",
             "@php artisan view:cache",
             "@php artisan event:cache",
-            "@php artisan build:production-structure --include-storage --zip --zip-only --zip-output=production.zip"
+            "@php artisan build:production-structure --include-storage --zip --zip-only --zip-output=production-with-storage.zip"
         ],
         "build:production-with-vendor": [
             "powershell -Command \"if (Test-Path 'dist') { Remove-Item -Recurse -Force 'dist' }\"",
@@ -103,7 +103,7 @@
             "@php artisan config:cache",
             "@php artisan view:cache",
             "@php artisan event:cache",
-            "@php artisan build:production-structure --include-vendor --zip --zip-only --zip-output=production.zip"
+            "@php artisan build:production-structure --include-vendor --zip --zip-only --zip-output=production-with-vendor.zip"
         ],
         "build:production-full": [
             "powershell -Command \"if (Test-Path 'dist') { Remove-Item -Recurse -Force 'dist' }\"",
@@ -111,7 +111,7 @@
             "@php artisan config:cache",
             "@php artisan view:cache",
             "@php artisan event:cache",
-            "@php artisan build:production-structure --include-vendor --include-storage --zip --zip-only --zip-output=production.zip"
+            "@php artisan build:production-structure --include-vendor --include-storage --zip --zip-only --zip-output=full-production.zip"
         ],
         "build:production-minimal": [
             "powershell -Command \"if (Test-Path 'dist') { Remove-Item -Recurse -Force 'dist' }\"",
@@ -119,7 +119,7 @@
             "@php artisan config:cache",
             "@php artisan view:cache",
             "@php artisan event:cache",
-            "@php artisan build:production-structure --minimal --zip --zip-only --zip-output=production.zip"
+            "@php artisan build:production-structure --minimal --zip --zip-only --zip-output=minimal-production.zip"
         ],
         "build:production-full-minimal": [
             "powershell -Command \"if (Test-Path 'dist') { Remove-Item -Recurse -Force 'dist' }\"",
@@ -127,7 +127,7 @@
             "@php artisan config:cache",
             "@php artisan view:cache",
             "@php artisan event:cache",
-            "@php artisan build:production-structure --include-vendor --include-storage --minimal --zip --zip-only --zip-output=production.zip"
+            "@php artisan build:production-structure --include-vendor --include-storage --minimal --zip --zip-only --zip-output=full-minimal-production.zip"
         ]
     },
     "extra": {
