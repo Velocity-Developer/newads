@@ -201,3 +201,46 @@ php artisan storage:link
 ```
 
 Pastikan `APP_ENV=production` dan `APP_DEBUG=false` di `.env`. Atur permission `storage` dan `bootstrap/cache` agar bisa ditulis oleh web server.
+
+# Integrasi Input Negative Keywords (Velocity API)
+
+Tujuan
+- Mengirim negative keywords ke `https://api.velocitydeveloper.com/new/adsfetch/input_keywords_negative.php` dengan mode `validate`/`execute`.
+- Sumber:
+  - `terms` dari `new_terms_negative_0click` dengan `hasil_cek_ai = negatif` → `match_type = EXACT`
+  - `frasa` dari `new_frasa_negative` → `match_type = PHRASE`
+
+Konfigurasi
+- Tambahkan ke `.env`:
+  - `VELOCITY_ADS_API_TOKEN="<token>"` (wajib, dikirim sebagai `Authorization: Bearer <token>`)
+  - `VELOCITY_ADS_INPUT_API_URL="https://api.velocitydeveloper.com/new/adsfetch/input_keywords_negative.php"`
+  - (opsional) `VELOCITY_ADS_MATCH_TYPE_TERMS=EXACT`
+  - (opsional) `VELOCITY_ADS_MATCH_TYPE_FRASA=PHRASE` (ubah ke `PHARSE` jika API memang memerlukan)
+- Konfigurasi di `config/integrations.php` akan membaca variabel ini.
+
+Perintah Artisan (tidak dieksekusi sekarang)
+- Validasi terms saja:
+  - `php artisan negative-keywords:input-velocity --source=terms --mode=validate --batch-size=50`
+- Eksekusi terms ke API:
+  - `php artisan negative-keywords:input-velocity --source=terms --mode=execute --batch-size=50`
+- Validasi frasa saja:
+  - `php artisan negative-keywords:input-velocity --source=frasa --mode=validate --batch-size=50`
+- Eksekusi frasa ke API:
+  - `php artisan negative-keywords:input-velocity --source=frasa --mode=execute --batch-size=50`
+- Validasi keduanya (dua panggilan API terpisah):
+  - `php artisan negative-keywords:input-velocity --source=both --mode=validate --batch-size=50`
+- Eksekusi keduanya:
+  - `php artisan negative-keywords:input-velocity --source=both --mode=execute --batch-size=50`
+
+Catatan Operasional
+- Pada `mode=validate`, perintah hanya mengetes API, tidak mengubah status di DB.
+- Pada `mode=execute`, status akan diperbarui:
+  - Berhasil → `status_input_google = 'sukses'`, `notif_telegram = 'sukses'`
+  - Gagal → `status_input_google = 'gagal'`, `retry_count++` (max 3 lalu `error`)
+- Response API yang berisi `{"success": true/false}` akan diprioritaskan untuk menentukan keberhasilan.
+- Jika API tidak mengembalikan JSON, fallback ke status HTTP (`2xx` dianggap sukses).
+
+Troubleshooting
+- Pastikan token `VELOCITY_ADS_API_TOKEN` aktif.
+- Pastikan nilai `VELOCITY_ADS_MATCH_TYPE_FRASA` adalah `PHRASE`.
+- Gunakan `--batch-size` kecil saat pertama kali coba mode `execute`.

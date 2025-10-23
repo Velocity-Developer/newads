@@ -19,5 +19,11 @@ return [
     'velocity_ads' => [
         'api_url' => env('VELOCITY_ADS_API_URL', 'https://api.velocitydeveloper.com/new/adsfetch/fetch_terms_negative0click_secure.php'),
         'api_token' => 'Bearer ' . env('VELOCITY_ADS_API_TOKEN'),
+        // Konfigurasi input negative keywords ke Velocity
+        'input_api_url' => env('VELOCITY_ADS_INPUT_API_URL', 'https://api.velocitydeveloper.com/new/adsfetch/input_keywords_negative.php'),
+        'input_match_types' => [
+            'terms' => env('VELOCITY_ADS_MATCH_TYPE_TERMS', 'EXACT'),
+            'frasa' => env('VELOCITY_ADS_MATCH_TYPE_FRASA', 'PHRASE'),
+        ],
     ],
 ];
