@@ -37,10 +37,12 @@ class InputNegativeKeywordsVelocityCommand extends Command
 
         foreach ($sources as $src) {
             if ($src === 'terms') {
+                $this->line('Debug: candidates (terms) = ' . \App\Models\NewTermsNegative0Click::needsGoogleAdsInput()->count());
                 $terms = NewTermsNegative0Click::needsGoogleAdsInput()
                     ->limit($batchSize)
                     ->pluck('terms')
                     ->toArray();
+                $this->line('Debug: sample terms = ' . implode(', ', array_slice($terms, 0, 5)));
 
                 $matchType = $svc->getMatchTypeForSource('terms');
 
