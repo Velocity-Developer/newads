@@ -518,9 +518,10 @@ function handleStorageLink()
         }
     }
 
+    // Deteksi: symlink (Unix) atau junction (Windows) atau folder biasa
     if (file_exists($storagePath)) {
         if (is_link($storagePath)) {
-            $target = readlink($storagePath);
+            $target = @readlink($storagePath);
             $output .= "Current link target: {$target}\n";
             if ($target !== $storageTarget) {
                 $output .= "Recreating link with correct target...\n";
@@ -532,6 +533,14 @@ function handleStorageLink()
                 }
             } else {
                 $output .= "✅ Link is correct\n";
+            }
+        } elseif (is_dir($storagePath)) {
+            // Windows junction atau mount: valid jika realpath sama dengan target
+            if (isLinkCorrect($storagePath, $storageTarget)) {
+                $output .= "✅ Link is correct (junction/mount)\n";
+            } else {
+                $output .= "⚠️ Storage exists but does not point to target\n";
+                $output .= "ℹ️ You may remove 'public/storage' and recreate the link\n";
             }
         } else {
             $output .= "⚠️ Storage exists but is not a symlink\n";
@@ -546,6 +555,67 @@ function handleStorageLink()
     }
 
     return $output;
+}
+
+// Tambahan helper untuk verifikasi link (symlink/junction)
+function isLinkCorrect(string $storagePath, string $storageTarget): bool
+{
+    if (! file_exists($storagePath)) {
+        return false;
+    }
+
+    if (is_link($storagePath)) {
+        $target = @readlink($storagePath);
+
+        return $target === $storageTarget;
+    }
+
+    if (is_dir($storagePath)) {
+        // Junction/mount: nilai realpath sama menandakan menunjuk ke target
+        return realpath($storagePath) === realpath($storageTarget);
+    }
+
+    return false;
+}
+
+// Tambahan: fungsi pembuat storage link cross-platform
+function createStorageLink($storageTarget, $storagePath)
+{
+    // Jika sudah benar, anggap sukses
+    if (isLinkCorrect($storagePath, $storageTarget)) {
+        return true;
+    }
+
+    // Coba artisan storage:link
+    if (function_exists('shell_exec')) {
+        $cwd = getcwd();
+        $laravelRoot = getLaravelRoot();
+        @chdir($laravelRoot);
+        $out = shell_exec('php artisan storage:link 2>&1');
+        @chdir($cwd);
+
+        if (isLinkCorrect($storagePath, $storageTarget) || file_exists($storagePath)) {
+            return true;
+        }
+    }
+
+    // Coba symlink (Unix/macOS)
+    if (function_exists('symlink')) {
+        if (@symlink($storageTarget, $storagePath)) {
+            return true;
+        }
+    }
+
+    // Coba junction (Windows)
+    if (stripos(PHP_OS, 'WIN') === 0 && function_exists('shell_exec')) {
+        $cmd = 'cmd /c mklink /J '.escapeshellarg($storagePath).' '.escapeshellarg($storageTarget);
+        $result = shell_exec($cmd.' 2>&1');
+        if (is_dir($storagePath)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 function handleStoragePermissions()
@@ -1330,7 +1400,13 @@ $laravelRoot = getLaravelRoot();
             </div>
             <div class="info-item">
                 <span class="info-label">Storage Link</span>
-                <span class="info-value"><?php echo file_exists(dirname($laravelRoot).'/public_html/storage') ? 'Exists' : 'Missing'; ?></span>
+                <span class="info-value">
+                    <?php
+                    $storagePath = $laravelRoot.'/public/storage';
+                    $storageTarget = $laravelRoot.'/storage/app/public';
+                    echo isLinkCorrect($storagePath, $storageTarget) ? 'Exists' : 'Missing';
+                    ?>
+                </span>
             </div>
         </div>
 
