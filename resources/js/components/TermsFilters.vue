@@ -4,8 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { router } from '@inertiajs/vue3';
-import { Search, Filter, Download, Calendar, FileSpreadsheet } from 'lucide-vue-next';
-import { ref, watch } from 'vue';
+import { Search, Filter, Calendar, FileSpreadsheet } from 'lucide-vue-next';
+import { ref } from 'vue';
 
 interface Filters {
     search?: string;
@@ -112,7 +112,7 @@ const exportToExcel = () => {
         </CardHeader>
         <CardContent class="space-y-4">
             <!-- First Row: Search, AI Result, Google Status, Telegram -->
-            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4 items-end">
                 <!-- Search -->
                 <div class="space-y-2">
                     <Label for="search">Search Terms</Label>
@@ -125,6 +125,47 @@ const exportToExcel = () => {
                             class="pl-8"
                             @keyup.enter="applyFilters"
                         />
+                    </div>
+                </div>
+
+                <!-- Date From -->
+                <div class="space-y-2">
+                    <Label for="date-from">Date From</Label>
+                    <div class="relative">
+                        <Calendar class="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            id="date-from"
+                            v-model="dateFrom"
+                            type="date"
+                            class="pl-8"
+                        />
+                    </div>
+                </div>
+
+                <!-- Date To -->
+                <div class="space-y-2">
+                    <Label for="date-to">Date To</Label>
+                    <div class="relative">
+                        <Calendar class="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            id="date-to"
+                            v-model="dateTo"
+                            type="date"
+                            class="pl-8"
+                        />
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="space-y-2">
+                    <div class="flex flex-wrap gap-2">
+                        <Button @click="applyFilters" class="flex items-center gap-2">
+                            <Search class="h-4 w-4" />
+                            Apply
+                        </Button>
+                        <Button variant="outline" @click="clearFilters">
+                            Clear
+                        </Button>
                     </div>
                 </div>
 
@@ -174,47 +215,7 @@ const exportToExcel = () => {
                     </select>
                 </div> -->
             </div>
-
-            <!-- Second Row: Date Range -->
-            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                <!-- Date From -->
-                <div class="space-y-2">
-                    <Label for="date-from">Date From</Label>
-                    <div class="relative">
-                        <Calendar class="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            id="date-from"
-                            v-model="dateFrom"
-                            type="date"
-                            class="pl-8"
-                        />
-                    </div>
-                </div>
-
-                <!-- Date To -->
-                <div class="space-y-2">
-                    <Label for="date-to">Date To</Label>
-                    <div class="relative">
-                        <Calendar class="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            id="date-to"
-                            v-model="dateTo"
-                            type="date"
-                            class="pl-8"
-                        />
-                    </div>
-                </div>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="flex flex-wrap gap-2">
-                <Button @click="applyFilters" class="flex items-center gap-2">
-                    <Search class="h-4 w-4" />
-                    Apply
-                </Button>
-                <Button variant="outline" @click="clearFilters">
-                    Clear
-                </Button>
+            <div class="flex justify-start">
                 <Button :variant="getButtonVariant('success')" @click="exportToExcel" class="flex items-center gap-2">
                     <FileSpreadsheet class="h-4 w-4" />
                     Export to Excel

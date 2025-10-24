@@ -14,8 +14,19 @@ interface Stats {
     google_sukses: number;
     google_gagal: number;
     google_error: number;
+    google_null: number;
     telegram_sukses: number;
     telegram_gagal: number;
+    telegram_null: number;
+    // Frasa stats
+    frasa_total: number;
+    frasa_google_sukses: number;
+    frasa_google_gagal: number;
+    frasa_google_error: number;
+    frasa_google_null: number;
+    frasa_telegram_sukses: number;
+    frasa_telegram_gagal: number;
+    frasa_telegram_null: number;
 }
 
 interface Props {
@@ -39,7 +50,7 @@ const breadcrumbs: BreadcrumbItem[] = [
             <!-- Statistics Dashboard -->
             <TermsStatistics :stats="stats" />
             
-            <div class="grid auto-rows-min gap-4 md:grid-cols-3">
+            <!-- <div class="grid auto-rows-min gap-4 md:grid-cols-3">
                 <div
                     class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border"
                 >
@@ -48,19 +59,13 @@ const breadcrumbs: BreadcrumbItem[] = [
                 <div
                     class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border"
                 >
-                    <PlaceholderPattern />
+                    <AppLogo class="w-24 h-24" />
                 </div>
                 <div
                     class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border"
                 >
                     <PlaceholderPattern />
-                </div>
-            </div>
-            <div
-                class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border"
-            >
-                <PlaceholderPattern />
-            </div>
+                </div> -->
         </div>
     </AppLayout>
 </template>
