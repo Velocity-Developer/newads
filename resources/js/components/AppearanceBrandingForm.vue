@@ -29,7 +29,7 @@ function submit() {
 <template>
   <div class="space-y-6">
     <!-- Debug info -->
-    <div class="p-4 bg-gray-100 rounded-md text-sm">
+    <div class="p-4 bg-neutral-50 rounded-md text-sm dark:bg-neutral-800">
       <strong>Debug Info:</strong><br>
       Site Title: {{ branding?.siteTitle || 'Not set' }}<br>
       Sidebar Title: {{ branding?.sidebarTitle || 'Not set' }}<br>

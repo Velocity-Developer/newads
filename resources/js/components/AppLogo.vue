@@ -1,23 +1,24 @@
 <script setup lang="ts">
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
 import { usePage } from '@inertiajs/vue3';
+import { ref } from 'vue';
 
 const page = usePage();
 const branding = page.props.branding as {
     sidebarTitle?: string;
     sidebarIconUrl?: string | null;
 };
+const hasError = ref(false);
 </script>
 
 <template>
-    <div
-        class="flex aspect-square size-8 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground"
-    >
+    <div class="flex aspect-square size-8 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
         <img
-            v-if="branding?.sidebarIconUrl"
+            v-if="branding?.sidebarIconUrl && !hasError"
             :src="branding.sidebarIconUrl"
             alt="Logo"
-            class="size-6 fill-current text-white dark:text-black"
+            class="size-6 object-contain"
+            @error="hasError = true"
         />
         <AppLogoIcon v-else class="size-8" />
     </div>
