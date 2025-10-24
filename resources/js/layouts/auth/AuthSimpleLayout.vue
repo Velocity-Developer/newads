@@ -7,6 +7,14 @@ defineProps<{
     title?: string;
     description?: string;
 }>();
+
+import { usePage } from '@inertiajs/vue3';
+import { computed, ref } from 'vue';
+
+const page = usePage();
+const branding = computed(() => (page.props as any).branding);
+const sidebarIconUrl = computed(() => branding.value?.sidebarIconUrl || null);
+const hasError = ref(false);
 </script>
 
 <template>
@@ -23,7 +31,15 @@ defineProps<{
                         <div
                             class="mb-1 flex h-9 w-9 items-center justify-center rounded-md"
                         >
+                            <img
+                                v-if="sidebarIconUrl && !hasError"
+                                :src="sidebarIconUrl"
+                                alt="Brand Icon"
+                                class="size-9 object-contain"
+                                @error="hasError = true"
+                            />
                             <AppLogoIcon
+                                v-else
                                 class="size-9 fill-current text-[var(--foreground)] dark:text-white"
                             />
                         </div>
