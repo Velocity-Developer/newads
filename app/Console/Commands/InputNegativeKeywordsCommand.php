@@ -62,6 +62,7 @@ class InputNegativeKeywordsCommand extends Command
             
             $successCount = 0;
             $failedCount = 0;
+            $successTerms = [];
             
             foreach ($terms as $term) {
                 try {
@@ -78,6 +79,7 @@ class InputNegativeKeywordsCommand extends Command
                         ]);
                         
                         $successCount++;
+                        $successTerms[] = $term->terms;
                         $this->info("✓ Successfully added: {$term->terms}");
                         
                     } else {
@@ -88,6 +90,7 @@ class InputNegativeKeywordsCommand extends Command
                         ]);
                         
                         $failedCount++;
+                        $failedTerms[] = $term->terms;
                         $this->error("✗ Failed to add: {$term->terms}");
                     }
                     
@@ -101,19 +104,24 @@ class InputNegativeKeywordsCommand extends Command
                     ]);
                     
                     $failedCount++;
+                    $failedTerms[] = $term->terms;
                 }
             }
             
             $this->info("Input completed. Success: {$successCount}, Failed: {$failedCount}");
             
             // Send Telegram notifications
-            // if ($successCount > 0) {
-            //     $this->notificationService->sendNegativeKeywordSuccess($successCount);
-            // }
+            if ($successCount > 0) {
+                $list = implode(', ', array_slice($successTerms, 0, 50));
+                $message = "✅ New Ads berhasil input kata kunci negatif ke Google Ads: {$successCount}\nTerms: {$list}";
+                $this->notificationService->sendNegativeKeywordSuccess($message);
+            }
             
-            // if ($failedCount > 0) {
-            //     $this->notificationService->sendNegativeKeywordFailed($failedCount);
-            // }
+            if ($failedCount > 0) {
+                $list = implode(', ', array_slice($failedTerms, 0, 50));
+                $message = "❌ New Ads gagal input kata kunci negatif ke Google Ads: {$failedCount}\nTerms: {$list}";
+                $this->notificationService->sendNegativeKeywordFailed($message);
+            }
             
             return 0;
             
@@ -121,10 +129,10 @@ class InputNegativeKeywordsCommand extends Command
             $this->error("Error during Google Ads input: " . $e->getMessage());
             
             // Send error notification
-            // $this->notificationService->sendSystemError(
-            //     'Google Ads Input',
-            //     $e->getMessage()
-            // );
+            $this->notificationService->sendSystemError(
+                'Google Ads Input',
+                $e->getMessage()
+            );
             
             return 1;
         }

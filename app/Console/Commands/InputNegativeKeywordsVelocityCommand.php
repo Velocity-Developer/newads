@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use App\Services\Velocity\NegativeKeywordInputService;
 use App\Models\NewTermsNegative0Click;
 use App\Models\NewFrasaNegative;
+use App\Services\Telegram\NotificationService;
 
 class InputNegativeKeywordsVelocityCommand extends Command
 {
@@ -53,6 +54,8 @@ class InputNegativeKeywordsVelocityCommand extends Command
                     $res = $svc->send($terms, $matchType, $mode);
 
                     $this->reportResult('terms', $res);
+                    // Kirim notifikasi Telegram untuk terms
+                    $this->notifyTelegram($notifier, 'terms', $terms, $matchType, $mode, $res);
 
                     if ($mode === 'execute') {
                         $this->updateStatusesForTerms($terms, $res['success']);
@@ -75,6 +78,8 @@ class InputNegativeKeywordsVelocityCommand extends Command
                     $res = $svc->send($phrases, $matchType, $mode);
 
                     $this->reportResult('frasa', $res);
+                    // Kirim notifikasi Telegram untuk frasa
+                    $this->notifyTelegram($notifier, 'frasa', $phrases, $matchType, $mode, $res);
 
                     if ($mode === 'execute') {
                         $this->updateStatusesForFrasa($phrases, $res['success']);
@@ -110,7 +115,11 @@ class InputNegativeKeywordsVelocityCommand extends Command
             $rows = NewTermsNegative0Click::whereIn('terms', $terms)->get();
             foreach ($rows as $row) {
                 $row->incrementRetry();
-                $row->update(['status_input_google' => NewTermsNegative0Click::STATUS_GAGAL]);
+                if ($row->retry_count >= 3) {
+                    $row->update(['status_input_google' => NewTermsNegative0Click::STATUS_ERROR]);
+                } else {
+                    $row->update(['status_input_google' => NewTermsNegative0Click::STATUS_GAGAL]);
+                }
             }
         }
     }
@@ -127,8 +136,44 @@ class InputNegativeKeywordsVelocityCommand extends Command
             $rows = NewFrasaNegative::whereIn('frasa', $phrases)->get();
             foreach ($rows as $row) {
                 $row->incrementRetry();
-                $row->update(['status_input_google' => NewFrasaNegative::STATUS_GAGAL]);
+                if ($row->retry_count >= 3) {
+                    $row->update(['status_input_google' => NewFrasaNegative::STATUS_ERROR]);
+                } else {
+                    $row->update(['status_input_google' => NewFrasaNegative::STATUS_GAGAL]);
+                }
             }
         }
+    }
+
+    // Helper: kirim notifikasi Telegram dengan daftar item
+    private function notifyTelegram(NotificationService $notifier, string $src, array $items, string $matchType, string $mode, array $res): void
+    {
+        $count = count($items);
+        $list = implode(', ', array_slice($items, 0, 50));
+        $timestamp = now()->format('Y-m-d H:i:s');
+
+        if ($res['success']) {
+            $message = "✅ <b>Input Keywords Berhasil</b>\n\n" .
+                "📦 <b>Sumber:</b> {$src}\n" .
+                "🧮 <b>Jumlah:</b> {$count}\n" .
+                "📝 <b>Match Type:</b> {$matchType}\n" .
+                "⚙️ <b>Mode:</b> {$mode}\n" .
+                "🗒️ <b>Items:</b> {$list}\n" .
+                "⏰ <b>Waktu:</b> {$timestamp}";
+        } else {
+            $error = $res['error'] ?? 'Unknown error';
+            $status = $res['status'] ?? 'N/A';
+            $message = "❌ <b>Input Keywords Gagal</b>\n\n" .
+                "📦 <b>Sumber:</b> {$src}\n" .
+                "🧮 <b>Jumlah:</b> {$count}\n" .
+                "📝 <b>Match Type:</b> {$matchType}\n" .
+                "⚙️ <b>Mode:</b> {$mode}\n" .
+                "📡 <b>Status API:</b> {$status}\n" .
+                "❗ <b>Error:</b> {$error}\n" .
+                "🗒️ <b>Items:</b> {$list}\n" .
+                "⏰ <b>Waktu:</b> {$timestamp}";
+        }
+
+        $notifier->sendMessage($message);
     }
 }

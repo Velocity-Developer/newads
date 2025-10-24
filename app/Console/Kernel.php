@@ -33,8 +33,8 @@ class Kernel extends ConsoleKernel
             ->withoutOverlapping()
             ->runInBackground();
         
-        // Menit ke-3: Input negative keywords to Google Ads
-        $schedule->command('negative-keywords:input-google --batch-size=5')
+        // Menit ke-3: Input negative keywords ke Velocity API
+        $schedule->command('negative-keywords:input-velocity --source=both --mode=execute --batch-size=50')
             ->everyMinute()
             ->when(function () {
                 return now()->minute % 7 === 3;
