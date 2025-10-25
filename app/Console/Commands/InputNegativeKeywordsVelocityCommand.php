@@ -39,8 +39,32 @@ class InputNegativeKeywordsVelocityCommand extends Command
 
         foreach ($sources as $src) {
             if ($src === 'terms') {
-                $this->line('Debug: candidates (terms) = ' . \App\Models\NewTermsNegative0Click::needsGoogleAdsInput()->count());
-                $terms = NewTermsNegative0Click::needsGoogleAdsInput()
+                // Tambah debug nama database aktif
+                $this->line('Debug: DB connection = ' . \DB::connection()->getDatabaseName());
+
+                // Snapshot statistik cepat
+                $total = NewTermsNegative0Click::query()->count();
+                $cntStatus = NewTermsNegative0Click::whereIn('status_input_google', [null, NewTermsNegative0Click::STATUS_GAGAL, NewTermsNegative0Click::STATUS_ERROR])->count();
+                $cntRetryOk = NewTermsNegative0Click::where('retry_count', '<', 3)->count();
+                $cntNegatif = NewTermsNegative0Click::where('hasil_cek_ai', NewTermsNegative0Click::HASIL_AI_NEGATIF)->count();
+                $this->line("Debug: totals = total={$total}, status_in=[null,gagal,error]={$cntStatus}, retry<3={$cntRetryOk}, hasil_cek_ai=negatif={$cntNegatif}");
+
+                // Gunakan query lebih longgar saat mode validate
+                $query = NewTermsNegative0Click::query();
+                if ($mode === 'validate') {
+                    // Validate hanya untuk kandidat AI-negatif, tanpa membatasi status_input_google
+                    $query->where('hasil_cek_ai', NewTermsNegative0Click::HASIL_AI_NEGATIF)
+                        ->whereIn('status_input_google', [null, NewTermsNegative0Click::STATUS_GAGAL])
+                        ->where('retry_count', '<', 3);
+                } else {
+                    $query->where('hasil_cek_ai', NewTermsNegative0Click::HASIL_AI_NEGATIF)
+                        ->whereIn('status_input_google', [null, NewTermsNegative0Click::STATUS_GAGAL])
+                        ->where('retry_count', '<', 3);
+                }
+
+                $this->line('Debug: candidates (terms) = ' . $query->count());
+
+                $terms = $query
                     ->limit($batchSize)
                     ->pluck('terms')
                     ->toArray();
@@ -56,7 +80,7 @@ class InputNegativeKeywordsVelocityCommand extends Command
 
                     $this->reportResult('terms', $res);
                     // Kirim notifikasi Telegram untuk terms
-                    $this->notifyTelegram($notifier, 'terms', $terms, $matchType, $mode, $res);
+                    // $this->notifyTelegram($notifier, 'terms', $terms, $matchType, $mode, $res);
 
                     if ($mode === 'execute') {
                         $this->updateStatusesForTerms($terms, $res['success']);
@@ -80,7 +104,7 @@ class InputNegativeKeywordsVelocityCommand extends Command
 
                     $this->reportResult('frasa', $res);
                     // Kirim notifikasi Telegram untuk frasa
-                    $this->notifyTelegram($notifier, 'frasa', $phrases, $matchType, $mode, $res);
+                    // $this->notifyTelegram($notifier, 'frasa', $phrases, $matchType, $mode, $res);
 
                     if ($mode === 'execute') {
                         $this->updateStatusesForFrasa($phrases, $res['success']);
@@ -94,22 +118,25 @@ class InputNegativeKeywordsVelocityCommand extends Command
 
     private function reportResult(string $src, array $res): void
     {
-        if ($res['success']) {
-            $this->info("✅ {$src}: API success (status={$res['status']})");
-            $data = $res['json']['data'] ?? [];
-            if (!empty($data)) {
-                $details = [];
-                if (array_key_exists('campaign_id', $data)) { $details[] = "campaign_id={$data['campaign_id']}"; }
-                if (array_key_exists('match_type', $data)) { $details[] = "match_type={$data['match_type']}"; }
-                if (array_key_exists('validate_only', $data)) { $details[] = "validate_only=" . ($data['validate_only'] ? 'true' : 'false'); }
-                if (array_key_exists('terms', $data) && is_array($data['terms'])) { $details[] = 'terms_count=' . count($data['terms']); }
-                if (!empty($details)) { $this->line('Details: ' . implode(', ', $details)); }
-            }
+        $success = $res['success'] ?? false;
+        $status = $res['status'] ?? 'N/A';
+        $data = $res['json']['data'] ?? [];
+        $count = $data['count'] ?? null;
+        $matchType = $data['match_type'] ?? null;
+        $campaignId = $data['campaign_id'] ?? null;
+        $validateOnly = $data['validate_only'] ?? null;
+
+        if ($success) {
+            $this->info("✅ New Ads Berhasil Input Negative Keywords!");
+            $this->line("Status API: {$status}");
+            if ($count !== null) $this->line("Jumlah: {$count}");
+            if ($matchType !== null) $this->line("Match type (API): {$matchType}");
+            if ($validateOnly !== null) $this->line("Validate only: " . ($validateOnly ? 'true' : 'false'));
+            if ($campaignId !== null) $this->line("Campaign ID: {$campaignId}");
         } else {
-            $this->error("❌ {$src}: API failed (status=" . ($res['status'] ?? 'N/A') . ")");
-            if (!empty($res['error'])) {
-                $this->error("Error: {$res['error']}");
-            }
+            $error = $res['error'] ?? 'Unknown error';
+            $this->error("❌ New Ads Gagal Input Negative Keywords: {$error}");
+            $this->line("Status API: {$status}");
         }
     }
 
@@ -159,7 +186,8 @@ class InputNegativeKeywordsVelocityCommand extends Command
     private function notifyTelegram(NotificationService $notifier, string $src, array $items, string $matchType, string $mode, array $res): void
     {
         $count = count($items);
-        $list = implode(', ', array_slice($items, 0, 50));
+        // Tampilkan tiap keyword per baris dengan bullet untuk keterbacaan
+        $list = implode("\n", array_map(function ($item) { return '• ' . $item; }, array_slice($items, 0, 50)));
         $timestamp = now()->format('Y-m-d H:i:s');
 
         $data = $res['json']['data'] ?? [];
@@ -168,27 +196,26 @@ class InputNegativeKeywordsVelocityCommand extends Command
         $validateOnly = $data['validate_only'] ?? null;
 
         if ($res['success']) {
-            $message = "✅ <b>Input Keywords Berhasil</b>\n\n" .
-                "📦 <b>Sumber:</b> {$src}\n" .
+            $message = "✅ <b>News Ads Berhasil Input Keywords Negative</b>\n\n" .
+                // "📦 <b>Sumber:</b> {$src}\n" .
                 "🧮 <b>Jumlah:</b> {$count}\n" .
                 "📝 <b>Match Type:</b> {$matchType}" . ($apiMatchType ? " (API={$apiMatchType})" : "") . "\n" .
-                "⚙️ <b>Mode:</b> {$mode}" . (is_bool($validateOnly) ? " (validate_only=" . ($validateOnly ? 'true' : 'false') . ")" : "") . "\n" .
-                ($campaignId ? "📣 <b>Campaign ID:</b> {$campaignId}\n" : "") .
-                "🗒️ <b>Items:</b> {$list}\n" .
-                "⏰ <b>Waktu:</b> {$timestamp}";
+                // "⚙️ <b>Mode:</b> {$mode}" . (is_bool($validateOnly) ? " (validate_only=" . ($validateOnly ? 'true' : 'false') . ")" : "") . "\n" .
+                // ($campaignId ? "📣 <b>Campaign ID:</b> {$campaignId}\n" : "") .
+                "⏰ <b>Waktu:</b> {$timestamp}\n" .
+                "🗒️ <b>Keywords:</b>\n{$list}\n";
         } else {
             $error = $res['error'] ?? 'Unknown error';
             $status = $res['status'] ?? 'N/A';
-            $message = "❌ <b>Input Keywords Gagal</b>\n\n" .
+            $message = "❌ <b>News Ads Gagal Input Keywords Negative</b>\n\n" .
                 "📦 <b>Sumber:</b> {$src}\n" .
                 "🧮 <b>Jumlah:</b> {$count}\n" .
                 "📝 <b>Match Type:</b> {$matchType}\n" .
                 "⚙️ <b>Mode:</b> {$mode}\n" .
                 "📡 <b>Status API:</b> {$status}\n" .
                 "❗ <b>Error:</b> {$error}\n" .
-                "🗒️ <b>Items:</b> {$list}\n" .
-                "⏰ <b>Waktu:</b> {$timestamp}" .
-                "<b>Test by : kdt</b>";
+                "⏰ <b>Waktu:</b> {$timestamp}\n" .
+                "🗒️ <b>Keywords:</b>\n{$list}\n";
         }
 
         $notifier->sendMessage($message);
