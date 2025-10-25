@@ -126,7 +126,7 @@ Schedule::command('negative-keywords:fetch-terms --limit=50')
     ->environments(['production', 'local'])
     ->appendOutputTo(storage_path('logs/schedule-' . now()->format('Y-m-d') . '.log'));
 
-Schedule::command('negative-keywords:analyze-terms --batch-size=10')
+Schedule::command('negative-keywords:analyze-terms --batch-size=50')
     ->everyMinute()
     ->when(function () { return now()->minute % 7 === 2; })
     ->withoutOverlapping()
@@ -134,7 +134,7 @@ Schedule::command('negative-keywords:analyze-terms --batch-size=10')
     ->environments(['production', 'local'])
     ->appendOutputTo(storage_path('logs/schedule-' . now()->format('Y-m-d') . '.log'));
 
-Schedule::command('negative-keywords:input-velocity --source=both --mode=execute --batch-size=50')
+Schedule::command('negative-keywords:input-velocity --source=terms --mode=execute --batch-size=2')
     ->everyMinute()
     ->when(function () { return now()->minute % 7 === 3; })
     ->withoutOverlapping()
@@ -142,9 +142,17 @@ Schedule::command('negative-keywords:input-velocity --source=both --mode=execute
     ->environments(['production', 'local'])
     ->appendOutputTo(storage_path('logs/schedule-' . now()->format('Y-m-d') . '.log'));
 
-Schedule::command('negative-keywords:process-phrases --batch-size=10')
+Schedule::command('negative-keywords:process-phrases --batch-size=50')
     ->everyMinute()
-    ->when(function () { return now()->minute % 7 === 0; })
+    ->when(function () { return now()->minute % 7 === 5; })
+    ->withoutOverlapping()
+    ->runInBackground()
+    ->environments(['production', 'local'])
+    ->appendOutputTo(storage_path('logs/schedule-' . now()->format('Y-m-d') . '.log'));
+
+Schedule::command('negative-keywords:input-velocity --source=frasa --mode=execute --batch-size=2')
+    ->everyMinute()
+    ->when(function () { return now()->minute % 7 === 6; })
     ->withoutOverlapping()
     ->runInBackground()
     ->environments(['production', 'local'])
