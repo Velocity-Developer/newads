@@ -186,6 +186,7 @@ class TestNegativeKeywordsSystemCommand extends Command
             if ($this->termAnalyzer->isConfigured()) {
                 $results['configuration'] = true;
                 $this->line('✅ AI service configured');
+                $this->line('🧩 Model GPT saat ini: ' . $this->termAnalyzer->getModel());
             } else {
                 $this->error('❌ AI service not configured (missing OpenAI API key)');
             }

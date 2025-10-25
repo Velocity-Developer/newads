@@ -16,7 +16,7 @@ class TermAnalyzer
     {
         $this->apiKey = config('services.openai.api_key', env('OPENAI_API_KEY'));
         // Gunakan default model yang valid (override lewat .env jika perlu)
-        $this->model = config('services.openai.model', env('OPENAI_MODEL', 'gpt-3.5-turbo'));
+        $this->model = config('services.openai.model', env('OPENAI_MODEL'));
     }
 
     /**
@@ -43,7 +43,7 @@ class TermAnalyzer
             ]);
 
             // Hindari bias negatif saat API gagal
-            return 'relevan';
+            return null;
         }
     }
 
@@ -189,8 +189,8 @@ class TermAnalyzer
                     'content' => $prompt
                 ]
             ],
-            // Hapus 'max_tokens' karena tidak didukung oleh model saat ini
             // 'temperature' => 0.1,
+            // 'max_tokens' => 10,
         ]);
 
         if (!$response->successful()) {
@@ -205,22 +205,30 @@ class TermAnalyzer
      */
     private function parseResponse(array $response): string
     {
-        $content = $response['choices'][0]['message']['content'] ?? '';
-        $content = strtolower(trim($content));
-        
-        // Clean up the response
-        $content = preg_replace('/[^a-z]/', '', $content);
-        
-        if (in_array($content, ['relevan', 'negatif'])) {
-            return $content;
+        $raw = $response['choices'][0]['message']['content'] ?? '';
+        $normalized = mb_strtolower(trim($raw));
+
+        // Jika satu kata persis, langsung kembalikan
+        if ($normalized === 'relevan' || $normalized === 'negatif') {
+            return $normalized;
         }
-        
-        // If response is unclear, default to 'relevan' to be safe
+
+        // Deteksi kata dengan word boundary, toleran terhadap kalimat panjang/tanda baca
+        if (preg_match_all('/\b(relevan|negatif)\b/iu', $normalized, $matches, PREG_OFFSET_CAPTURE)) {
+            // Ambil kemunculan pertama berdasarkan offset
+            $firstMatchWord = $matches[1][0][0] ?? null;
+            if ($firstMatchWord) {
+                return mb_strtolower($firstMatchWord);
+            }
+        }
+
+        // Jika tidak jelas, fallback aman ke 'relevan' dan log detail
         Log::warning('Unclear AI response, defaulting to relevan', [
-            'response' => $content,
+            'response_raw' => $raw,
+            'normalized' => $normalized,
             'full_response' => $response
         ]);
-        
+
         return 'relevan';
     }
 
@@ -293,5 +301,9 @@ class TermAnalyzer
                 'error' => $e->getMessage(),
             ];
         }
+    }
+    public function getModel(): string
+    {
+        return $this->model;
     }
 }
