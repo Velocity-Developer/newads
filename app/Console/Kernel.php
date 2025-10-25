@@ -28,7 +28,7 @@ class Kernel extends ConsoleKernel
             ->environments(['production', 'local']);
         
         // Menit ke-2: Analyze terms with AI
-        $schedule->command('negative-keywords:analyze-terms --batch-size=10')
+        $schedule->command('negative-keywords:analyze-terms --batch-size=50')
             ->everyMinute()
             ->when(function () {
                 return now()->minute % 7 === 2;
@@ -48,7 +48,7 @@ class Kernel extends ConsoleKernel
             ->environments(['production', 'local']);
         
         // Menit ke-7: Process individual phrases
-        $schedule->command('negative-keywords:process-phrases --batch-size=10')
+        $schedule->command('negative-keywords:process-phrases --batch-size=50')
             ->everyMinute()
             ->when(function () {
                 return now()->minute % 7 === 0;
