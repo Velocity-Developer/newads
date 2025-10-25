@@ -7,11 +7,13 @@ use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
 class Kernel extends ConsoleKernel
 {
-    /**
-     * Define the application's command schedule.
-     */
     protected function schedule(Schedule $schedule): void
     {
+        // Diagnostic: simple inspire command to verify scheduler registration
+        $schedule->command('inspire')
+            ->everyMinute()
+            ->environments(['production', 'local']);
+
         // Negative Keywords Automation Schedule
         // Based on trae.md - 7-minute cycle automation
         
@@ -22,7 +24,8 @@ class Kernel extends ConsoleKernel
                 return now()->minute % 7 === 1;
             })
             ->withoutOverlapping()
-            ->runInBackground();
+            ->runInBackground()
+            ->environments(['production', 'local']);
         
         // Menit ke-2: Analyze terms with AI
         $schedule->command('negative-keywords:analyze-terms --batch-size=10')
@@ -31,7 +34,8 @@ class Kernel extends ConsoleKernel
                 return now()->minute % 7 === 2;
             })
             ->withoutOverlapping()
-            ->runInBackground();
+            ->runInBackground()
+            ->environments(['production', 'local']);
         
         // Menit ke-3: Input negative keywords ke Velocity API
         $schedule->command('negative-keywords:input-velocity --source=both --mode=execute --batch-size=50')
@@ -40,7 +44,8 @@ class Kernel extends ConsoleKernel
                 return now()->minute % 7 === 3;
             })
             ->withoutOverlapping()
-            ->runInBackground();
+            ->runInBackground()
+            ->environments(['production', 'local']);
         
         // Menit ke-7: Process individual phrases
         $schedule->command('negative-keywords:process-phrases --batch-size=10')
@@ -49,7 +54,8 @@ class Kernel extends ConsoleKernel
                 return now()->minute % 7 === 0;
             })
             ->withoutOverlapping()
-            ->runInBackground();
+            ->runInBackground()
+            ->environments(['production', 'local']);
         
         // Additional maintenance tasks
         
@@ -57,7 +63,8 @@ class Kernel extends ConsoleKernel
         $schedule->call(function () {
             $notificationService = app(\App\Services\Telegram\NotificationService::class);
             $notificationService->sendDailySummary();
-        })->dailyAt('23:00');
+        })->dailyAt('23:00')
+          ->environments(['production', 'local']);
         
         // Weekly cleanup of old processed records (older than 30 days)
         $schedule->call(function () {
@@ -68,11 +75,11 @@ class Kernel extends ConsoleKernel
             \App\Models\NewFrasaNegative::where('created_at', '<', now()->subDays(30))
                 ->where('status_input_google', \App\Models\NewFrasaNegative::STATUS_BERHASIL)
                 ->delete();
-        })->weekly()->sundays()->at('02:00');
+        })->weekly()->sundays()->at('02:00')
+          ->environments(['production', 'local']);
         
         // Retry failed operations every hour
         $schedule->call(function () {
-            // Reset retry count for failed items that can be retried
             \App\Models\NewTermsNegative0Click::where('status_input_google', \App\Models\NewTermsNegative0Click::STATUS_GAGAL)
                 ->where('retry_count', '<', 3)
                 ->update(['status_input_google' => null]);
@@ -80,7 +87,8 @@ class Kernel extends ConsoleKernel
             \App\Models\NewFrasaNegative::where('status_input_google', \App\Models\NewFrasaNegative::STATUS_GAGAL)
                 ->where('retry_count', '<', 3)
                 ->update(['status_input_google' => null]);
-        })->hourly();
+        })->hourly()
+          ->environments(['production', 'local']);
     }
 
     /**
