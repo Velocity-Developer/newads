@@ -72,38 +72,47 @@ class AnalyzeTermsWithAICommand extends Command
             
             $analyzedCount = 0;
             $positiveCount = 0;
-            
+            $relevanTerms = [];
+            $negatifTerms = [];
+
             foreach ($terms as $term) {
                 try {
                     $this->line("Analyzing: {$term->terms}");
-                    
-                    // Analyze the term
-                    $result = $this->termAnalyzer->analyzeTerm($term->terms);
-                    
-                    // Update the term with AI result
+
+                    // Kembali memakai hasil terstruktur (relevan/negatif)
+                    $result = $this->termAnalyzer->analyzeTerm($term->terms); // 'relevan' / 'negatif'
+                    $this->line("AI Result: {$result}");
+                    // Simpan ke database
                     $term->update([
-                        'hasil_cek_ai' => $result ? 'relevan' : 'negatif'
+                        'hasil_cek_ai' => $result
                     ]);
-                    
-                    if (!$result) { // Count negative terms (terms that should be negative keywords)
-                        $positiveCount++;
+
+                    // Hitung ringkasan
+                    if ($result === 'relevan') {
+                        $relevanTerms[] = $term->terms;
+                    } elseif ($result === 'negatif') {
+                        $negatifTerms[] = $term->terms;
+                        $positiveCount++; // tetap dipakai untuk jumlah kandidat negatif
+                    } else {
+                        $this->line("Unclear AI result for: {$term->terms} => '{$result}'");
                     }
-                    
+
                     $analyzedCount++;
-                    
+
                 } catch (Exception $e) {
                     $this->error("Error analyzing term '{$term->terms}': " . $e->getMessage());
-                    
-                    // For failed analysis, we'll leave hasil_cek_ai as null so it can be retried
-                    // Don't update the field to maintain retry capability
                 }
             }
-            
-            $this->info("Analysis completed. Analyzed: {$analyzedCount}, Positive for negative keywords: {$positiveCount}");
-            
-            // Send Telegram notification
-            // $this->notificationService->notifyAiAnalysisResults($analyzedCount, $positiveCount, $analyzedCount - $positiveCount);
-            
+
+            $displayLimit = 20;
+            $this->info("Analysis completed. Total: {$analyzedCount}, Relevan: " . count($relevanTerms) . ", Negatif: " . count($negatifTerms));
+            if (!empty($relevanTerms)) {
+                $this->line("Relevan terms (max {$displayLimit}): " . implode(', ', array_slice($relevanTerms, 0, $displayLimit)));
+            }
+            if (!empty($negatifTerms)) {
+                $this->line("Negatif terms (max {$displayLimit}): " . implode(', ', array_slice($negatifTerms, 0, $displayLimit)));
+            }
+
             return 0;
             
         } catch (Exception $e) {

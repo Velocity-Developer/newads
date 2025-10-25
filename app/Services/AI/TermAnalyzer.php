@@ -15,7 +15,8 @@ class TermAnalyzer
     public function __construct()
     {
         $this->apiKey = config('services.openai.api_key', env('OPENAI_API_KEY'));
-        $this->model = config('services.openai.model', env('OPENAI_MODEL', 'gpt-5'));
+        // Gunakan default model yang valid (override lewat .env jika perlu)
+        $this->model = config('services.openai.model', env('OPENAI_MODEL', 'gpt-3.5-turbo'));
     }
 
     /**
@@ -26,24 +27,23 @@ class TermAnalyzer
         try {
             $prompt = $this->buildAnalysisPrompt($term);
             $response = $this->callOpenAI($prompt);
-            
             $result = $this->parseResponse($response);
-            
+
             Log::info('AI analysis completed', [
                 'term' => $term,
                 'result' => $result
             ]);
-            
+
             return $result;
-            
+
         } catch (\Exception $e) {
             Log::error('AI analysis failed', [
                 'term' => $term,
                 'error' => $e->getMessage()
             ]);
-            
-            // Return empty string as default to be safe
-            return '';
+
+            // Hindari bias negatif saat API gagal
+            return 'relevan';
         }
     }
 
@@ -108,6 +108,8 @@ class TermAnalyzer
     private function buildAnalysisPrompt(string $term): string
     {
         return '<<<PROMPT
+
+        Istilah yang diuji: ' . $term . '
         Kamu adalah asisten yang bertugas memeriksa apakah sebuah istilah penelusuran Google Ads TIDAK RELEVAN atau RELEVAN untuk bisnis JASA PEMBUATAN WEBSITE.
 
         ---
@@ -165,10 +167,10 @@ class TermAnalyzer
 
         ---
 
-        Format jawaban:
-        Relevan  
-        Negatif
-        PROMPT';
+        Instruksi Output:
+        - Jawab hanya satu kata persis: Relevan atau Negatif.
+        - Jangan menambahkan kata lain, tanda petik, atau mengulang instruksi.';
+        
     }
 
     /**
@@ -187,8 +189,8 @@ class TermAnalyzer
                     'content' => $prompt
                 ]
             ],
-            'max_tokens' => 10,
-            'temperature' => 0.1,
+            // Hapus 'max_tokens' karena tidak didukung oleh model saat ini
+            // 'temperature' => 0.1,
         ]);
 
         if (!$response->successful()) {
@@ -256,6 +258,39 @@ class TermAnalyzer
             return [
                 'success' => false,
                 'error' => $e->getMessage()
+            ];
+        }
+    }
+
+    public function analyzeTermRaw(string $term): array
+    {
+        try {
+            $prompt = $this->buildAnalysisPrompt($term);
+            $response = $this->callOpenAI($prompt);
+
+            $content = $response['choices'][0]['message']['content'] ?? '';
+
+            Log::info('AI raw analysis', [
+                'term' => $term,
+                'content_raw' => $content,
+            ]);
+
+            return [
+                'success' => true,
+                'term' => $term,
+                'content' => $content,
+                'response' => $response,
+            ];
+        } catch (\Exception $e) {
+            Log::error('AI raw analysis failed', [
+                'term' => $term,
+                'error' => $e->getMessage(),
+            ]);
+
+            return [
+                'success' => false,
+                'term' => $term,
+                'error' => $e->getMessage(),
             ];
         }
     }
