@@ -37,8 +37,8 @@ class Kernel extends ConsoleKernel
             ->runInBackground()
             ->environments(['production', 'local']);
         
-        // Menit ke-3: Input negative keywords ke Velocity API
-        $schedule->command('negative-keywords:input-velocity --source=both --mode=execute --batch-size=50')
+        // Menit ke-3: Input negative keywords terms ke Velocity API
+        $schedule->command('negative-keywords:input-velocity --source=terms --mode=execute --batch-size=2')
             ->everyMinute()
             ->when(function () {
                 return now()->minute % 7 === 3;
@@ -47,11 +47,21 @@ class Kernel extends ConsoleKernel
             ->runInBackground()
             ->environments(['production', 'local']);
         
-        // Menit ke-7: Process individual phrases
+        // Menit ke-5: Process individual phrases
         $schedule->command('negative-keywords:process-phrases --batch-size=50')
             ->everyMinute()
             ->when(function () {
-                return now()->minute % 7 === 0;
+                return now()->minute % 7 === 5;
+            })
+            ->withoutOverlapping()
+            ->runInBackground()
+            ->environments(['production', 'local']);
+
+        // Menit ke-6: Input negative keywords frasa ke Velocity API
+        $schedule->command('negative-keywords:input-velocity --source=frasa --mode=execute --batch-size=2')
+            ->everyMinute()
+            ->when(function () {
+                return now()->minute % 7 === 6;
             })
             ->withoutOverlapping()
             ->runInBackground()
@@ -67,16 +77,16 @@ class Kernel extends ConsoleKernel
           ->environments(['production', 'local']);
         
         // Weekly cleanup of old processed records (older than 30 days)
-        $schedule->call(function () {
-            \App\Models\NewTermsNegative0Click::where('created_at', '<', now()->subDays(30))
-                ->where('status_input_google', \App\Models\NewTermsNegative0Click::STATUS_BERHASIL)
-                ->delete();
+        // $schedule->call(function () {
+        //     \App\Models\NewTermsNegative0Click::where('created_at', '<', now()->subDays(30))
+        //         ->where('status_input_google', \App\Models\NewTermsNegative0Click::STATUS_BERHASIL)
+        //         ->delete();
                 
-            \App\Models\NewFrasaNegative::where('created_at', '<', now()->subDays(30))
-                ->where('status_input_google', \App\Models\NewFrasaNegative::STATUS_BERHASIL)
-                ->delete();
-        })->weekly()->sundays()->at('02:00')
-          ->environments(['production', 'local']);
+        //     \App\Models\NewFrasaNegative::where('created_at', '<', now()->subDays(30))
+        //         ->where('status_input_google', \App\Models\NewFrasaNegative::STATUS_BERHASIL)
+        //         ->delete();
+        // })->weekly()->sundays()->at('02:00')
+        //   ->environments(['production', 'local']);
         
         // Retry failed operations every hour
         $schedule->call(function () {

@@ -54,10 +54,24 @@ return [
 
         'stack' => [
             'driver' => 'stack',
-            'channels' => explode(',', env('LOG_STACK', 'single')),
+            'channels' => ['daily'], // gunakan channel daily dalam stack
             'ignore_exceptions' => false,
         ],
 
+        'daily' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/laravel.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 14, // retensi 14 hari untuk laravel-YYYY-MM-DD.log
+        ],
+
+        // Channel khusus untuk scheduler
+        'schedule' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/schedule.log'),
+            'level' => 'info',
+            'days' => 14, // retensi 14 hari untuk schedule-YYYY-MM-DD.log
+        ],
         'single' => [
             'driver' => 'single',
             'path' => storage_path('logs/laravel.log'),
