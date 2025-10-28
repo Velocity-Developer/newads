@@ -80,7 +80,7 @@ class InputNegativeKeywordsVelocityCommand extends Command
 
                     $this->reportResult('terms', $res);
                     // Kirim notifikasi Telegram untuk terms
-                    // $this->notifyTelegram($notifier, 'terms', $terms, $matchType, $mode, $res);
+                    $this->notifyTelegram($notifier, 'terms', $terms, $matchType, $mode, $res);
 
                     if ($mode === 'execute') {
                         $this->updateStatusesForTerms($terms, $res['success']);
@@ -104,7 +104,7 @@ class InputNegativeKeywordsVelocityCommand extends Command
 
                     $this->reportResult('frasa', $res);
                     // Kirim notifikasi Telegram untuk frasa
-                    // $this->notifyTelegram($notifier, 'frasa', $phrases, $matchType, $mode, $res);
+                    $this->notifyTelegram($notifier, 'frasa', $phrases, $matchType, $mode, $res);
 
                     if ($mode === 'execute') {
                         $this->updateStatusesForFrasa($phrases, $res['success']);
