@@ -15,55 +15,55 @@ class Kernel extends ConsoleKernel
             ->environments(['production', 'local']);
 
         // Negative Keywords Automation Schedule
-        // Based on trae.md - 7-minute cycle automation
-        
-        // Menit ke-1: Fetch zero-click terms from Google Ads
-        $schedule->command('negative-keywords:fetch-terms --limit=50')
+        // Based on trae.md - 10-minute cycle automation
+
+        // Menit ke-1: Fetch zero-click terms from External Ads API
+        $schedule->command('negative-keywords:fetch-terms')
             ->everyMinute()
             ->when(function () {
-                return now()->minute % 7 === 1;
+                return now()->minute % 10 === 1;
             })
-            ->withoutOverlapping()
+            ->withoutOverlapping(5)
             ->runInBackground()
             ->environments(['production', 'local']);
         
         // Menit ke-2: Analyze terms with AI
-        $schedule->command('negative-keywords:analyze-terms --batch-size=50')
+        $schedule->command('negative-keywords:analyze-terms')
             ->everyMinute()
             ->when(function () {
-                return now()->minute % 7 === 2;
+                return now()->minute % 10 === 2;
             })
-            ->withoutOverlapping()
+            ->withoutOverlapping(5)
             ->runInBackground()
             ->environments(['production', 'local']);
         
         // Menit ke-3: Input negative keywords terms ke Velocity API
-        $schedule->command('negative-keywords:input-velocity --source=terms --mode=validate --batch-size=2')
+        $schedule->command('negative-keywords:input-velocity --source=terms --mode=validate')
             ->everyMinute()
             ->when(function () {
-                return now()->minute % 7 === 3;
+                return now()->minute % 10 === 3;
             })
-            ->withoutOverlapping()
+            ->withoutOverlapping(5)
             ->runInBackground()
             ->environments(['production', 'local']);
         
-        // Menit ke-5: Process individual phrases
-        $schedule->command('negative-keywords:process-phrases --batch-size=50')
+        // Menit ke-6: Process individual phrases (split-only)
+        $schedule->command('negative-keywords:process-phrases')
             ->everyMinute()
             ->when(function () {
-                return now()->minute % 7 === 5;
+                return now()->minute % 10 === 6;
             })
-            ->withoutOverlapping()
+            ->withoutOverlapping(5)
             ->runInBackground()
             ->environments(['production', 'local']);
 
-        // Menit ke-6: Input negative keywords frasa ke Velocity API
-        $schedule->command('negative-keywords:input-velocity --source=frasa --mode=validate --batch-size=2')
+        // Menit ke-7: Input negative keywords frasa ke Velocity API
+        $schedule->command('negative-keywords:input-velocity --source=frasa --mode=validate')
             ->everyMinute()
             ->when(function () {
-                return now()->minute % 7 === 6;
+                return now()->minute % 10 === 7;
             })
-            ->withoutOverlapping()
+            ->withoutOverlapping(5)
             ->runInBackground()
             ->environments(['production', 'local']);
         

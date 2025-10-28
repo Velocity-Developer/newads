@@ -18,56 +18,56 @@ Schedule::command('inspire')
     ->appendOutputTo(storage_path('logs/schedule.log'));
 
 // Menit ke-1: Fetch zero-click terms from Google Ads
-Schedule::command('negative-keywords:fetch-terms --limit=50')
+Schedule::command('negative-keywords:fetch-terms')
     ->everyMinute()
     ->when(function () {
-        return now()->minute % 7 === 1;
+        return now()->minute % 10 === 1;
     })
-    ->withoutOverlapping()
+    ->withoutOverlapping(5)
     ->runInBackground()
     ->environments(['production', 'local'])
     ->appendOutputTo(storage_path('logs/schedule.log'));
 
 // Menit ke-2: Analyze terms with AI
-Schedule::command('negative-keywords:analyze-terms --batch-size=50')
+Schedule::command('negative-keywords:analyze-terms')
     ->everyMinute()
     ->when(function () {
-        return now()->minute % 7 === 2;
+        return now()->minute % 10 === 2;
     })
-    ->withoutOverlapping()
+    ->withoutOverlapping(5)
     ->runInBackground()
     ->environments(['production', 'local'])
     ->appendOutputTo(storage_path('logs/schedule.log'));
 
 // Menit ke-3: Input negative keywords terms ke Velocity API
-Schedule::command('negative-keywords:input-velocity --source=terms --mode=validate --batch-size=2')
+Schedule::command('negative-keywords:input-velocity --source=terms --mode=validate')
     ->everyMinute()
     ->when(function () {
-        return now()->minute % 7 === 3;
+        return now()->minute % 10 === 3;
     })
-    ->withoutOverlapping()
+    ->withoutOverlapping(5)
     ->runInBackground()
     ->environments(['production', 'local'])
     ->appendOutputTo(storage_path('logs/schedule.log'));
 
-// Menit ke-5: Process individual phrases
-Schedule::command('negative-keywords:process-phrases --batch-size=50')
+// Menit ke-6: Process individual phrases
+Schedule::command('negative-keywords:process-phrases')
     ->everyMinute()
     ->when(function () {
-        return now()->minute % 7 === 5;
+        return now()->minute % 10 === 6;
     })
-    ->withoutOverlapping()
+    ->withoutOverlapping(5)
     ->runInBackground()
     ->environments(['production', 'local'])
     ->appendOutputTo(storage_path('logs/schedule.log'));
 
-// Menit ke-6: Input negative keywords frasa ke Velocity API
-Schedule::command('negative-keywords:input-velocity --source=frasa --mode=validate --batch-size=2')
+// Menit ke-7: Input negative keywords frasa ke Velocity API
+Schedule::command('negative-keywords:input-velocity --source=frasa --mode=validate')
     ->everyMinute()
     ->when(function () {
-        return now()->minute % 7 === 6;
+        return now()->minute % 10 === 7;
     })
-    ->withoutOverlapping()
+    ->withoutOverlapping(5)
     ->runInBackground()
     ->environments(['production', 'local'])
     ->appendOutputTo(storage_path('logs/schedule.log'));
@@ -118,42 +118,42 @@ Schedule::command('inspire')
     ->environments(['production', 'local'])
     ->appendOutputTo(storage_path('logs/schedule-' . now()->format('Y-m-d') . '.log'));
 
-Schedule::command('negative-keywords:fetch-terms --limit=50')
+Schedule::command('negative-keywords:fetch-terms')
     ->everyMinute()
-    ->when(function () { return now()->minute % 7 === 1; })
-    ->withoutOverlapping()
+    ->when(function () { return now()->minute % 10 === 1; })
+    ->withoutOverlapping(5)
     ->runInBackground()
     ->environments(['production', 'local'])
     ->appendOutputTo(storage_path('logs/schedule-' . now()->format('Y-m-d') . '.log'));
 
-Schedule::command('negative-keywords:analyze-terms --batch-size=50')
+Schedule::command('negative-keywords:analyze-terms')
     ->everyMinute()
-    ->when(function () { return now()->minute % 7 === 2; })
-    ->withoutOverlapping()
+    ->when(function () { return now()->minute % 10 === 2; })
+    ->withoutOverlapping(5)
     ->runInBackground()
     ->environments(['production', 'local'])
     ->appendOutputTo(storage_path('logs/schedule-' . now()->format('Y-m-d') . '.log'));
 
-Schedule::command('negative-keywords:input-velocity --source=terms --mode=validate --batch-size=2')
+Schedule::command('negative-keywords:input-velocity --source=terms --mode=validate')
     ->everyMinute()
-    ->when(function () { return now()->minute % 7 === 3; })
-    ->withoutOverlapping()
+    ->when(function () { return now()->minute % 10 === 3; })
+    ->withoutOverlapping(5)
     ->runInBackground()
     ->environments(['production', 'local'])
     ->appendOutputTo(storage_path('logs/schedule-' . now()->format('Y-m-d') . '.log'));
 
-Schedule::command('negative-keywords:process-phrases --batch-size=50')
+Schedule::command('negative-keywords:process-phrases')
     ->everyMinute()
-    ->when(function () { return now()->minute % 7 === 5; })
-    ->withoutOverlapping()
+    ->when(function () { return now()->minute % 10 === 6; })
+    ->withoutOverlapping(5)
     ->runInBackground()
     ->environments(['production', 'local'])
     ->appendOutputTo(storage_path('logs/schedule-' . now()->format('Y-m-d') . '.log'));
 
-Schedule::command('negative-keywords:input-velocity --source=frasa --mode=validate --batch-size=2')
+Schedule::command('negative-keywords:input-velocity --source=frasa --mode=validate')
     ->everyMinute()
-    ->when(function () { return now()->minute % 7 === 6; })
-    ->withoutOverlapping()
+    ->when(function () { return now()->minute % 10 === 7; })
+    ->withoutOverlapping(5)
     ->runInBackground()
     ->environments(['production', 'local'])
     ->appendOutputTo(storage_path('logs/schedule-' . now()->format('Y-m-d') . '.log'));
