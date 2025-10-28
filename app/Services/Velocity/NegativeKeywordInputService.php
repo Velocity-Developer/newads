@@ -73,11 +73,26 @@ class NegativeKeywordInputService
         ];
 
         try {
-            $resp = Http::timeout(30)
-                ->retry(3, 200)
-                ->withHeaders($headers)
-                ->withOptions(['multipart' => $multipart])
-                ->post($url);
+            $form = [
+                'match_type' => strtoupper($matchType),
+                'mode' => strtolower($mode),
+            ];
+            foreach ($terms as $t) {
+                $form['terms'][] = $t;
+            }
+
+            // Tambahkan header Authorization Bearer jika token tersedia
+            $request = Http::timeout(30)->retry(3, 200);
+            if (!empty($this->apiToken)) {
+                $request = $request->withHeaders([
+                    'Authorization' => "Bearer {$this->apiToken}",
+                    'Accept' => 'application/json',
+                ]);
+            }
+
+            $resp = $request
+                ->asForm()
+                ->post($url, $form);
 
             $status = $resp->status();
             $json = null;

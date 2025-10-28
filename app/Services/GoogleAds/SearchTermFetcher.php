@@ -18,7 +18,8 @@ class SearchTermFetcher
         'biaya',
         'beli',
         'pesan',
-        'velocity'
+        'velocity',
+        'jual'
     ];
 
     public function getConfig(): array
@@ -69,7 +70,6 @@ class SearchTermFetcher
 
             if (!empty($apiToken)) {
                 $request = $request->withHeaders([
-                    // gunakan bearer yang benar
                     'Authorization' => "Bearer {$apiToken}",
                     'Accept' => 'application/json',
                 ]);

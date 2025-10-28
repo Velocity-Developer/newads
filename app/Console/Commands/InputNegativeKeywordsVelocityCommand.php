@@ -190,9 +190,9 @@ class InputNegativeKeywordsVelocityCommand extends Command
         if ($res['success']) {
             $message = "✅ <b>News Ads Berhasil Input Keywords Negative</b>\n\n" .
                 // "📦 <b>Sumber:</b> {$src}\n" .
-                "🧮 <b>Jumlah:</b> {$count}\n" .
+                "🧮 <b>Jumlah:</b> {$count} data\n" .
                 // "📝 <b>Match Type:</b> {$matchType}" . ($apiMatchType ? " (API={$apiMatchType})" : "") . "\n" .
-                "⚙️ <b>Mode:</b> {$mode}" . (is_bool($validateOnly) ? " (validate_only=" . ($validateOnly ? 'true' : 'false') . ")" : "") . "\n" .
+                // "⚙️ <b>Mode:</b> {$mode}" . (is_bool($validateOnly) ? " (validate_only=" . ($validateOnly ? 'true' : 'false') . ")" : "") . "\n" .
                 // ($campaignId ? "📣 <b>Campaign ID:</b> {$campaignId}\n" : "") .
                 "⏰ <b>Waktu:</b> {$timestamp}\n" .
                 "🗒️ <b>Keywords:</b>\n{$list}\n";
@@ -200,16 +200,17 @@ class InputNegativeKeywordsVelocityCommand extends Command
             $error = $res['error'] ?? 'Unknown error';
             $status = $res['status'] ?? 'N/A';
             $message = "❌ <b>News Ads Gagal Input Keywords Negative</b>\n\n" .
-                "📦 <b>Sumber:</b> {$src}\n" .
-                "🧮 <b>Jumlah:</b> {$count}\n" .
-                "📝 <b>Match Type:</b> {$matchType}\n" .
-                "⚙️ <b>Mode:</b> {$mode}\n" .
+                // "📦 <b>Sumber:</b> {$src}\n" .
+                "🧮 <b>Jumlah:</b> {$count} data\n" .
+                // "📝 <b>Match Type:</b> {$matchType}\n" .
+                // "⚙️ <b>Mode:</b> {$mode}\n" .
                 "📡 <b>Status API:</b> {$status}\n" .
                 "❗ <b>Error:</b> {$error}\n" .
                 "⏰ <b>Waktu:</b> {$timestamp}\n" .
-                "🗒️ <b>Keywords:</b>\n{$list}\n";
+                "🗒️ <b>Keywords:</b>\n\n{$list}\n";
         }
 
-        $notifier->sendMessage($message);
+        // $notifier->sendMessage($message);
+        $this->line($message);
     }
 }
