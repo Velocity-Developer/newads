@@ -186,14 +186,24 @@ class InputNegativeKeywordsVelocityCommand extends Command
     private function notifyTelegram(NotificationService $notifier, string $src, array $items, string $matchType, string $mode, array $res): void
     {
         $count = count($items);
-        // Tampilkan tiap keyword per baris dengan bullet untuk keterbacaan
-        $list = implode("\n", array_map(function ($item) { return '• ' . $item; }, array_slice($items, 0, 50)));
         $timestamp = now()->format('Y-m-d H:i:s');
 
         $data = $res['json']['data'] ?? [];
         $campaignId = $data['campaign_id'] ?? null;
         $apiMatchType = $data['match_type'] ?? null;
         $validateOnly = $data['validate_only'] ?? null;
+
+        // Format list sesuai match type (gunakan API match type jika tersedia)
+        $effectiveMatchType = strtoupper($apiMatchType ?? $matchType);
+        $list = implode("\n", array_map(function ($item) use ($effectiveMatchType) {
+            if ($effectiveMatchType === 'EXACT') {
+                return '[' . $item . '] EXACT';
+            } elseif ($effectiveMatchType === 'PHRASE') {
+                return '"' . $item . '" PHRASE';
+            }
+            // Fallback untuk tipe lain: tampilkan apa adanya
+            return $item . ' ' . $effectiveMatchType;
+        }, array_slice($items, 0, 50)));
 
         if ($res['success']) {
             $message = "✅ <b>News Ads Berhasil Input Keywords Negative</b>\n\n" .
