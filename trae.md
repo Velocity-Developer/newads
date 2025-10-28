@@ -6,6 +6,10 @@ Dokumentasi ringkas untuk sistem otomatis pengambilan, analisis AI, dan pemroses
 - Ambil term 0-click dari API eksternal.
 - Simpan unik ke database dan filter kata yang dikecualikan.
 - Analisis relevansi dengan AI dan tandai hasil (`relevan` atau `negatif`).
+- Input ke Velocity API (validate/execute) dengan filter kandidat yang identik:
+  - `terms`: `hasil_cek_ai = negatif`, `status_input_google ∈ {NULL, 'gagal'}`, `retry_count < 3`
+  - `frasa`: `status_input_google ∈ {NULL, 'gagal'}`, `retry_count < 3`
+- Penjadwalan aktif untuk input `terms` dan `frasa` (lihat bagian Penjadwalan).
 - (Opsional) Pecah term menjadi frasa dan input ke Google Ads — saat ini integrasi input Google Ads dinonaktifkan.
 
 ## Perintah Artisan Utama
@@ -49,9 +53,9 @@ protected function schedule(Schedule $schedule)
 - File: `config/integrations.php` (key `velocity_ads`)
 - Env yang diperlukan:
   - `VELOCITY_ADS_API_URL` — default: `https://api.velocitydeveloper.com/new/adsfetch/fetch_terms_negative0click_secure.php`
-  - `VELOCITY_ADS_API_TOKEN` — isi token mentah (tanpa "Bearer").
-
-Catatan: Header `Authorization` ditambahkan sebagai Bearer di kode. Pastikan env berisi token mentah untuk menghindari format ganda.
+  - `VELOCITY_ADS_INPUT_API_URL` — default: `https://api.velocitydeveloper.com/new/adsfetch/input_keywords_negative.php`
+  - `VELOCITY_ADS_API_TOKEN` — isi token mentah (tanpa "Bearer")
+- Header `Authorization: Bearer <token>` dikirim saat request di service terkait (fetch dan input). Pastikan env berisi token mentah untuk menghindari format ganda.
 
 ### AI
 - Env yang diperlukan:
@@ -85,7 +89,7 @@ php artisan negative-keywords:process-phrases --batch-size=10
 - Dedup: Penyimpanan term mengecek eksistensi di DB dan kolom `terms` bersifat unik.
 - Filter: Kata yang dikecualikan seperti `jasa`, `harga`, `buat`, `bikin`, `murah`, `pembuatan`, `biaya`, `beli`, `pesan`, `velocity` akan dibuang sebelum simpan.
 - Validasi term: Respons API dinormalisasi ke `search_term` dan diverifikasi agar bukan tanggal/waktu.
-- Integrasi Google Ads input saat ini dinonaktifkan; perintah akan menampilkan peringatan dan keluar.
+- Integrasi Google Ads (langsung) dinonaktifkan; gunakan Velocity API untuk input negative keywords.
 
 ## Troubleshooting Singkat
 - 401 API eksternal: Pastikan `VELOCITY_ADS_API_TOKEN` terisi token mentah dan `VELOCITY_ADS_API_URL` benar.
@@ -218,29 +222,47 @@ Konfigurasi
   - (opsional) `VELOCITY_ADS_MATCH_TYPE_FRASA=PHRASE` (ubah ke `PHARSE` jika API memang memerlukan)
 - Konfigurasi di `config/integrations.php` akan membaca variabel ini.
 
-Perintah Artisan (tidak dieksekusi sekarang)
-- Validasi terms saja:
+Perintah Artisan
+- Validasi terms:
   - `php artisan negative-keywords:input-velocity --source=terms --mode=validate --batch-size=50`
-- Eksekusi terms ke API:
+- Eksekusi terms:
   - `php artisan negative-keywords:input-velocity --source=terms --mode=execute --batch-size=50`
-- Validasi frasa saja:
+- Validasi frasa:
   - `php artisan negative-keywords:input-velocity --source=frasa --mode=validate --batch-size=50`
-- Eksekusi frasa ke API:
+- Eksekusi frasa:
   - `php artisan negative-keywords:input-velocity --source=frasa --mode=execute --batch-size=50`
-- Validasi keduanya (dua panggilan API terpisah):
-  - `php artisan negative-keywords:input-velocity --source=both --mode=validate --batch-size=50`
-- Eksekusi keduanya:
-  - `php artisan negative-keywords:input-velocity --source=both --mode=execute --batch-size=50`
 
 Catatan Operasional
-- Pada `mode=validate`, perintah hanya mengetes API, tidak mengubah status di DB.
-- Pada `mode=execute`, status akan diperbarui:
+- Seleksi kandidat IDENTIK untuk `validate` dan `execute` (pakai scopes `needsGoogleAdsInput()`):
+  - `terms`: `hasil_cek_ai = negatif`, `status_input_google ∈ {NULL, 'gagal'}`, `retry_count < 3`
+  - `frasa`: `status_input_google ∈ {NULL, 'gagal'}`, `retry_count < 3`
+- Status DB diperbarui berdasarkan hasil API untuk kedua mode:
   - Berhasil → `status_input_google = 'sukses'`, `notif_telegram = 'sukses'`
-  - Gagal → `status_input_google = 'gagal'`, `retry_count++` (max 3 lalu `error`)
-- Response API yang berisi `{"success": true/false}` akan diprioritaskan untuk menentukan keberhasilan.
-- Jika API tidak mengembalikan JSON, fallback ke status HTTP (`2xx` dianggap sukses).
+  - Gagal → `retry_count++`; jika `retry_count >= 3` → `status_input_google = 'error'`, selain itu `status_input_google = 'gagal'`
+- Response API `{"success": true/false}` diprioritaskan; jika bukan JSON, fallback ke status HTTP (`2xx` dianggap sukses).
+- Jika ingin preflight murni tanpa perubahan DB, pertimbangkan opsi tambahan `--dry-run` (belum diimplementasi).
 
 Troubleshooting
 - Pastikan token `VELOCITY_ADS_API_TOKEN` aktif.
 - Pastikan nilai `VELOCITY_ADS_MATCH_TYPE_FRASA` adalah `PHRASE`.
 - Gunakan `--batch-size` kecil saat pertama kali coba mode `execute`.
+
+## Penjadwalan (Aktual)
+- Kernel (`app/Console/Kernel.php`):
+  - Menit ke-1: `negative-keywords:fetch-terms --limit=50`
+  - Menit ke-2: `negative-keywords:analyze-terms --batch-size=50`
+  - Menit ke-3: `negative-keywords:input-velocity --source=terms --mode=execute --batch-size=2`
+- Routes (`routes/console.php`):
+  - Menit ke-6: `negative-keywords:input-velocity --source=frasa --mode=execute --batch-size=2`
+- Semua jadwal dijalankan untuk `environments(['production', 'local'])` dan diarahkan append output ke `storage/logs/schedule-YYYY-MM-DD.log`.
+
+## Catatan Penting
+- Dedup: Penyimpanan term mengecek eksistensi di DB dan kolom `terms` bersifat unik.
+- Filter: Kata yang dikecualikan seperti `jasa`, `harga`, `buat`, `bikin`, `murah`, `pembuatan`, `biaya`, `beli`, `pesan`, `velocity` akan dibuang sebelum simpan.
+- Validasi term: Respons API dinormalisasi ke `search_term` dan diverifikasi agar bukan tanggal/waktu.
+- Integrasi Google Ads (langsung) dinonaktifkan; gunakan Velocity API untuk input negative keywords.
+
+## Troubleshooting Singkat
+- 401 API eksternal (“Missing token”): Pastikan `VELOCITY_ADS_API_TOKEN` terisi token mentah dan header `Authorization` terkirim sebagai `Bearer <token>`.
+- “No zero-click terms found”: Periksa payload API dan filter kata dikecualikan.
+- Konfigurasi tidak terbaca: Jalankan `php artisan config:clear` sebelum pengujian.
