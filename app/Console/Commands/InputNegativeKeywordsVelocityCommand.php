@@ -19,7 +19,7 @@ class InputNegativeKeywordsVelocityCommand extends Command
 
     public function handle()
     {
-        $source = strtolower((string)$this->option('source') ?? 'both');
+        $source = strtolower((string)$this->option('source') ?? '');
         $mode = strtolower((string)$this->option('mode') ?? 'validate');
         $batchSize = (int)$this->option('batch-size');
 
@@ -30,10 +30,10 @@ class InputNegativeKeywordsVelocityCommand extends Command
         $this->line("Source: {$source}, Mode: {$mode}, Batch size: {$batchSize}");
 
         $sources = [];
-        if ($source === 'terms' || $source === 'both') {
+        if ($source === 'terms' || $source === '') {
             $sources[] = 'terms';
         }
-        if ($source === 'frasa' || $source === 'both') {
+        if ($source === 'frasa' || $source === '') {
             $sources[] = 'frasa';
         }
 
