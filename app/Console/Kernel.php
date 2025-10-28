@@ -89,16 +89,16 @@ class Kernel extends ConsoleKernel
         //   ->environments(['production', 'local']);
         
         // Retry failed operations every hour
-        $schedule->call(function () {
-            \App\Models\NewTermsNegative0Click::where('status_input_google', \App\Models\NewTermsNegative0Click::STATUS_GAGAL)
-                ->where('retry_count', '<', 3)
-                ->update(['status_input_google' => null]);
+        // $schedule->call(function () {
+        //     \App\Models\NewTermsNegative0Click::where('status_input_google', \App\Models\NewTermsNegative0Click::STATUS_GAGAL)
+        //         ->where('retry_count', '<', 3)
+        //         ->update(['status_input_google' => null]);
                 
-            \App\Models\NewFrasaNegative::where('status_input_google', \App\Models\NewFrasaNegative::STATUS_GAGAL)
-                ->where('retry_count', '<', 3)
-                ->update(['status_input_google' => null]);
-        })->hourly()
-          ->environments(['production', 'local']);
+        //     \App\Models\NewFrasaNegative::where('status_input_google', \App\Models\NewFrasaNegative::STATUS_GAGAL)
+        //         ->where('retry_count', '<', 3)
+        //         ->update(['status_input_google' => null]);
+        // })->hourly()
+        //   ->environments(['production', 'local']);
     }
 
     /**
