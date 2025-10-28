@@ -40,7 +40,7 @@ Schedule::command('negative-keywords:analyze-terms --batch-size=50')
     ->appendOutputTo(storage_path('logs/schedule.log'));
 
 // Menit ke-3: Input negative keywords terms ke Velocity API
-Schedule::command('negative-keywords:input-velocity --source=terms --mode=execute --batch-size=2')
+Schedule::command('negative-keywords:input-velocity --source=terms --mode=validate --batch-size=2')
     ->everyMinute()
     ->when(function () {
         return now()->minute % 7 === 3;
@@ -62,7 +62,7 @@ Schedule::command('negative-keywords:process-phrases --batch-size=50')
     ->appendOutputTo(storage_path('logs/schedule.log'));
 
 // Menit ke-6: Input negative keywords frasa ke Velocity API
-Schedule::command('negative-keywords:input-velocity --source=frasa --mode=execute --batch-size=2')
+Schedule::command('negative-keywords:input-velocity --source=frasa --mode=validate --batch-size=2')
     ->everyMinute()
     ->when(function () {
         return now()->minute % 7 === 6;
@@ -134,7 +134,7 @@ Schedule::command('negative-keywords:analyze-terms --batch-size=50')
     ->environments(['production', 'local'])
     ->appendOutputTo(storage_path('logs/schedule-' . now()->format('Y-m-d') . '.log'));
 
-Schedule::command('negative-keywords:input-velocity --source=terms --mode=execute --batch-size=2')
+Schedule::command('negative-keywords:input-velocity --source=terms --mode=validate --batch-size=2')
     ->everyMinute()
     ->when(function () { return now()->minute % 7 === 3; })
     ->withoutOverlapping()
@@ -150,7 +150,7 @@ Schedule::command('negative-keywords:process-phrases --batch-size=50')
     ->environments(['production', 'local'])
     ->appendOutputTo(storage_path('logs/schedule-' . now()->format('Y-m-d') . '.log'));
 
-Schedule::command('negative-keywords:input-velocity --source=frasa --mode=execute --batch-size=2')
+Schedule::command('negative-keywords:input-velocity --source=frasa --mode=validate --batch-size=2')
     ->everyMinute()
     ->when(function () { return now()->minute % 7 === 6; })
     ->withoutOverlapping()

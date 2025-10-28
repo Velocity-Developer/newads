@@ -55,7 +55,7 @@ class TermsController extends Controller
                 'ai_result' => $aiResult,
                 'google_status' => $googleStatus,
                 'telegram_notif' => $telegramNotif,
-                'sort_by' => $request->get('sort_by', 'created_at'),
+                'sort_by' => $request->get('sort_by', 'id'),
                 'sort_order' => $request->get('sort_order', 'desc'),
                 'date_from' => $dateFrom,
                 'date_to' => $dateTo,

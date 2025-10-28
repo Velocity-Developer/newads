@@ -1,16 +1,16 @@
 # Sistem Otomasi Negative Keywords
 
-Dokumentasi ringkas untuk sistem otomatis pengambilan, analisis AI, dan pemrosesan negative keywords berbasis data search terms 0-click.
+Dokumentasi ringkas untuk sistem otomatis pengambilan, analisis AI, pemecahan frasa, dan input negative keywords via Velocity API.
 
 ## Ringkasan Alur
 - Ambil term 0-click dari API eksternal.
 - Simpan unik ke database dan filter kata yang dikecualikan.
 - Analisis relevansi dengan AI dan tandai hasil (`relevan` atau `negatif`).
-- Input ke Velocity API (validate/execute) dengan filter kandidat yang identik:
+- Pecah term `negatif` menjadi frasa menggunakan `negative-keywords:process-phrases` (split-only).
+- Input ke Velocity API (validate/execute) untuk `terms` dan `frasa` dengan kandidat yang identik:
   - `terms`: `hasil_cek_ai = negatif`, `status_input_google ∈ {NULL, 'gagal'}`, `retry_count < 3`
   - `frasa`: `status_input_google ∈ {NULL, 'gagal'}`, `retry_count < 3`
-- Penjadwalan aktif untuk input `terms` dan `frasa` (lihat bagian Penjadwalan).
-- (Opsional) Pecah term menjadi frasa dan input ke Google Ads — saat ini integrasi input Google Ads dinonaktifkan.
+- Integrasi input Google Ads dihapus. Submission hanya via Velocity API.
 
 ## Perintah Artisan Utama
 - `negative-keywords:fetch-terms --limit=100`
@@ -18,11 +18,11 @@ Dokumentasi ringkas untuk sistem otomatis pengambilan, analisis AI, dan pemroses
 - `negative-keywords:analyze-terms --batch-size=10`
   - Menganalisis term yang belum dinilai AI (scope `needsAiAnalysis`).
 - `negative-keywords:process-phrases --batch-size=10`
-  - Memecah term yang sudah berhasil diproses menjadi frasa individual dan menyiapkan input.
-- `negative-keywords:input-google --batch-size=5`
-  - Menginput negative keywords ke Google Ads (saat ini akan di-skip karena integrasi dimatikan).
+  - Memecah term yang berlabel AI-`negatif` dan belum punya frasa menjadi frasa individual. Tidak melakukan input ke Google Ads.
+- `negative-keywords:input-velocity --source=terms|frasa --mode=validate|execute --batch-size=50`
+  - Mengirim terms/frasa ke Velocity API. Jika `mode=execute`, update status DB (berhasil/gagal, retry_count, notif).
 - `negative-keywords:test-system --component=ai|google-ads|database|telegram|all`
-  - Menjalankan tes komponen sistem secara terpisah atau keseluruhan.
+  - Uji tiap komponen sistem (konfigurasi, koneksi, layanan).
 - `test:safe-fetch --limit=5`
   - Uji fetch aman tanpa menyimpan ke database (menampilkan sampel terms dan hasil penyaringan).
 - `test:google-ads-connection --dry-run`
@@ -236,6 +236,9 @@ Catatan Operasional
 - Seleksi kandidat IDENTIK untuk `validate` dan `execute` (pakai scopes `needsGoogleAdsInput()`):
   - `terms`: `hasil_cek_ai = negatif`, `status_input_google ∈ {NULL, 'gagal'}`, `retry_count < 3`
   - `frasa`: `status_input_google ∈ {NULL, 'gagal'}`, `retry_count < 3`
+- Mode `execute`:
+  - Berhasil → `status_input_google = berhasil`, `notif_telegram = berhasil`.
+  - Gagal → `retry_count++`, `status_input_google = gagal`.
 - Status DB diperbarui berdasarkan hasil API untuk kedua mode:
   - Berhasil → `status_input_google = 'sukses'`, `notif_telegram = 'sukses'`
   - Gagal → `retry_count++`; jika `retry_count >= 3` → `status_input_google = 'error'`, selain itu `status_input_google = 'gagal'`

@@ -23,7 +23,7 @@ class ProcessIndividualPhrasesCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Process individual phrases from approved terms and input them to Google Ads';
+    protected $description = 'Process individual phrases from approved terms (split only, no Google Ads input)';
 
     protected $searchTermFetcher;
     protected $notificationService;
@@ -53,16 +53,8 @@ class ProcessIndividualPhrasesCommand extends Command
             
             if ($terms->isEmpty()) {
                 $this->info('No terms found that need phrase processing.');
-                
-                // Check for phrases that need Google Ads input
-                $phrasesToProcess = NewFrasaNegative::needsGoogleAdsInput()->limit($batchSize)->get();
-                
-                if ($phrasesToProcess->isEmpty()) {
-                    $this->info('No phrases found that need Google Ads input.');
-                    return 0;
-                }
-                
-                return $this->processPhrasesToGoogleAds($phrasesToProcess);
+                $this->info('Skipping Google Ads input; use negative-keywords:input-velocity for submission.');
+                return 0;
             }
             
             $this->info("Found {$terms->count()} terms to break down into phrases.");
@@ -109,87 +101,12 @@ class ProcessIndividualPhrasesCommand extends Command
             }
             
             $this->info("Phrase extraction completed. Total new phrases created: {$totalPhrasesCreated}");
-            
-            // Now process phrases that need Google Ads input
-            $phrasesToProcess = NewFrasaNegative::needsGoogleAdsInput()->limit($batchSize)->get();
-            
-            if (!$phrasesToProcess->isEmpty()) {
-                $this->info("Processing {$phrasesToProcess->count()} phrases for Google Ads input...");
-                return $this->processPhrasesToGoogleAds($phrasesToProcess);
-            }
-            
+            $this->info('Google Ads input removed. Use negative-keywords:input-velocity to submit phrases.');
             return 0;
             
         } catch (Exception $e) {
             $this->error("Error during phrase processing: " . $e->getMessage());
-            
-            // Send error notification
-            // $this->notificationService->sendSystemError(
-            //     'Process Individual Phrases',
-            //     $e->getMessage()
-            // );
-            
             return 1;
         }
-    }
-    
-    private function processPhrasesToGoogleAds($phrases)
-    {
-        $successCount = 0;
-        $failedCount = 0;
-        
-        foreach ($phrases as $phrase) {
-            try {
-                $this->line("Adding phrase to Google Ads: {$phrase->frasa}");
-                
-                // Add negative keyword to Google Ads
-                $success = $this->searchTermFetcher->addNegativeKeyword($phrase->frasa);
-                
-                if ($success) {
-                    // Update status to success
-                    $phrase->update([
-                        'status_input_google' => NewFrasaNegative::STATUS_BERHASIL,
-                        'notif_telegram' => NewFrasaNegative::NOTIF_BERHASIL
-                    ]);
-                    
-                    $successCount++;
-                    $this->info("✓ Successfully added phrase: {$phrase->frasa}");
-                    
-                } else {
-                    // Update status to failed and increment retry
-                    $phrase->incrementRetry();
-                    $phrase->update([
-                        'status_input_google' => NewFrasaNegative::STATUS_GAGAL
-                    ]);
-                    
-                    $failedCount++;
-                    $this->error("✗ Failed to add phrase: {$phrase->frasa}");
-                }
-                
-            } catch (Exception $e) {
-                $this->error("Error processing phrase '{$phrase->frasa}': " . $e->getMessage());
-                
-                // Update status to failed and increment retry
-                $phrase->incrementRetry();
-                $phrase->update([
-                    'status_input_google' => NewFrasaNegative::STATUS_GAGAL
-                ]);
-                
-                $failedCount++;
-            }
-        }
-        
-        $this->info("Phrase processing completed. Success: {$successCount}, Failed: {$failedCount}");
-        
-        // Send Telegram notifications
-        // if ($successCount > 0) {
-        //     $this->notificationService->sendNegativeKeywordSuccess($successCount, 'phrases');
-        // }
-        
-        // if ($failedCount > 0) {
-        //     $this->notificationService->sendNegativeKeywordFailed($failedCount, 'phrases');
-        // }
-        
-        return 0;
     }
 }

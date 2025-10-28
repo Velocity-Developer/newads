@@ -38,7 +38,7 @@ class Kernel extends ConsoleKernel
             ->environments(['production', 'local']);
         
         // Menit ke-3: Input negative keywords terms ke Velocity API
-        $schedule->command('negative-keywords:input-velocity --source=terms --mode=execute --batch-size=2')
+        $schedule->command('negative-keywords:input-velocity --source=terms --mode=validate --batch-size=2')
             ->everyMinute()
             ->when(function () {
                 return now()->minute % 7 === 3;
@@ -58,7 +58,7 @@ class Kernel extends ConsoleKernel
             ->environments(['production', 'local']);
 
         // Menit ke-6: Input negative keywords frasa ke Velocity API
-        $schedule->command('negative-keywords:input-velocity --source=frasa --mode=execute --batch-size=2')
+        $schedule->command('negative-keywords:input-velocity --source=frasa --mode=validate --batch-size=2')
             ->everyMinute()
             ->when(function () {
                 return now()->minute % 7 === 6;
