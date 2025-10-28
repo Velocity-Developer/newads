@@ -43,27 +43,41 @@ class NegativeKeywordInputService
             return ['success' => false, 'status' => null, 'json' => null, 'error' => 'No terms provided'];
         }
 
-        $url = rtrim($this->inputApiUrl, '?&');
-        $url .= (str_contains($url, '?') ? '&' : '?') . 'mode=' . urlencode($mode);
+        $url = rtrim($this->inputApiUrl, '?&'); // jangan taruh mode di query
 
         $headers = [
             'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
+            // Jangan set Content-Type manual, biarkan multipart mengatur boundary
         ];
         if (!empty($this->apiToken)) {
             $headers['Authorization'] = $this->apiToken;
         }
 
-        $payload = [
-            'terms' => $terms,
-            'match_type' => $matchType,
+        // Kirim sebagai multipart form-data:
+        // - terms: JSON array string
+        // - match_type: EXACT/PHRASE (uppercase)
+        // - mode: validate/execute (lowercase)
+        $multipart = [
+            [
+                'name' => 'terms',
+                'contents' => json_encode($terms, JSON_UNESCAPED_UNICODE),
+            ],
+            [
+                'name' => 'match_type',
+                'contents' => strtoupper($matchType),
+            ],
+            [
+                'name' => 'mode',
+                'contents' => strtolower($mode),
+            ],
         ];
 
         try {
             $resp = Http::timeout(30)
                 ->retry(3, 200)
                 ->withHeaders($headers)
-                ->post($url, $payload);
+                ->withOptions(['multipart' => $multipart])
+                ->post($url);
 
             $status = $resp->status();
             $json = null;

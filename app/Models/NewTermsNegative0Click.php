@@ -87,7 +87,10 @@ class NewTermsNegative0Click extends Model
     public function scopeNeedsGoogleAdsInput($query)
     {
         return $query->where('hasil_cek_ai', self::HASIL_AI_NEGATIF)
-                    ->whereIn('status_input_google', [null, self::STATUS_GAGAL])
-                    ->where('retry_count', '<', 3);
+            ->where(function ($q) {
+                $q->whereNull('status_input_google')
+                  ->orWhere('status_input_google', self::STATUS_GAGAL);
+            })
+            ->where('retry_count', '<', 3);
     }
 }

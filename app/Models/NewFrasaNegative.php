@@ -93,8 +93,12 @@ class NewFrasaNegative extends Model
      */
     public function scopeNeedsGoogleAdsInput($query)
     {
-        return $query->whereIn('status_input_google', [null, self::STATUS_GAGAL])
-                    ->where('retry_count', '<', 3);
+        return $query
+            ->where(function ($q) {
+                $q->whereNull('status_input_google')
+                  ->orWhere('status_input_google', self::STATUS_GAGAL);
+            })
+            ->where('retry_count', '<', 3);
     }
     
     /**

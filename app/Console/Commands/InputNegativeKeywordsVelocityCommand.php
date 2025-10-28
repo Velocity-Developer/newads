@@ -40,27 +40,11 @@ class InputNegativeKeywordsVelocityCommand extends Command
         foreach ($sources as $src) {
             if ($src === 'terms') {
                 // Tambah debug nama database aktif
-                $this->line('Debug: DB connection = ' . \DB::connection()->getDatabaseName());
+                // $this->line('Debug: DB connection = ' . \DB::connection()->getDatabaseName());
 
-                // Snapshot statistik cepat
-                $total = NewTermsNegative0Click::query()->count();
-                $cntStatus = NewTermsNegative0Click::whereIn('status_input_google', [null, NewTermsNegative0Click::STATUS_GAGAL, NewTermsNegative0Click::STATUS_ERROR])->count();
-                $cntRetryOk = NewTermsNegative0Click::where('retry_count', '<', 3)->count();
-                $cntNegatif = NewTermsNegative0Click::where('hasil_cek_ai', NewTermsNegative0Click::HASIL_AI_NEGATIF)->count();
-                $this->line("Debug: totals = total={$total}, status_in=[null,gagal,error]={$cntStatus}, retry<3={$cntRetryOk}, hasil_cek_ai=negatif={$cntNegatif}");
-
-                // Gunakan query lebih longgar saat mode validate
-                $query = NewTermsNegative0Click::query();
-                if ($mode === 'validate') {
-                    // Validate hanya untuk kandidat AI-negatif, tanpa membatasi status_input_google
-                    $query->where('hasil_cek_ai', NewTermsNegative0Click::HASIL_AI_NEGATIF)
-                        ->whereIn('status_input_google', [null, NewTermsNegative0Click::STATUS_GAGAL])
-                        ->where('retry_count', '<', 3);
-                } else {
-                    $query->where('hasil_cek_ai', NewTermsNegative0Click::HASIL_AI_NEGATIF)
-                        ->whereIn('status_input_google', [null, NewTermsNegative0Click::STATUS_GAGAL])
-                        ->where('retry_count', '<', 3);
-                }
+                // Preflight (validate) dan execute memakai filter IDENTIK (strict)
+                $query = NewTermsNegative0Click::needsGoogleAdsInput()
+                    ->where('retry_count', '<', 3);
 
                 $this->line('Debug: candidates (terms) = ' . $query->count());
 
@@ -79,12 +63,11 @@ class InputNegativeKeywordsVelocityCommand extends Command
                     $res = $svc->send($terms, $matchType, $mode);
 
                     $this->reportResult('terms', $res);
+
                     // Kirim notifikasi Telegram untuk terms
                     $this->notifyTelegram($notifier, 'terms', $terms, $matchType, $mode, $res);
 
-                    if ($mode === 'execute') {
-                        $this->updateStatusesForTerms($terms, $res['success']);
-                    }
+                    $this->updateStatusesForTerms($terms, $res['success']);
                 }
             }
 
@@ -103,12 +86,11 @@ class InputNegativeKeywordsVelocityCommand extends Command
                     $res = $svc->send($phrases, $matchType, $mode);
 
                     $this->reportResult('frasa', $res);
+
                     // Kirim notifikasi Telegram untuk frasa
                     $this->notifyTelegram($notifier, 'frasa', $phrases, $matchType, $mode, $res);
 
-                    if ($mode === 'execute') {
-                        $this->updateStatusesForFrasa($phrases, $res['success']);
-                    }
+                    $this->updateStatusesForFrasa($phrases, $res['success']);
                 }
             }
         }
@@ -209,8 +191,8 @@ class InputNegativeKeywordsVelocityCommand extends Command
             $message = "✅ <b>News Ads Berhasil Input Keywords Negative</b>\n\n" .
                 // "📦 <b>Sumber:</b> {$src}\n" .
                 "🧮 <b>Jumlah:</b> {$count}\n" .
-                "📝 <b>Match Type:</b> {$matchType}" . ($apiMatchType ? " (API={$apiMatchType})" : "") . "\n" .
-                // "⚙️ <b>Mode:</b> {$mode}" . (is_bool($validateOnly) ? " (validate_only=" . ($validateOnly ? 'true' : 'false') . ")" : "") . "\n" .
+                // "📝 <b>Match Type:</b> {$matchType}" . ($apiMatchType ? " (API={$apiMatchType})" : "") . "\n" .
+                "⚙️ <b>Mode:</b> {$mode}" . (is_bool($validateOnly) ? " (validate_only=" . ($validateOnly ? 'true' : 'false') . ")" : "") . "\n" .
                 // ($campaignId ? "📣 <b>Campaign ID:</b> {$campaignId}\n" : "") .
                 "⏰ <b>Waktu:</b> {$timestamp}\n" .
                 "🗒️ <b>Keywords:</b>\n{$list}\n";
