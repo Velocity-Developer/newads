@@ -1,13 +1,32 @@
 <?php
+
+use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\Facades\Log;
 
-// Jalankan mode validate setiap 6 menit (dengan output ke log)
-$schedule->command('negative-keywords:pipeline')
-    ->everySixMinutes()
+// Artisan::command('inspire', function () {
+//     $this->comment(Inspiring::quote());
+// })->purpose('Display an inspiring quote');
+
+// Scheduler definitions (migrated from App\Console\Kernel)
+// Jalankan mode validate setiap 10 menit (dengan output ke log)
+Schedule::command('negative-keywords:pipeline')
+    ->everyTenMinutes()
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/negative_keywords_pipeline.log'));
+
+// Jalankan mode apply tiap hari jam 00:10 (opsional, sesuaikan)
+// Schedule::command('negative-keywords:pipeline', ['--apply' => true])
+//     ->dailyAt('00:10')
+//     ->withoutOverlapping()
+//     ->appendOutputTo(storage_path('logs/negative_keywords_pipeline.log'));
+
+// Diagnostic: schedule inspire every minute to verify scheduler wiring
+// Schedule::command('inspire')
+//     ->everyMinute()
+//     ->environments(['production', 'local'])
+//     ->appendOutputTo(storage_path('logs/schedule.log'));
 
 // Menit ke-1: Fetch zero-click terms from Google Ads
 // Schedule::command('negative-keywords:fetch-terms')
@@ -105,6 +124,10 @@ $schedule->command('negative-keywords:pipeline')
 //   ->environments(['production', 'local']);
 
 // Ubah file output perintah menjadi harian (rotasi otomatis per-hari)
+// Schedule::command('inspire')
+//     ->everyMinute()
+//     ->environments(['production', 'local'])
+//     ->appendOutputTo(storage_path('logs/schedule-' . now()->format('Y-m-d') . '.log'));
 
 // Schedule::command('negative-keywords:fetch-terms')
 //     ->everyMinute()

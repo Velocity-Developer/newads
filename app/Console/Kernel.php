@@ -9,18 +9,22 @@ class Kernel extends ConsoleKernel
 {
     protected function schedule(Schedule $schedule): void
     {
-
-        // Jalankan mode validate setiap 6 menit (dengan output ke log)
+        // Jalankan mode validate setiap 10 menit (dengan output ke log)
         $schedule->command('negative-keywords:pipeline')
-            ->everySixMinutes()
+            ->everyTenMinutes()
             ->withoutOverlapping()
             ->appendOutputTo(storage_path('logs/negative_keywords_pipeline.log'));
 
         // Jalankan mode apply tiap hari jam 00:10 (opsional, sesuaikan)
-        // $schedule->command('negative-keywords:pipeline', ['--apply' => true, '--json' => true])
+        // $schedule->command('negative-keywords:pipeline', ['--apply' => true])
         //     ->dailyAt('00:10')
         //     ->withoutOverlapping()
         //     ->appendOutputTo(storage_path('logs/negative_keywords_pipeline.log'));
+        
+        // Diagnostic: simple inspire command to verify scheduler registration
+        // $schedule->command('inspire')
+        //     ->everyMinute()
+        //     ->environments(['production', 'local']);
 
         // Negative Keywords Automation Schedule
         // Based on trae.md - 10-minute cycle automation
@@ -75,9 +79,9 @@ class Kernel extends ConsoleKernel
         //     ->runInBackground()
         //     ->environments(['production', 'local']);
         
-        // Additional maintenance tasks
+        // // Additional maintenance tasks
         
-        // Daily summary at 23:00
+        // // Daily summary at 23:00
         // $schedule->call(function () {
         //     $notificationService = app(\App\Services\Telegram\NotificationService::class);
         //     $notificationService->sendDailySummary();
@@ -118,7 +122,4 @@ class Kernel extends ConsoleKernel
 
         require base_path('routes/console.php');
     }
-    protected $commands = [
-        \App\Console\Commands\RunNegativeKeywordsPipelineCommand::class,
-    ];
 }
