@@ -9,15 +9,15 @@ class Kernel extends ConsoleKernel
 {
     protected function schedule(Schedule $schedule): void
     {
-        // Jalankan mode validate setiap 10 menit (dengan output ke log)
+        // Jalankan mode validate setiap menit (dengan output ke log)
         $schedule->command('negative-keywords:pipeline')
-            ->everyTenMinutes()
+            ->everyMinute()
             ->withoutOverlapping()
             ->appendOutputTo(storage_path('logs/negative_keywords_pipeline.log'));
 
-        // Jalankan mode apply tiap hari jam 00:10 (opsional, sesuaikan)
+        // Jalankan mode apply setiap 10 menit (dengan output ke log)
         // $schedule->command('negative-keywords:pipeline', ['--apply' => true])
-        //     ->dailyAt('00:10')
+        //     ->everyTenMinutes()
         //     ->withoutOverlapping()
         //     ->appendOutputTo(storage_path('logs/negative_keywords_pipeline.log'));
         

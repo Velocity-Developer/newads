@@ -16,7 +16,7 @@ class ProcessIndividualPhrasesCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'negative-keywords:process-phrases {--batch-size=10 : Number of terms to process in one batch}';
+    protected $signature = 'negative-keywords:process-phrases {--batch-size=0 : Number of terms to process in one batch (0=all)}';
 
     /**
      * The console command description.
@@ -44,12 +44,16 @@ class ProcessIndividualPhrasesCommand extends Command
         
         try {
             $batchSize = (int) $this->option('batch-size');
-            
+
             // Ambil terms dengan AI hasil negatif yang belum dipecah menjadi frasa
-            $terms = NewTermsNegative0Click::where('hasil_cek_ai', NewTermsNegative0Click::HASIL_AI_NEGATIF)
-                ->whereDoesntHave('frasa')
-                ->limit($batchSize)
-                ->get();
+            $query = NewTermsNegative0Click::where('hasil_cek_ai', NewTermsNegative0Click::HASIL_AI_NEGATIF)
+                ->whereDoesntHave('frasa');
+
+            if ($batchSize > 0) {
+                $query->limit($batchSize);
+            }
+
+            $terms = $query->get();
             
             if ($terms->isEmpty()) {
                 $this->info('No terms found that need phrase processing.');

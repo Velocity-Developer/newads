@@ -14,7 +14,7 @@ class FetchZeroClickTermsCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'negative-keywords:fetch-terms {--limit=100 : Maximum number of terms to fetch}';
+    protected $signature = 'negative-keywords:fetch-terms {--limit=0 : Maximum number of terms to fetch (0=all)}';
 
     /**
      * The console command description.

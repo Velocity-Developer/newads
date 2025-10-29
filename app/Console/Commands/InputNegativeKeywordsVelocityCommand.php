@@ -48,8 +48,11 @@ class InputNegativeKeywordsVelocityCommand extends Command
 
                 $this->line('Debug: candidates (terms) = ' . $query->count());
 
+                if ($batchSize > 0) {
+                    $query->limit($batchSize);
+                }
+
                 $terms = $query
-                    ->limit($batchSize)
                     ->pluck('terms')
                     ->toArray();
                 $this->line('Debug: sample terms = ' . implode(', ', array_slice($terms, 0, 5)));
@@ -72,8 +75,13 @@ class InputNegativeKeywordsVelocityCommand extends Command
             }
 
             if ($src === 'frasa') {
-                $phrases = NewFrasaNegative::needsGoogleAdsInput()
-                    ->limit($batchSize)
+                $query = NewFrasaNegative::needsGoogleAdsInput()
+                    ->where('retry_count', '<', 3);
+                $this->line('Debug: candidates (frasa) = ' . $query->count());
+                if ($batchSize > 0) {
+                    $query->limit($batchSize);
+                }
+                $phrases = $query
                     ->pluck('frasa')
                     ->toArray();
 

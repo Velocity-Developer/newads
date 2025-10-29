@@ -15,7 +15,7 @@ class AnalyzeTermsWithAICommand extends Command
      *
      * @var string
      */
-    protected $signature = 'negative-keywords:analyze-terms {--batch-size=10 : Number of terms to analyze in one batch}';
+    protected $signature = 'negative-keywords:analyze-terms {--batch-size=0 : Number of terms to analyze in one batch (0=all)}';
 
     /**
      * The console command description.
@@ -43,24 +43,26 @@ class AnalyzeTermsWithAICommand extends Command
         
         try {
             $batchSize = (int) $this->option('batch-size');
-            
+
             // Debug: Check total records first
             $totalRecords = NewTermsNegative0Click::count();
             $this->info("Total records in database: {$totalRecords}");
-            
+
             // Debug: Check records with null hasil_cek_ai
             $nullAiCount = NewTermsNegative0Click::whereNull('hasil_cek_ai')->count();
             $this->info("Records with null hasil_cek_ai: {$nullAiCount}");
-            
+
             // Debug: Check records with status_input_google conditions
             $statusCount = NewTermsNegative0Click::whereIn('status_input_google', [null, 'gagal'])->count();
             $this->info("Records with status_input_google null or gagal: {$statusCount}");
-            
+
             // Get terms that need AI analysis
-            $terms = NewTermsNegative0Click::needsAiAnalysis()
-                ->limit($batchSize)
-                ->get();
-                
+            $query = NewTermsNegative0Click::needsAiAnalysis();
+            if ($batchSize > 0) {
+                $query->limit($batchSize);
+            }
+            $terms = $query->get();
+            
             $this->info("Records matching needsAiAnalysis scope: {$terms->count()}");
             
             if ($terms->isEmpty()) {
