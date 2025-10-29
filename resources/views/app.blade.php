@@ -53,5 +53,8 @@
     </head>
     <body class="font-sans antialiased">
         @inertia
+        <footer style="margin-top:2rem; padding:0.5rem 1.5rem; color:#666; font-size:12px; text-align:right;">
+            Versi aplikasi: {{ config('app.version') }}
+        </footer>
     </body>
 </html>

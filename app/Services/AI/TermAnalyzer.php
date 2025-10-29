@@ -14,9 +14,8 @@ class TermAnalyzer
 
     public function __construct()
     {
-        $this->apiKey = config('services.openai.api_key', env('OPENAI_API_KEY'));
-        // Gunakan default model yang valid (override lewat .env jika perlu)
-        $this->model = config('services.openai.model', env('OPENAI_MODEL'));
+        $this->apiKey = config('services.openai.api_key', env('OPENAI_API_KEY', ''));
+        $this->model = config('services.openai.model', env('OPENAI_MODEL', 'gpt-4o-mini'));
     }
 
     /**

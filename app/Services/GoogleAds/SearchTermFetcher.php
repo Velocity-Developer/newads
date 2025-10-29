@@ -8,19 +8,21 @@ use Illuminate\Support\Facades\Http;
 
 class SearchTermFetcher
 {
-    private array $excludedWords = [
-        'jasa',
-        'harga', 
-        'buat',
-        'bikin',
-        'murah',
-        'pembuatan',
-        'biaya',
-        'beli',
-        'pesan',
-        'velocity',
-        'jual'
-    ];
+
+    // DISABLED: Excluded words filtering is now disabled
+    // private array $excludedWords = [
+    //     'jasa',
+    //     'harga', 
+    //     'buat',
+    //     'bikin',
+    //     'murah',
+    //     'pembuatan',
+    //     'biaya',
+    //     'beli',
+    //     'pesan',
+    //     'velocity',
+    //     'jual'
+    // ];
 
     public function getConfig(): array
     {
@@ -35,20 +37,25 @@ class SearchTermFetcher
 
     /**
      * Filter out terms containing excluded words.
+     * DISABLED: Now returns all terms without filtering.
      */
     private function filterExcludedWords(array $terms): array
     {
-        return array_filter($terms, function($term) {
-            $searchTerm = strtolower($term['search_term'] ?? '');
-            
-            foreach ($this->excludedWords as $excludedWord) {
-                if (strpos($searchTerm, strtolower($excludedWord)) !== false) {
-                    return false;
-                }
-            }
-            
-            return true;
-        });
+        // DISABLED: Return all terms without filtering
+        return $terms;
+        
+        // OLD CODE (commented out):
+        // return array_filter($terms, function($term) {
+        //     $searchTerm = strtolower($term['search_term'] ?? '');
+        //     
+        //     foreach ($this->excludedWords as $excludedWord) {
+        //         if (strpos($searchTerm, strtolower($excludedWord)) !== false) {
+        //             return false;
+        //         }
+        //     }
+        //     
+        //     return true;
+        // });
     }
 
     private function isAssoc(array $arr): bool
@@ -141,7 +148,8 @@ class SearchTermFetcher
             }
 
             // Filter excluded words
-            $filteredResults = $this->filterExcludedWords($normalized);
+            // $filteredResults = $this->filterExcludedWords($normalized);
+            $filteredResults = $normalized;
 
             Log::info('Fetched zero-click terms (external API)', [
                 'total_results' => count($normalized),

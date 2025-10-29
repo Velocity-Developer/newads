@@ -9,72 +9,80 @@ class Kernel extends ConsoleKernel
 {
     protected function schedule(Schedule $schedule): void
     {
-        // Diagnostic: simple inspire command to verify scheduler registration
-        $schedule->command('inspire')
-            ->everyMinute()
-            ->environments(['production', 'local']);
+
+        // Jalankan mode validate setiap 6 menit (dengan output ke log)
+        $schedule->command('negative-keywords:pipeline')
+            ->everySixMinutes()
+            ->withoutOverlapping()
+            ->appendOutputTo(storage_path('logs/negative_keywords_pipeline.log'));
+
+        // Jalankan mode apply tiap hari jam 00:10 (opsional, sesuaikan)
+        // $schedule->command('negative-keywords:pipeline', ['--apply' => true, '--json' => true])
+        //     ->dailyAt('00:10')
+        //     ->withoutOverlapping()
+        //     ->appendOutputTo(storage_path('logs/negative_keywords_pipeline.log'));
 
         // Negative Keywords Automation Schedule
         // Based on trae.md - 10-minute cycle automation
 
         // Menit ke-1: Fetch zero-click terms from External Ads API
-        $schedule->command('negative-keywords:fetch-terms')
-            ->everyMinute()
-            ->when(function () {
-                return now()->minute % 10 === 1;
-            })
-            ->withoutOverlapping(5)
-            ->runInBackground()
-            ->environments(['production', 'local']);
+        // $schedule->command('negative-keywords:fetch-terms')
+        //     ->everyMinute()
+        //     ->when(function () {
+        //         return now()->minute % 10 === 1;
+        //     })
+        //     ->withoutOverlapping(5)
+        //     ->runInBackground()
+        //     ->environments(['production', 'local']);
         
-        // Menit ke-2: Analyze terms with AI
-        $schedule->command('negative-keywords:analyze-terms')
-            ->everyMinute()
-            ->when(function () {
-                return now()->minute % 10 === 2;
-            })
-            ->withoutOverlapping(5)
-            ->runInBackground()
-            ->environments(['production', 'local']);
+        // // Menit ke-2: Analyze terms with AI
+        // $schedule->command('negative-keywords:analyze-terms')
+        //     ->everyMinute()
+        //     ->when(function () {
+        //         return now()->minute % 10 === 2;
+        //     })
+        //     ->withoutOverlapping(5)
+        //     ->runInBackground()
+        //     ->environments(['production', 'local']);
         
-        // Menit ke-3: Input negative keywords terms ke Velocity API
-        $schedule->command('negative-keywords:input-velocity --source=terms --mode=validate')
-            ->everyMinute()
-            ->when(function () {
-                return now()->minute % 10 === 3;
-            })
-            ->withoutOverlapping(5)
-            ->runInBackground()
-            ->environments(['production', 'local']);
+        // // Menit ke-3: Input negative keywords terms ke Velocity API
+        // $schedule->command('negative-keywords:input-velocity --source=terms --mode=validate')
+        //     ->everyMinute()
+        //     ->when(function () {
+        //         return now()->minute % 10 === 3;
+        //     })
+        //     ->withoutOverlapping(5)
+        //     ->runInBackground()
+        //     ->environments(['production', 'local']);
         
-        // Menit ke-6: Process individual phrases (split-only)
-        $schedule->command('negative-keywords:process-phrases')
-            ->everyMinute()
-            ->when(function () {
-                return now()->minute % 10 === 6;
-            })
-            ->withoutOverlapping(5)
-            ->runInBackground()
-            ->environments(['production', 'local']);
+        // // Menit ke-6: Process individual phrases (split-only)
+        // $schedule->command('negative-keywords:process-phrases')
+        //     ->everyMinute()
+        //     ->when(function () {
+        //         return now()->minute % 10 === 6;
+        //     })
+        //     ->withoutOverlapping(5)
+        //     ->runInBackground()
+        //     ->environments(['production', 'local']);
 
-        // Menit ke-7: Input negative keywords frasa ke Velocity API
-        $schedule->command('negative-keywords:input-velocity --source=frasa --mode=validate')
-            ->everyMinute()
-            ->when(function () {
-                return now()->minute % 10 === 7;
-            })
-            ->withoutOverlapping(5)
-            ->runInBackground()
-            ->environments(['production', 'local']);
+        // // Menit ke-7: Input negative keywords frasa ke Velocity API
+        // $schedule->command('negative-keywords:input-velocity --source=frasa --mode=validate')
+        //     ->everyMinute()
+        //     ->when(function () {
+        //         return now()->minute % 10 === 7;
+        //     })
+        //     ->withoutOverlapping(5)
+        //     ->runInBackground()
+        //     ->environments(['production', 'local']);
         
         // Additional maintenance tasks
         
         // Daily summary at 23:00
-        $schedule->call(function () {
-            $notificationService = app(\App\Services\Telegram\NotificationService::class);
-            $notificationService->sendDailySummary();
-        })->dailyAt('23:00')
-          ->environments(['production', 'local']);
+        // $schedule->call(function () {
+        //     $notificationService = app(\App\Services\Telegram\NotificationService::class);
+        //     $notificationService->sendDailySummary();
+        // })->dailyAt('23:00')
+        //   ->environments(['production', 'local']);
         
         // Weekly cleanup of old processed records (older than 30 days)
         // $schedule->call(function () {
@@ -110,4 +118,7 @@ class Kernel extends ConsoleKernel
 
         require base_path('routes/console.php');
     }
+    protected $commands = [
+        \App\Console\Commands\RunNegativeKeywordsPipelineCommand::class,
+    ];
 }

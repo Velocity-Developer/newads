@@ -39,6 +39,7 @@ return [
     |
     */
 
+    'version' => env('APP_VERSION', 'dev'),
     'debug' => (bool) env('APP_DEBUG', false),
 
     /*
