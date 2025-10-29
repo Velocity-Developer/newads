@@ -54,7 +54,11 @@ return [
 
         'stack' => [
             'driver' => 'stack',
-            'channels' => ['daily'], // gunakan channel daily dalam stack
+            'channels' => [
+                'daily',
+                'single',
+                'telegram',
+            ],
             'ignore_exceptions' => false,
         ],
 
@@ -143,4 +147,9 @@ return [
 
     ],
 
+    'telegram' => [
+        'driver' => 'custom',
+        'via' => App\Logging\TelegramLoggerFactory::class,
+        'level' => env('LOG_TELEGRAM_LEVEL', 'error'),
+    ],
 ];
