@@ -96,6 +96,14 @@ class NewFrasaNegative extends Model {
     }
     
     /**
+     * Scope untuk frasa yang perlu dianalisis AI.
+     */
+    public function scopeNeedsAiAnalysis($query)
+    {
+        return $query->whereNull('hasil_cek_ai');
+    }
+    
+    /**
      * Scope for frasa that need Google Ads input.
      */
     public function scopeNeedsGoogleAdsInput($query)
@@ -105,7 +113,8 @@ class NewFrasaNegative extends Model {
                 $q->whereNull('status_input_google')
                   ->orWhere('status_input_google', self::STATUS_GAGAL);
             })
-            ->where('retry_count', '<', 3);
+            ->where('retry_count', '<', 3)
+            ->where('hasil_cek_ai', self::HASIL_CEK_AI_LUAR);
     }
     
     /**
@@ -125,5 +134,13 @@ class NewFrasaNegative extends Model {
         }
         
         return array_unique($allowedFrasa);
+    }
+    
+    public function setHasilCekAiAttribute($value): void
+    {
+        $v = is_string($value) ? strtolower(trim($value)) : null;
+        $this->attributes['hasil_cek_ai'] = in_array($v, [self::HASIL_CEK_AI_INDONESIA, self::HASIL_CEK_AI_LUAR], true)
+            ? $v
+            : null;
     }
 }

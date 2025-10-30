@@ -24,6 +24,7 @@ class NegativeKeywordsPipelineService
             ['cmd' => 'negative-keywords:analyze-terms', 'opts' => []],
             ['cmd' => 'negative-keywords:input-velocity', 'opts' => ['--source' => 'terms', '--mode' => $validate ? 'validate' : 'execute']],
             ['cmd' => 'negative-keywords:process-phrases', 'opts' => []],
+            ['cmd' => 'negative-keywords:analyze-frasa', 'opts' => []],
             ['cmd' => 'negative-keywords:input-velocity', 'opts' => ['--source' => 'frasa', '--mode' => $validate ? 'validate' : 'execute']],
         ];
 

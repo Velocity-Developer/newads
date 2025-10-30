@@ -108,7 +108,7 @@ class TermAnalyzer
     {
         return '<<<PROMPT
 
-        Istilah yang diuji: ' . $term . '
+        Istilah yang diuji: ' . $term . ' 
         Kamu adalah asisten yang bertugas memeriksa apakah sebuah istilah penelusuran Google Ads TIDAK RELEVAN atau RELEVAN untuk bisnis JASA PEMBUATAN WEBSITE.
 
         ---
