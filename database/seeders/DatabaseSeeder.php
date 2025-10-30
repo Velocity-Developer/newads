@@ -28,8 +28,8 @@ class DatabaseSeeder extends Seeder
         ])->save();
 
         // idempotent: buat/update Demo User dari .env
-        $email = env('DEMO_LOGIN_EMAIL', 'demo@example.com');
-        $password = env('DEMO_LOGIN_PASSWORD', 'password');
+        $email = env('DEMO_LOGIN_EMAIL', 'klatenku123@gmail.com');
+        $password = env('DEMO_LOGIN_PASSWORD', 'hutara000');
 
         if ($email) {
             $demo = User::updateOrCreate(

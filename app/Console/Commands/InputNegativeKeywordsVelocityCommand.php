@@ -13,7 +13,7 @@ class InputNegativeKeywordsVelocityCommand extends Command
     protected $signature = 'negative-keywords:input-velocity 
         {--source=terms : Sumber data: terms|frasa} 
         {--mode=validate : Mode: validate|execute} 
-        {--batch-size=50 : Jumlah maksimal item per sumber}';
+        {--batch-size=0 : Jumlah maksimal item per sumber}';
 
     protected $description = 'Input negative keywords ke Velocity API (validate/execute) dari terms AI-negatif dan frasa.';
 
@@ -218,7 +218,7 @@ class InputNegativeKeywordsVelocityCommand extends Command
                 "🗒️ <b>Keywords:</b>\n\n{$list}\n";
         }
 
-        $notifier->sendMessage($message);
+        // $notifier->sendMessage($message);
         $this->line($message);
     }
 }

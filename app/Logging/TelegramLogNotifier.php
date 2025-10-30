@@ -9,7 +9,7 @@ class TelegramLogNotifier
     // Masukkan kredensial khusus log di sini (hanya di file ini)
     private string $botToken = '7347197196:AAHj2Stttl0gA8T20-pfYc3PMQmYApFSUOY';
     // Satu chat ID bisa string, multi chat ID array
-    private array|string $chatId = ['817996592'];
+    private array|string $chatId = ['-1003107021002'];
 
     private string $baseUrl;
 

@@ -14,14 +14,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $retry_count Jumlah percobaan ulang (maksimal 3)
  * @property string|null $notif_telegram Status notifikasi Telegram: 'sukses' atau 'gagal'
  */
-class NewFrasaNegative extends Model
-{
+/**
+ * @property string|null $hasil_cek_ai Nilai hasil cek AI: 'indonesia' atau 'luar'
+ */
+class NewFrasaNegative extends Model {
     protected $table = 'new_frasa_negative';
     
     protected $fillable = [
         'frasa',
         'parent_term_id',
         'status_input_google',
+        'hasil_cek_ai',
         'retry_count',
         'notif_telegram',
     ];
@@ -35,9 +38,13 @@ class NewFrasaNegative extends Model
     const STATUS_BERHASIL = 'sukses';
     const STATUS_GAGAL = 'gagal';
     const STATUS_ERROR = 'error';
-    
+
     const NOTIF_BERHASIL = 'sukses';
     const NOTIF_GAGAL = 'gagal';
+
+    // Nilai enum untuk hasil cek AI
+    const HASIL_CEK_AI_INDONESIA = 'indonesia';
+    const HASIL_CEK_AI_LUAR = 'luar';
     
     /**
      * Get the parent term that owns this frasa.
