@@ -16,6 +16,7 @@ interface FrasaItem {
     } | null;
     status_input_google: 'sukses' | 'gagal' | 'error' | null;
     notif_telegram: 'sukses' | 'gagal' | null;
+    hasil_cek_ai: 'indonesia' | 'luar' | null;
     retry_count: number;
     created_at: string;
     updated_at: string;
@@ -68,6 +69,17 @@ const getTelegramBadgeVariant = (status: string) => {
         case 'sukses':
             return 'default';
         case 'gagal':
+            return 'destructive';
+        default:
+            return 'secondary';
+    }
+};
+
+const getAiBadgeVariant = (hasil: string) => {
+    switch (hasil) {
+        case 'indonesia':
+            return 'default';
+        case 'luar':
             return 'destructive';
         default:
             return 'secondary';
@@ -148,12 +160,17 @@ const changePerPage = (event: Event) => {
                                         </div>
                                     </td>
                                     <td class="p-2">
-                                        <Badge :variant="getGoogleBadgeVariant(item.status_input_google)">
+                                        <Badge :variant="getAiBadgeVariant(item.hasil_cek_ai as any)">
+                                            {{ item.hasil_cek_ai }}
+                                        </Badge>
+                                    </td>
+                                    <td class="p-2">
+                                        <Badge :variant="getGoogleBadgeVariant(item.status_input_google as any)">
                                             {{ item.status_input_google }}
                                         </Badge>
                                     </td>
                                     <td class="p-2">
-                                        <Badge :variant="getTelegramBadgeVariant(item.notif_telegram)">
+                                        <Badge :variant="getTelegramBadgeVariant(item.notif_telegram as any)">
                                             {{ item.notif_telegram }}
                                         </Badge>
                                     </td>
