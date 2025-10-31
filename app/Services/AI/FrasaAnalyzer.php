@@ -85,20 +85,30 @@ class FrasaAnalyzer
 
     private function callOpenAI(string $prompt): array
     {
-        $res = Http::timeout(120) // 2 menit timeout
-            ->connectTimeout(30) // 30 detik untuk koneksi
+        $res = Http::retry(5, 750, function ($exception, $request) {
+                $resp = method_exists($request, 'response') ? $request->response : null;
+                return $exception instanceof \Illuminate\Http\Client\ConnectionException
+                    || ($resp && ($resp->serverError() || $resp->status() === 429));
+            })
+            ->timeout(120)
+            ->connectTimeout(30)
             ->withToken($this->apiKey)
+            ->withHeaders([
+                'Accept' => 'application/json',
+            ])
+            ->asJson()
             ->post($this->baseUrl, [
                 'model' => $this->model,
                 'messages' => [
-                    ['role' => 'system', 'content' => 'Anda adalah asisten yang mengklasifikasikan frasa.'],
-                    ['role' => 'user', 'content' => $prompt],
+                    [
+                        'role' => 'user',
+                        'content' => $prompt
+                    ]
                 ],
-                // 'temperature' => 0,  // model AI tidak menerima parameter temperature
             ]);
 
         if (!$res->successful()) {
-            throw new \RuntimeException("OpenAI error: {$res->status()} {$res->body()}");
+            throw new \Exception('OpenAI API request failed: ' . $res->body());
         }
 
         return $res->json();

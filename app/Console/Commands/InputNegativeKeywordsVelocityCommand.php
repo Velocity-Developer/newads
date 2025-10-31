@@ -218,7 +218,7 @@ class InputNegativeKeywordsVelocityCommand extends Command
                 "🗒️ <b>Keywords:</b>\n\n{$list}\n";
         }
 
-        $notifier->sendMessage($message);
+        // $notifier->sendMessage($message);
         $this->line($message);
     }
 }

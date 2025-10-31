@@ -146,10 +146,4 @@ return [
         ],
 
     ],
-
-    'telegram' => [
-        'driver' => 'custom',
-        'via' => App\Logging\TelegramLoggerFactory::class,
-        'level' => env('LOG_TELEGRAM_LEVEL', 'error'),
-    ],
 ];

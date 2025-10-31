@@ -177,20 +177,27 @@ class TermAnalyzer
      */
     private function callOpenAI(string $prompt): array
     {
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $this->apiKey,
-            'Content-Type' => 'application/json',
-        ])->timeout(30)->post($this->baseUrl, [
-            'model' => $this->model,
-            'messages' => [
-                [
-                    'role' => 'user',
-                    'content' => $prompt
-                ]
-            ],
-            // 'temperature' => 0.1,
-            // 'max_tokens' => 10,
-        ]);
+        $response = Http::retry(5, 750, function ($exception, $request) {
+                $resp = method_exists($request, 'response') ? $request->response : null;
+                return $exception instanceof \Illuminate\Http\Client\ConnectionException
+                    || ($resp && ($resp->serverError() || $resp->status() === 429));
+            })
+            ->timeout(120)
+            ->connectTimeout(30)
+            ->withToken($this->apiKey)
+            ->withHeaders([
+                'Accept' => 'application/json',
+            ])
+            ->asJson()
+            ->post($this->baseUrl, [
+                'model' => $this->model,
+                'messages' => [
+                    [
+                        'role' => 'user',
+                        'content' => $prompt
+                    ]
+                ],
+            ]);
 
         if (!$response->successful()) {
             throw new \Exception('OpenAI API request failed: ' . $response->body());
