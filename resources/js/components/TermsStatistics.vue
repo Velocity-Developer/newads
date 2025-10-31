@@ -63,6 +63,19 @@
 
         <Card>
             <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle class="text-sm font-medium">AI Analysis (Frasa)</CardTitle>
+                <CheckCircle class="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+                <div class="text-2xl font-bold text-green-600">{{ stats.frasa_ai_indonesia }}</div>
+                <p class="text-xs text-muted-foreground">
+                    {{ stats.frasa_ai_luar }} luar, {{ stats.frasa_ai_null }} null
+                </p>
+            </CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle class="text-sm font-medium">Google Ads (Frasa)</CardTitle>
                 <TrendingUp class="h-4 w-4 text-muted-foreground" />
             </CardHeader>
@@ -107,6 +120,9 @@ interface StatsProps {
     telegram_null: number
     // Frasa stats
     frasa_total: number
+    frasa_ai_indonesia: number
+    frasa_ai_luar: number
+    frasa_ai_null: number
     frasa_google_sukses: number
     frasa_google_gagal: number
     frasa_google_error: number

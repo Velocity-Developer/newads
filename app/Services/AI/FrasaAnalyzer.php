@@ -73,7 +73,14 @@ class FrasaAnalyzer
     {
         return '
         Frasa yang diuji: '.$frasa.' 
-        Kamu adalah detektor bahasa yang sangat akurat. Tugasmu adalah menentukan apakah sebuah frasa ditulis dalam bahasa Indonesia atau bahasa luar negeri (non-Indonesia). Jawablah hanya dengan satu kata output: "INDONESIA" atau "LUAR".';
+        Kamu adalah detektor bahasa yang sangat akurat. Tugasmu adalah menentukan apakah sebuah frasa ditulis dalam bahasa Indonesia atau bahasa luar negeri (non-Indonesia).
+
+        * Tambahan khusus: *
+        Termasuk "INDONESIA" jika:
+        - Berisi angka saja, tanpa huruf, misal: 2025, 3, 300, 125, 1000, 1, 2, dll.
+        - Berisi hanya 1 huruf, misal: e, a, b, c, dll.
+
+        Jawablah hanya dengan satu kata output: "INDONESIA" atau "LUAR".';
     }
 
     private function callOpenAI(string $prompt): array

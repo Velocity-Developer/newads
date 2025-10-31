@@ -25,6 +25,9 @@ class DashboardController extends Controller
             'telegram_null' => NewTermsNegative0Click::whereNull('notif_telegram')->count(),
             // Frasa stats
             'frasa_total' => NewFrasaNegative::count(),
+            'frasa_ai_indonesia' => NewFrasaNegative::where('hasil_cek_ai', 'indonesia')->count(),
+            'frasa_ai_luar' => NewFrasaNegative::where('hasil_cek_ai', 'luar')->count(),
+            'frasa_ai_null' => NewFrasaNegative::whereNull('hasil_cek_ai')->count(),
             'frasa_google_sukses' => NewFrasaNegative::where('status_input_google', 'sukses')->count(),
             'frasa_google_gagal' => NewFrasaNegative::where('status_input_google', 'gagal')->count(),
             'frasa_google_error' => NewFrasaNegative::where('status_input_google', 'error')->count(),

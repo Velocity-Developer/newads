@@ -20,6 +20,9 @@ interface Stats {
     telegram_null: number;
     // Frasa stats
     frasa_total: number;
+    frasa_ai_indonesia: number;
+    frasa_ai_luar: number;
+    frasa_ai_null: number;
     frasa_google_sukses: number;
     frasa_google_gagal: number;
     frasa_google_error: number;

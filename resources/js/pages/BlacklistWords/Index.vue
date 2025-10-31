@@ -1,9 +1,14 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { Head, router } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
 import { type BreadcrumbItem } from '@/types';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Trash2, Power, PowerOff, Upload } from 'lucide-vue-next';
 import BlacklistWordsFilters from '@/components/BlacklistWordsFilters.vue';
+import BlacklistWordModal from '@/components/BlacklistWordModal.vue';
+import BlacklistWordsImportModal from '@/components/BlacklistWordsImportModal.vue';
 
 type Item = {
   id: number;
@@ -53,6 +58,28 @@ const breadcrumbs: BreadcrumbItem[] = [
   { title: 'Blacklist Words', href: '/blacklist-words' },
 ];
 
+// Badge variant untuk status
+const getStatusBadgeVariant = (active: boolean) => {
+  return active ? 'default' : 'secondary';
+};
+
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleString();
+};
+
+const changePerPage = (event: Event) => {
+  const target = event.target as HTMLSelectElement;
+  const perPage = parseInt(target.value);
+  const params: Record<string, any> = { ...props.filters };
+  params.per_page = perPage;
+  
+  router.get('/blacklist-words', params, {
+    preserveState: true,
+    preserveScroll: true,
+  });
+};
+
 // Sinkronkan saat props berubah (mis. setelah filter/tambah/update dengan preserveState)
 watch(() => props.items, (val) => {
   items.value = val?.data ?? [];
@@ -72,21 +99,6 @@ function refresh() {
   router.get('/blacklist-words', query, { preserveScroll: true, preserveState: true });
 }
 
-function addWord() {
-  router.post('/blacklist-words', {
-    word: newWord.value.trim(),
-    active: newActive.value,
-    notes: newNotes.value || null,
-  }, {
-    onSuccess: () => {
-      newWord.value = '';
-      newActive.value = true;
-      newNotes.value = '';
-      refresh();
-    },
-  });
-}
-
 function updateWord(item: Item) {
   router.put(`/blacklist-words/${item.id}`, {
     word: item.word.trim(),
@@ -104,68 +116,154 @@ function removeWord(item: Item) {
   router.delete(`/blacklist-words/${item.id}`, { onSuccess: refresh });
 }
 
-const newWord = ref<string>('');
-const newActive = ref<boolean>(true);
-const newNotes = ref<string>('');
+function importLocal() {
+  if (!confirm('Import dari file .txt di repo? Semua kata akan di-set aktif. Lanjutkan?')) return;
+  router.post('/blacklist-words/import-local', {}, {
+    onSuccess: () => {
+      refresh();
+    },
+  });
+}
 </script>
 
 <template>
   <Head title="Blacklist Words" />
   <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="p-6 space-y-4">
+    <div class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-6">
       <!-- Filter -->
-      <!-- Ganti blok filter lama dengan komponen bergaya seperti Terms/Frasa -->
       <BlacklistWordsFilters :filters="filters" />
 
-      <!-- Tambah Kata -->
-      <div class="border rounded p-3">
-        <h2 class="font-medium mb-2">Tambah Kata</h2>
-        <div class="flex gap-2">
-          <input v-model="newWord" type="text" class="border px-2 py-1 rounded flex-1" placeholder="Kata (exact-case)">
-          <select v-model="newActive" class="border px-2 py-1 rounded">
-            <option :value="true">Aktif</option>
-            <option :value="false">Nonaktif</option>
-          </select>
-          <input v-model="newNotes" type="text" class="border px-2 py-1 rounded flex-1" placeholder="Catatan (opsional)">
-          <button class="px-3 py-2 bg-green-600 text-white rounded" @click="addWord">Tambah</button>
-        </div>
+      <!-- Aksi: Tambah & Import -->
+      <div class="flex items-center gap-2">
+        <BlacklistWordModal mode="create" @saved="refresh" />
+        <BlacklistWordsImportModal @imported="refresh" />
+        <!-- Opsi import dari file repo (tetap tersedia) -->
+        <button
+          class="inline-flex items-center gap-2 px-3 py-2 bg-neutral-700 text-white rounded hover:bg-neutral-800"
+          @click="importLocal"
+        >
+          <Upload class="w-4 h-4" />
+          <span class="text-sm">Import .txt (repo)</span>
+        </button>
       </div>
 
-      <!-- Tabel -->
-      <table class="w-full border-collapse">
-        <thead>
-          <tr class="bg-gray-100">
-            <th class="border p-2 text-left">Word</th>
-            <th class="border p-2 text-left">Active</th>
-            <th class="border p-2 text-left">Notes</th>
-            <th class="border p-2">Aksi</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="item in items" :key="item.id">
-            <td class="border p-2">
-              <input v-model="item.word" class="border px-2 py-1 rounded w-full">
-            </td>
-            <td class="border p-2">
-              <span :class="item.active ? 'text-green-700' : 'text-gray-500'">{{ item.active ? 'Aktif' : 'Nonaktif' }}</span>
-            </td>
-            <td class="border p-2">
-              <input v-model="item.notes" class="border px-2 py-1 rounded w-full">
-            </td>
-            <td class="border p-2 space-x-2">
-              <button class="px-2 py-1 bg-blue-500 text-white rounded" @click="updateWord(item)">Simpan</button>
-              <button class="px-2 py-1 bg-yellow-500 text-white rounded" @click="toggleActive(item)">{{ item.active ? 'Nonaktifkan' : 'Aktifkan' }}</button>
-              <button class="px-2 py-1 bg-red-600 text-white rounded" @click="removeWord(item)">Hapus</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <!-- Blacklist Words Table -->
+      <Card>
+        <CardHeader>
+          <CardTitle>Blacklist Words Data</CardTitle>
+          
+          <!-- Per Page Selector -->
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-sm text-muted-foreground">Items per page:</span>
+              <select
+                :value="props.items.per_page"
+                @change="changePerPage($event)"
+                class="flex h-8 w-20 rounded-md border border-input bg-background px-2 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              >
+                <option value="10">10</option>
+                <option value="15">15</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+            </div>
+            <div class="text-sm text-muted-foreground">
+              Showing {{ props.items.from }} to {{ props.items.to }} of {{ props.items.total }} results
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div class="overflow-x-auto">
+            <table class="w-full border-collapse">
+              <thead class="bg-muted/50">
+                <tr class="border-b">
+                  <th class="text-left p-2 font-medium">ID</th>
+                  <th class="text-left p-2 font-medium">Word</th>
+                  <th class="text-left p-2 font-medium">Status</th>
+                  <th class="text-left p-2 font-medium">Notes</th>
+                  <th class="text-left p-2 font-medium">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in items" :key="item.id" class="border-b hover:bg-muted/50">
+                  <td class="p-2">
+                    <div class="font-medium">{{ item.id }}</div>
+                  </td>
+                  <td class="p-2">
+                    <div class="font-medium">{{ item.word }}</div>
+                  </td>
+                  <td class="p-2">
+                    <Badge :variant="getStatusBadgeVariant(item.active)">
+                      {{ item.active ? 'Aktif' : 'Nonaktif' }}
+                    </Badge>
+                  </td>
+                  <td class="p-2">
+                    <div class="text-sm text-muted-foreground">{{ item.notes || '-' }}</div>
+                  </td>
+                  <td class="p-2">
+                    <div class="flex items-center gap-2">
+                      <!-- Edit via Modal -->
+                      <BlacklistWordModal mode="edit" :item="item" @saved="refresh" />
 
-      <p class="text-sm text-gray-500">Catatan: matching case-sensitive; huruf besar/kecil harus persis.</p>
+                      <!-- Toggle status dengan ikon dan warna dinamis -->
+                      <button
+                        class="inline-flex items-center gap-1 p-2 rounded text-white text-xs"
+                        :class="item.active ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'"
+                        @click="toggleActive(item)"
+                        :aria-label="item.active ? 'Off' : 'On'"
+                      >
+                        <component :is="item.active ? PowerOff : Power" class="h-3 w-3" />
+                        <span>{{ item.active ? 'Off' : 'On' }}</span>
+                      </button>
+
+                      <!-- Hapus -->
+                      <button 
+                        class="p-2 bg-yellow-500 text-white rounded hover:bg-yellow-600" 
+                        @click="removeWord(item)"
+                        aria-label="Delete"
+                      >
+                        <Trash2 class="h-3 w-3" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div v-if="props.items.last_page > 1" class="flex items-center justify-center gap-4 mt-4">
+            <div class="text-sm text-muted-foreground">
+              Page {{ props.items.current_page }} of {{ props.items.last_page }}
+            </div>
+            <div class="flex gap-2">
+              <Link
+                v-for="link in props.items.links"
+                :key="link.label"
+                :href="link.url || '#'"
+                class="px-3 py-1 rounded border text-sm"
+                :class="{
+                  'bg-primary text-primary-foreground border-primary': link.active,
+                  'bg-background text-foreground border-input': !link.active,
+                  'opacity-50 pointer-events-none': !link.url,
+                }"
+                preserve-scroll
+                preserve-state
+                v-html="link.label"
+              />
+            </div>
+          </div>
+
+          <!-- Info -->
+          <div class="mt-4 text-sm text-muted-foreground">
+            <ul class="list-disc list-inside space-y-1">
+              <li>Matching case-sensitive; huruf besar/kecil harus persis.</li>
+              <li>Status: Aktif = terdeteksi; Nonaktif = tidak terdeteksi.</li>
+            </ul>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   </AppLayout>
 </template>
-
-<style scoped>
-table th, table td { font-size: 14px; }
-</style>

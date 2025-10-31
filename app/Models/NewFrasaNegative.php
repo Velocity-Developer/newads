@@ -66,6 +66,29 @@ class NewFrasaNegative extends Model {
     }
     
     /**
+     * Scope: frasa yang perlu dianalisis AI (hasil_cek_ai masih null)
+     */
+    public function scopeNeedsAiAnalysis($query)
+    {
+        return $query->whereNull('hasil_cek_ai');
+    }
+
+    /**
+     * Scope: frasa yang perlu diinput ke Google Ads (hasil AI 'luar')
+     * - status_input_google masih null atau gagal
+     * - retry_count di bawah 3
+     */
+    public function scopeNeedsGoogleAdsInput($query)
+    {
+        return $query->where('hasil_cek_ai', self::HASIL_CEK_AI_LUAR)
+            ->where(function ($q) {
+                $q->whereNull('status_input_google')
+                  ->orWhere('status_input_google', self::STATUS_GAGAL);
+            })
+            ->where('retry_count', '<', 3);
+    }
+
+    /**
      * Increment retry count.
      */
     public function incrementRetry(): void

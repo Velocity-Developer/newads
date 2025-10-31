@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Schema;
 
 class TruncateAllDataCommand extends Command
 {
-    protected $signature = 'data:truncate-all {--confirm : Skip confirmation prompt}';
+    protected $signature = 'data:truncate-all {--confirm : Skip confirmation prompt} {--only= : Comma-separated tables to truncate}';
     protected $description = 'Truncate all data tables and reset auto-increment IDs to 1';
 
     public function handle()
@@ -32,13 +32,37 @@ class TruncateAllDataCommand extends Command
                 'new_terms_negative_0click',
             ];
 
+            // Filter tables if --only provided
+            $onlyOpt = $this->option('only');
+            if ($onlyOpt) {
+                $requested = array_values(array_filter(array_map('trim', explode(',', $onlyOpt))));
+                if (!empty($requested)) {
+                    $tables = array_values(array_intersect($tables, $requested));
+                    if (empty($tables)) {
+                        $this->error('❌ Tidak ada tabel yang cocok dengan opsi --only.');
+                        // Re-enable foreign key checks before exit
+                        DB::statement('SET FOREIGN_KEY_CHECKS=1');
+                        return 1;
+                    }
+                }
+            }
+
+            // Konfirmasi dengan daftar tabel yang akan di-truncate
+            if (!$this->option('confirm')) {
+                $list = implode(', ', $tables);
+                if (!$this->confirm("⚠️  PERINGATAN: Ini akan TRUNCATE tabel: {$list}. Lanjutkan?")) {
+                    $this->info('Operasi dibatalkan.');
+                    DB::statement('SET FOREIGN_KEY_CHECKS=1');
+                    return 0;
+                }
+            }
+
             $truncated = [];
             $skipped = [];
 
             foreach ($tables as $table) {
                 if (Schema::hasTable($table)) {
                     $count = DB::table($table)->count();
-                    
                     if ($count > 0) {
                         DB::statement("TRUNCATE TABLE `{$table}`");
                         $truncated[] = "{$table} ({$count} records)";

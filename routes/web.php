@@ -43,6 +43,9 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/blacklist-words/{blacklistWord}', [BlacklistWordController::class, 'update'])->name('blacklist.update');
     Route::delete('/blacklist-words/{blacklistWord}', [BlacklistWordController::class, 'destroy'])->name('blacklist.destroy');
     Route::post('/blacklist-words/{blacklistWord}/toggle', [BlacklistWordController::class, 'toggle'])->name('blacklist.toggle');
+    Route::post('/blacklist-words/import-local', [BlacklistWordController::class, 'importLocal'])->name('blacklist.importLocal');
+    // Tambah endpoint upload manual .txt
+    Route::post('/blacklist-words/import-upload', [BlacklistWordController::class, 'importUpload'])->name('blacklist.importUpload');
 });
 
 require __DIR__.'/settings.php';
