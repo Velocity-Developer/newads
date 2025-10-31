@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Cache;
+use App\Models\BlacklistWord;
 
 /**
  * Model untuk menyimpan frasa negative keywords yang diekstrak dari search terms
@@ -76,64 +78,50 @@ class NewFrasaNegative extends Model {
     }
     
     /**
-     * Check if a frasa is allowed (not in blacklist).
+     * Ambil set blacklist aktif dari cache (case-sensitive)
      */
+    public static function getBlacklistSet(): array
+    {
+        $words = Cache::remember('blacklist_words_active', 300, function () {
+            return BlacklistWord::active()->pluck('word')->all();
+        });
+
+        $set = [];
+        foreach ($words as $w) {
+            $set[$w] = true;
+        }
+        return $set;
+    }
+
     public static function isAllowedFrasa(string $frasa): bool
     {
-        $blacklistedWords = [
-            'web',
-            'website', 
-            'company',
-            'profile',
-            'tour',
-            'travel',
-            'property'
-        ];
-        
-        $frasa = strtolower(trim($frasa));
-        
-        return !in_array($frasa, $blacklistedWords);
+        $frasa = trim($frasa);
+        if ($frasa === '') return false;
+
+        $set = self::getBlacklistSet();
+        return !isset($set[$frasa]);
     }
-    
-    /**
-     * Scope untuk frasa yang perlu dianalisis AI.
-     */
-    public function scopeNeedsAiAnalysis($query)
-    {
-        return $query->whereNull('hasil_cek_ai');
-    }
-    
-    /**
-     * Scope for frasa that need Google Ads input.
-     */
-    public function scopeNeedsGoogleAdsInput($query)
-    {
-        return $query
-            ->where(function ($q) {
-                $q->whereNull('status_input_google')
-                  ->orWhere('status_input_google', self::STATUS_GAGAL);
-            })
-            ->where('retry_count', '<', 3)
-            ->where('hasil_cek_ai', self::HASIL_CEK_AI_LUAR);
-    }
-    
-    /**
-     * Extract individual words from a term and return allowed frasa.
-     */
+
     public static function extractAllowedFrasa(string $term): array
     {
-        // Split by spaces and clean up
-        $words = array_filter(array_map('trim', explode(' ', $term)));
-        
+        // Split by whitespace, pertahankan case asli, boleh bersihkan spasi
+        $words = array_filter(array_map('trim', preg_split('/\s+/', $term)));
+
+        $set = self::getBlacklistSet();
         $allowedFrasa = [];
+
         foreach ($words as $word) {
-            $cleanWord = strtolower(preg_replace('/[^a-zA-Z0-9\s]/', '', $word));
-            if (!empty($cleanWord) && self::isAllowedFrasa($cleanWord)) {
+            $cleanWord = trim($word);
+            if ($cleanWord === '') continue;
+
+            // Buang jika exact-match ada di blacklist
+            if (!isset($set[$cleanWord])) {
                 $allowedFrasa[] = $cleanWord;
             }
         }
-        
-        return array_unique($allowedFrasa);
+
+        // Dedup case-sensitive (array_unique menjaga string apa adanya)
+        return array_values(array_unique($allowedFrasa));
     }
     
     public function setHasilCekAiAttribute($value): void

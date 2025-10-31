@@ -34,7 +34,7 @@ class DatabaseSeeder extends Seeder
         if ($email) {
             $demo = User::updateOrCreate(
                 ['email' => $email],
-                ['name' => 'Demo User', 'password' => $password]
+                ['name' => 'Admin', 'password' => $password]
             );
             $demo->forceFill([
                 'email_verified_at' => $demo->email_verified_at ?? now(),

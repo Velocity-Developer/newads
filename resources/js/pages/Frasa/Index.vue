@@ -139,6 +139,7 @@ const changePerPage = (event: Event) => {
                                     <th class="text-left p-2 font-medium">ID</th>
                                     <th class="text-left p-2 font-medium">Frasa</th>
                                     <th class="text-left p-2 font-medium">Parent Term</th>
+                                    <th class="text-left p-2 font-medium">AI Result</th>
                                     <th class="text-left p-2 font-medium">Input Google Ads</th>
                                     <th class="text-left p-2 font-medium">Notif Telegram</th>
                                     <th class="text-left p-2 font-medium">Retry Count</th>

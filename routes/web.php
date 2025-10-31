@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\BlacklistWordController;
 use App\Http\Controllers\TermsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AdminToolsController;
@@ -14,7 +15,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/terms/{id}', [TermsController::class, 'destroy'])->name('terms.destroy');
 
     // Frasa Negative page
-    \App\Http\Controllers\FrasaController::class;
     Route::get('/frasa', [\App\Http\Controllers\FrasaController::class, 'index'])->name('frasa.index');
 });
 
@@ -34,6 +34,15 @@ Route::middleware(['auth'])->prefix('admin-tools')->group(function () {
     Route::get('debug-500', [AdminToolsController::class, 'debug500']);
     Route::get('debug-hosting', [AdminToolsController::class, 'debugHosting']);
     Route::get('disk-space', [AdminToolsController::class, 'diskSpace']);
+});
+
+Route::middleware(['auth'])->group(function () {
+    // Manajemen blacklist single-word
+    Route::get('/blacklist-words', [BlacklistWordController::class, 'index'])->name('blacklist.index');
+    Route::post('/blacklist-words', [BlacklistWordController::class, 'store'])->name('blacklist.store');
+    Route::put('/blacklist-words/{blacklistWord}', [BlacklistWordController::class, 'update'])->name('blacklist.update');
+    Route::delete('/blacklist-words/{blacklistWord}', [BlacklistWordController::class, 'destroy'])->name('blacklist.destroy');
+    Route::post('/blacklist-words/{blacklistWord}/toggle', [BlacklistWordController::class, 'toggle'])->name('blacklist.toggle');
 });
 
 require __DIR__.'/settings.php';

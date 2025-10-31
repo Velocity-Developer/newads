@@ -8,7 +8,7 @@ use App\Services\AI\FrasaAnalyzer;
 
 class AnalyzePhrasesWithAICommand extends Command
 {
-    protected $signature = 'negative-keywords:analyze-frasa {--batch-size=2 : Jumlah frasa dianalisis per batch (0=semua)}';
+    protected $signature = 'negative-keywords:analyze-frasa {--batch-size=0 : Jumlah frasa dianalisis per batch (0=semua)} {--dry-run : Jangan simpan ke database} {--show-raw : Tampilkan jawaban AI utuh}';
     protected $description = 'Analisis frasa dengan AI untuk menentukan hasil_cek_ai: indonesia/luar';
 
     public function handle(FrasaAnalyzer $analyzer): int
@@ -19,6 +19,8 @@ class AnalyzePhrasesWithAICommand extends Command
         }
 
         $batchSize = (int)$this->option('batch-size');
+        $dryRun = (bool)$this->option('dry-run');
+        $showRaw = (bool)$this->option('show-raw');
 
         $query = NewFrasaNegative::needsAiAnalysis();
         if ($batchSize > 0) {
@@ -37,25 +39,33 @@ class AnalyzePhrasesWithAICommand extends Command
         $indonesia = 0;
 
         foreach ($items as $item) {
+            $this->line("Menganalisis: {$item->frasa}");
+
+            if ($showRaw) {
+                $raw = $analyzer->analyzeFrasaRaw($item->frasa);
+                if (($raw['success'] ?? false) === true) {
+                    $this->line("RAW AI: " . ($raw['content'] ?? ''));
+                } else {
+                    $this->error("RAW gagal: " . ($raw['error'] ?? 'Unknown error'));
+                }
+            }
+
             $result = $analyzer->analyzeFrasa($item->frasa);
             if ($result === null) {
-                $this->line("Gagal/ambigu: {$item->frasa}");
+                $this->error("❌ Gagal/ambigu: {$item->frasa} - tidak disimpan");
                 continue;
             }
 
-            $normalized = strtolower($result);
-            if (!in_array($normalized, [
-                \App\Models\NewFrasaNegative::HASIL_CEK_AI_INDONESIA,
-                \App\Models\NewFrasaNegative::HASIL_CEK_AI_LUAR
-            ], true)) {
-                $this->line("Nilai AI tidak valid: {$result} untuk frasa {$item->frasa}");
-                continue;
-            }
+            $this->info("✅ Hasil: {$item->frasa} → {$result}");
 
-            $item->update(['hasil_cek_ai' => $normalized]);
-            $updated++;
-            if ($result === NewFrasaNegative::HASIL_CEK_AI_LUAR) $luar++;
-            if ($result === NewFrasaNegative::HASIL_CEK_AI_INDONESIA) $indonesia++;
+            if ($dryRun) {
+                $this->line("⏭️ Dry-run aktif: skip update database untuk {$item->frasa}");
+            } else {
+                $item->update(['hasil_cek_ai' => $result]);
+                $updated++;
+                if ($result === NewFrasaNegative::HASIL_CEK_AI_LUAR) $luar++;
+                if ($result === NewFrasaNegative::HASIL_CEK_AI_INDONESIA) $indonesia++;
+            }
         }
 
         $this->info("Selesai. Diupdate: {$updated}, luar: {$luar}, indonesia: {$indonesia}");
