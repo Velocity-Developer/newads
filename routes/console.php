@@ -7,12 +7,17 @@ use Illuminate\Support\Facades\Log;
 // Heartbeat: mencatat waktu eksekusi scheduler setiap menit
 Schedule::call(function () {
     Log::channel('schedule')->info('Schedule ini dijalankan pada jam: ' . now()->setTimezone('Asia/Jakarta')->format('Y-m-d H:i:s'));
+    Log::channel('telegram')->info('Schedule ini dijalankan pada jam: ' . now()->setTimezone('Asia/Jakarta')->format('Y-m-d H:i:s'));
+    Log::channel('schedule')->info('Versi Laravel: ' . app()->version());
+    Log::channel('telegram')->info('Versi Laravel: ' . app()->version());
+    Log::channel('schedule')->info('Versi PHP: ' . PHP_VERSION);
+    Log::channel('telegram')->info('Versi PHP: ' . PHP_VERSION);
 })->everyMinute();
 
 // Scheduler definitions (migrated from App\Console\Kernel)
-// Validate mode (tanpa --apply): jalan tiap menit
+// Validate mode (tanpa --apply): jalan tiap 5 menit
 Schedule::command('negative-keywords:pipeline')
-    ->everyMinute()
+    ->everyFiveMinutes()
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/negative_keywords_pipeline.log'));
 
