@@ -1236,7 +1236,7 @@ function showLoginForm()
 
         .system-info {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
             gap: 1rem;
             margin: 1.5rem 0;
             padding: 1.5rem;
@@ -1247,7 +1247,7 @@ function showLoginForm()
 
         .info-item {
             display: flex;
-            justify-content: space-between;
+            justify-content: left;
             align-items: center;
             padding: 0.25rem 0;
             font-size: 0.875rem;
@@ -1261,6 +1261,7 @@ function showLoginForm()
         .info-value {
             color: hsl(var(--muted-foreground));
             font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+            padding: 0 5px;
         }
 
         .output {

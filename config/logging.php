@@ -54,11 +54,7 @@ return [
 
         'stack' => [
             'driver' => 'stack',
-            'channels' => [
-                'daily',
-                'single',
-                'telegram',
-            ],
+            'channels' => ['single', 'telegram'],
             'ignore_exceptions' => false,
         ],
 
@@ -71,7 +67,7 @@ return [
 
         // Channel khusus untuk scheduler
         'schedule' => [
-            'driver' => 'daily',
+            'driver' => 'single',
             'path' => storage_path('logs/schedule.log'),
             'level' => 'info',
             'days' => 14, // retensi 14 hari untuk schedule-YYYY-MM-DD.log
@@ -145,5 +141,11 @@ return [
             'path' => storage_path('logs/laravel.log'),
         ],
 
+        // Definisikan channel telegram
+        'telegram' => [
+            'driver' => 'custom',
+            'via' => \App\Logging\TelegramLoggerFactory::class,
+            'level' => env('TELEGRAM_LOG_LEVEL', 'error'),
+        ],
     ],
 ];

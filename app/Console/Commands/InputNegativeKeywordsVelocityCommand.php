@@ -117,7 +117,7 @@ class InputNegativeKeywordsVelocityCommand extends Command
         $validateOnly = $data['validate_only'] ?? null;
 
         if ($success) {
-            $this->info("✅ New Ads Berhasil Input Negative Keywords!");
+            $this->info("✅ Berhasil Input Negative Keywords!");
             $this->line("Status API: {$status}");
             if ($count !== null) $this->line("Jumlah: {$count}");
             if ($matchType !== null) $this->line("Match type (API): {$matchType}");
@@ -125,7 +125,7 @@ class InputNegativeKeywordsVelocityCommand extends Command
             if ($campaignId !== null) $this->line("Campaign ID: {$campaignId}");
         } else {
             $error = $res['error'] ?? 'Unknown error';
-            $this->error("❌ New Ads Gagal Input Negative Keywords: {$error}");
+            $this->error("❌ Gagal Input Negative Keywords: {$error}");
             $this->line("Status API: {$status}");
         }
     }
@@ -176,7 +176,7 @@ class InputNegativeKeywordsVelocityCommand extends Command
     private function notifyTelegram(NotificationService $notifier, string $src, array $items, string $matchType, string $mode, array $res): void
     {
         $count = count($items);
-        $timestamp = now()->format('Y-m-d H:i:s');
+        $timestamp = now()->setTimezone('Asia/Jakarta')->format('Y-m-d H:i:s');
 
         $data = $res['json']['data'] ?? [];
         $campaignId = $data['campaign_id'] ?? null;
@@ -196,7 +196,7 @@ class InputNegativeKeywordsVelocityCommand extends Command
         }, array_slice($items, 0, 50)));
 
         if ($res['success']) {
-            $message = "✅ <b>News Ads Berhasil Input Keywords Negative</b>\n\n" .
+            $message = "✅ <b>Berhasil Input Keywords Negative</b>\n\n" .
                 // "📦 <b>Sumber:</b> {$src}\n" .
                 "🧮 <b>Jumlah:</b> {$count} data\n" .
                 // "📝 <b>Match Type:</b> {$matchType}" . ($apiMatchType ? " (API={$apiMatchType})" : "") . "\n" .
@@ -207,7 +207,7 @@ class InputNegativeKeywordsVelocityCommand extends Command
         } else {
             $error = $res['error'] ?? 'Unknown error';
             $status = $res['status'] ?? 'N/A';
-            $message = "❌ <b>News Ads Gagal Input Keywords Negative</b>\n\n" .
+            $message = "❌ <b>Gagal Input Keywords Negative</b>\n\n" .
                 // "📦 <b>Sumber:</b> {$src}\n" .
                 "🧮 <b>Jumlah:</b> {$count} data\n" .
                 // "📝 <b>Match Type:</b> {$matchType}\n" .
