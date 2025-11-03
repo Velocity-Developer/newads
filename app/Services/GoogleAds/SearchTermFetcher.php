@@ -9,21 +9,6 @@ use Illuminate\Support\Facades\Http;
 class SearchTermFetcher
 {
 
-    // DISABLED: Excluded words filtering is now disabled
-    // private array $excludedWords = [
-    //     'jasa',
-    //     'harga', 
-    //     'buat',
-    //     'bikin',
-    //     'murah',
-    //     'pembuatan',
-    //     'biaya',
-    //     'beli',
-    //     'pesan',
-    //     'velocity',
-    //     'jual'
-    // ];
-
     public function getConfig(): array
     {
         // Baca konfigurasi API eksternal (velocity_ads)
@@ -39,24 +24,6 @@ class SearchTermFetcher
      * Filter out terms containing excluded words.
      * DISABLED: Now returns all terms without filtering.
      */
-    private function filterExcludedWords(array $terms): array
-    {
-        // DISABLED: Return all terms without filtering
-        return $terms;
-        
-        // OLD CODE (commented out):
-        // return array_filter($terms, function($term) {
-        //     $searchTerm = strtolower($term['search_term'] ?? '');
-        //     
-        //     foreach ($this->excludedWords as $excludedWord) {
-        //         if (strpos($searchTerm, strtolower($excludedWord)) !== false) {
-        //             return false;
-        //         }
-        //     }
-        //     
-        //     return true;
-        // });
-    }
 
     private function isAssoc(array $arr): bool
     {
@@ -147,8 +114,6 @@ class SearchTermFetcher
                 $normalized = array_slice($normalized, 0, $limit);
             }
 
-            // Filter excluded words
-            // $filteredResults = $this->filterExcludedWords($normalized);
             $filteredResults = $normalized;
 
             Log::info('Fetched zero-click terms (external API)', [
@@ -206,6 +171,7 @@ class SearchTermFetcher
         
         foreach ($terms as $termData) {
             $searchTerm = $termData['search_term'] ?? '';
+            // Log::debug('Processing term', ['term' => $searchTerm]);
             
             if (empty($searchTerm)) {
                 continue;
