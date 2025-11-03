@@ -17,8 +17,9 @@ class BlacklistWordController extends Controller
             $query->where('active', $request->boolean('active'));
         }
         if ($request->filled('q')) {
-            // Exact-case filtering untuk pencarian spesifik
-            $query->where('word', $request->input('q'));
+            // Case-insensitive filtering untuk pencarian
+            $searchTerm = $request->input('q');
+            $query->whereRaw('LOWER(word) LIKE ?', ['%' . strtolower($searchTerm) . '%']);
         }
 
         // Support per_page parameter
@@ -98,9 +99,14 @@ class BlacklistWordController extends Controller
         $unique = array_values(array_unique($lines, SORT_STRING));
         $total = count($unique);
 
-        // Cek yang sudah ada (exact-case, kolom case-sensitive)
-        $existing = BlacklistWord::whereIn('word', $unique)->pluck('word')->all();
-        $toInsert = array_values(array_diff($unique, $existing));
+        // Cek yang sudah ada (case-insensitive)
+        $existingLower = BlacklistWord::all()->pluck('word')->map(fn($w) => strtolower($w))->all();
+        $toInsert = [];
+        foreach ($unique as $word) {
+            if (!in_array(strtolower($word), $existingLower)) {
+                $toInsert[] = $word;
+            }
+        }
 
         // Insert batch
         $now = now();
@@ -144,9 +150,14 @@ class BlacklistWordController extends Controller
         $unique = array_values(array_unique($lines, SORT_STRING));
         $total = count($unique);
 
-        // Cari kata yang sudah ada
-        $existing = BlacklistWord::whereIn('word', $unique)->pluck('word')->all();
-        $toInsert = array_values(array_diff($unique, $existing));
+        // Cari kata yang sudah ada (case-insensitive)
+        $existingLower = BlacklistWord::all()->pluck('word')->map(fn($w) => strtolower($w))->all();
+        $toInsert = [];
+        foreach ($unique as $word) {
+            if (!in_array(strtolower($word), $existingLower)) {
+                $toInsert[] = $word;
+            }
+        }
 
         $now = now();
         $records = array_map(fn ($w) => [

@@ -464,6 +464,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 $output .= executeCommand('php artisan queue:work --stop-when-empty --timeout=10');
                 break;
 
+            case 'schedule_run':
+                $startTs = microtime(true);
+                $output = "Schedule Run (verbose):\n";
+                $output .= "Start: " . date('Y-m-d H:i:s') . "\n\n";
+
+                // Jalankan scheduler dengan verbosity maksimal
+                $output .= executeCommand('php artisan schedule:run -vvv');
+
+                $endTs = microtime(true);
+                $output .= "\nEnd: " . date('Y-m-d H:i:s') . "\n";
+                $output .= "Duration: " . number_format(($endTs - $startTs), 3) . "s\n";
+
+                // Tampilkan daftar schedule yang terdaftar
+                $output .= "\nScheduled Events (schedule:list):\n";
+                $output .= executeCommand('php artisan schedule:list');
+                break;
+
             case 'create_symlinks':
                 $output = "Creating Symlinks:\n";
 
@@ -1482,6 +1499,7 @@ function showLoginForm()
                         <button type="submit" name="action" value="clear_all_cache" class="warning">Clear All Cache</button>
                         <button type="submit" name="action" value="create_symlinks">Create Symlinks</button>
                         <button type="submit" name="action" value="queue_status">Check Queue Status</button>
+                        <button type="submit" name="action" value="schedule_run">Run Schedule (verbose)</button>
                     </form>
                 </div>
             </div>

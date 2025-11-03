@@ -101,7 +101,7 @@ class NewFrasaNegative extends Model {
     }
     
     /**
-     * Ambil set blacklist aktif dari cache (case-sensitive)
+     * Ambil set blacklist aktif dari cache (case-insensitive)
      */
     public static function getBlacklistSet(): array
     {
@@ -111,7 +111,8 @@ class NewFrasaNegative extends Model {
 
         $set = [];
         foreach ($words as $w) {
-            $set[$w] = true;
+            // Normalize ke lowercase untuk case-insensitive matching
+            $set[strtolower($w)] = true;
         }
         return $set;
     }
@@ -122,7 +123,8 @@ class NewFrasaNegative extends Model {
         if ($frasa === '') return false;
 
         $set = self::getBlacklistSet();
-        return !isset($set[$frasa]);
+        // Compare dengan lowercase untuk case-insensitive
+        return !isset($set[strtolower($frasa)]);
     }
 
     public static function extractAllowedFrasa(string $term): array
@@ -137,14 +139,24 @@ class NewFrasaNegative extends Model {
             $cleanWord = trim($word);
             if ($cleanWord === '') continue;
 
-            // Buang jika exact-match ada di blacklist
-            if (!isset($set[$cleanWord])) {
+            // Buang jika case-insensitive match ada di blacklist
+            if (!isset($set[strtolower($cleanWord)])) {
                 $allowedFrasa[] = $cleanWord;
             }
         }
 
-        // Dedup case-sensitive (array_unique menjaga string apa adanya)
-        return array_values(array_unique($allowedFrasa));
+        // Dedup case-insensitive dengan mempertahankan case asli
+        $seen = [];
+        $result = [];
+        foreach ($allowedFrasa as $frasa) {
+            $lower = strtolower($frasa);
+            if (!isset($seen[$lower])) {
+                $seen[$lower] = true;
+                $result[] = $frasa;
+            }
+        }
+        
+        return array_values($result);
     }
     
     public function setHasilCekAiAttribute($value): void

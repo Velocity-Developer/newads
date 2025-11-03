@@ -79,7 +79,7 @@ const clearFilters = () => {
             <Input
               id="search"
               v-model="searchQuery"
-              placeholder="Cari kata (case-sensitive)..."
+              placeholder="Cari kata..."
               class="pl-8"
               @keyup.enter="applyFilters"
             />

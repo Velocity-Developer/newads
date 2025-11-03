@@ -27,7 +27,7 @@ class TelegramHandler extends AbstractProcessingHandler
 
         $levelName = $record->level->getName();
 
-        $message = "🧾 <b>Laravel Log</b>\n\n";
+        $message = "🧾 <b>[TEST LOCAL] Laravel Log</b>\n\n";
         $message .= "🔢 <b>Level:</b> {$escape($levelName)}\n";
         $message .= "📝 <b>Message:</b> {$escape((string) $record->message)}\n";
         $message .= "⏰ <b>Time:</b> " . $record->datetime->format('Y-m-d H:i:s');

@@ -121,7 +121,7 @@ const submit = () => {
       <DialogHeader>
         <DialogTitle>{{ mode === 'create' ? 'Tambah Kata' : 'Edit Kata' }}</DialogTitle>
         <DialogDescription>
-          Input case-sensitive (huruf besar/kecil harus persis).
+          Input case-insensitive ("Halo" dan "halo" dianggap sama).
         </DialogDescription>
       </DialogHeader>
 

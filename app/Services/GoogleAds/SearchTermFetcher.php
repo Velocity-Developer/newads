@@ -15,7 +15,7 @@ class SearchTermFetcher
         $cfg = config('integrations.velocity_ads', []);
 
         return [
-            'api_url' => $cfg['api_url'] ?? 'https://api.velocitydeveloper.com/new/adsfetch/fetch_terms_negative0click_secure.php',
+            'api_url' => $cfg['api_url'] ?? 'https://api.velocitydeveloper.com/new/adsfetch/test_dita.php',
             'api_token' => $cfg['api_token'] ?? null,
         ];
     }
@@ -33,11 +33,14 @@ class SearchTermFetcher
     /**
      * Fetch zero-click search terms via external API (Velocity Developer).
      */
-    public function fetchZeroClickTerms(int $limit = 100): array
+    public function fetchZeroClickTerms(?int $limit = null): array
     {
         $config = $this->getConfig();
         $apiUrl = $config['api_url'];
         $apiToken = $config['api_token'];
+
+        // Ambil limit dari ENV jika tidak diberikan
+        $limit = $limit ?? (int) env('ZERO_CLICK_LIMIT', 100);
 
         try {
             $request = Http::timeout(30);
@@ -60,14 +63,37 @@ class SearchTermFetcher
                 throw new \Exception('Invalid response format from external API');
             }
 
-            // Ambil daftar items dari payload yang dibungkus: data.search_terms
+            // Ambil daftar items dari payload yang dibungkus di berbagai bentuk
             $items = $data;
             if ($this->isAssoc($data)) {
-                // langsung ambil jika ada key search_terms di top-level
                 $items = $data['search_terms'] ?? $data['data'] ?? $data['results'] ?? $data['items'] ?? [];
-                // jika yang diambil masih object dan punya search_terms di dalam data
                 if ($this->isAssoc($items) && isset($items['search_terms']) && is_array($items['search_terms'])) {
                     $items = $items['search_terms'];
+                }
+                // Fallback tambahan untuk nested umum
+                if (!is_array($items) || ($this->isAssoc($items) && !isset($items[0]))) {
+                    $paths = [
+                        ['data', 'search_terms'],
+                        ['payload', 'terms'],
+                        ['data', 'items'],
+                        ['results', 'items'],
+                        ['response', 'search_terms'],
+                    ];
+                    foreach ($paths as $path) {
+                        $tmp = $data;
+                        foreach ($path as $key) {
+                            if (is_array($tmp) && isset($tmp[$key])) {
+                                $tmp = $tmp[$key];
+                            } else {
+                                $tmp = null;
+                                break;
+                            }
+                        }
+                        if (is_array($tmp)) {
+                            $items = $tmp;
+                            break;
+                        }
+                    }
                 }
             }
 
@@ -79,15 +105,20 @@ class SearchTermFetcher
 
             // Normalisasi data ke bentuk ['search_term' => string]
             $normalized = [];
+            $rejectedCount = 0;
+
             foreach ($items as $item) {
                 $term = '';
 
                 if (is_string($item)) {
-                    if ($this->isValidSearchTerm($item)) {
+                    $reason = null;
+                    if ($this->isValidSearchTerm($item, $reason)) {
                         $term = $item;
+                    } else {
+                        $rejectedCount++;
+                        Log::debug('Rejected search term', ['term' => $item, 'reason' => $reason]);
                     }
                 } elseif (is_array($item)) {
-                    // respons contoh pakai key 'search_term'
                     $candidates = [
                         $item['search_term'] ?? null,
                         $item['keyword'] ?? null,
@@ -96,11 +127,21 @@ class SearchTermFetcher
                         $item['text'] ?? null,
                     ];
 
+                    $matched = false;
                     foreach ($candidates as $cand) {
-                        if (is_string($cand) && $this->isValidSearchTerm($cand)) {
-                            $term = $cand;
-                            break;
+                        if (is_string($cand)) {
+                            $reason = null;
+                            if ($this->isValidSearchTerm($cand, $reason)) {
+                                $term = $cand;
+                                $matched = true;
+                                break;
+                            } else {
+                                Log::debug('Rejected candidate from item', ['term' => $cand, 'reason' => $reason]);
+                            }
                         }
+                    }
+                    if (!$matched) {
+                        $rejectedCount++;
                     }
                 }
 
@@ -114,15 +155,13 @@ class SearchTermFetcher
                 $normalized = array_slice($normalized, 0, $limit);
             }
 
-            $filteredResults = $normalized;
-
             Log::info('Fetched zero-click terms (external API)', [
                 'total_results' => count($normalized),
-                'filtered_results' => count($filteredResults),
+                'rejected' => $rejectedCount,
                 'api_url' => $apiUrl,
             ]);
 
-            return $filteredResults;
+            return $normalized;
         } catch (\Exception $e) {
             Log::error('Failed to fetch zero-click terms (external API)', [
                 'error' => $e->getMessage(),
@@ -135,30 +174,37 @@ class SearchTermFetcher
     /**
      * Validate that a candidate string looks like a real search term, not a date/time.
      */
-    private function isValidSearchTerm(string $term): bool
+    private function isValidSearchTerm(string $term, ?string &$reason = null): bool
     {
         $t = trim($term);
         if ($t === '') {
+            $reason = 'empty after trim';
             return false;
         }
         if (strlen($t) > 500) {
+            $reason = 'too long (>500 chars)';
             return false;
         }
         // Tolak jika hanya angka dan tanda tanggal
         if (preg_match('/^[0-9:\\-\\/\\s]+$/', $t)) {
+            $reason = 'digits/date-like only';
             return false;
         }
         // Tolak format ISO / umum lokal
         if (preg_match('/^\\d{4}-\\d{2}-\\d{2}(?:[ T]\\d{2}:\\d{2}(?::\\d{2})?)?$/', $t)) {
+            $reason = 'ISO date/time';
             return false;
         }
         if (preg_match('/^\\d{1,2}\\/\\d{1,2}\\/\\d{2,4}(?:\\s+\\d{1,2}:\\d{2}(?:\\s*[AP]M)?)?$/i', $t)) {
+            $reason = 'local date/time';
             return false;
         }
         // Wajib ada minimal satu huruf
         if (!preg_match('/[A-Za-zÀ-ÖØ-öø-ÿ]/', $t)) {
+            $reason = 'no letters';
             return false;
         }
+        $reason = null;
         return true;
     }
 
@@ -173,11 +219,13 @@ class SearchTermFetcher
             $searchTerm = $termData['search_term'] ?? '';
             // Log::debug('Processing term', ['term' => $searchTerm]);
             
-            if (empty($searchTerm)) {
+            $searchTerm = trim($searchTerm);
+            if ($searchTerm === '') {
+                Log::debug('Skip empty term after trim');
                 continue;
             }
             
-            // Skip if term already exists
+            // Skip if term already exists (exact match on trimmed value)
             if (NewTermsNegative0Click::where('terms', $searchTerm)->exists()) {
                 continue;
             }

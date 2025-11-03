@@ -6,6 +6,7 @@ aceh
 ada
 adalah
 addresses
+ads
 admin
 administrasi
 adsense
