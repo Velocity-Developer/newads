@@ -45,10 +45,19 @@ class BlacklistWordController extends Controller
             'notes' => 'nullable|string',
         ]);
         $data['word'] = trim($data['word']);
-
+    
+        // Case-insensitive duplicate check
+        $lower = strtolower($data['word']);
+        $exists = BlacklistWord::whereRaw('LOWER(word) = ?', [$lower])->exists();
+        if ($exists) {
+            return redirect()->back()
+                ->withErrors(['word' => 'Kata sudah ada (case-insensitive).'])
+                ->withInput();
+        }
+    
         BlacklistWord::create($data);
         Cache::forget('blacklist_words_active');
-
+    
         return redirect()->back()->with('success', 'Kata blacklist ditambahkan.');
     }
 
@@ -60,10 +69,21 @@ class BlacklistWordController extends Controller
             'notes' => 'nullable|string',
         ]);
         $data['word'] = trim($data['word']);
-
+    
+        // Case-insensitive duplicate check excluding current record
+        $lower = strtolower($data['word']);
+        $exists = BlacklistWord::whereRaw('LOWER(word) = ?', [$lower])
+            ->where('id', '!=', $blacklistWord->id)
+            ->exists();
+        if ($exists) {
+            return redirect()->back()
+                ->withErrors(['word' => 'Kata sudah ada (case-insensitive).'])
+                ->withInput();
+        }
+    
         $blacklistWord->update($data);
         Cache::forget('blacklist_words_active');
-
+    
         return redirect()->back()->with('success', 'Kata blacklist diperbarui.');
     }
 
@@ -99,14 +119,30 @@ class BlacklistWordController extends Controller
         $unique = array_values(array_unique($lines, SORT_STRING));
         $total = count($unique);
 
-        // Cek yang sudah ada (case-insensitive)
-        $existingLower = BlacklistWord::all()->pluck('word')->map(fn($w) => strtolower($w))->all();
+        // Cek yang sudah ada (case-insensitive, ambil LOWER(word) dari DB)
+        $existingLower = BlacklistWord::query()
+            ->selectRaw('LOWER(word) as w')
+            ->pluck('w')
+            ->all();
+
+        // Filter yang belum ada di DB (case-insensitive)
         $toInsert = [];
         foreach ($unique as $word) {
-            if (!in_array(strtolower($word), $existingLower)) {
+            if (!in_array(strtolower($word), $existingLower, true)) {
                 $toInsert[] = $word;
             }
         }
+
+        // Deduplikasi internal batch secara case-insensitive
+        $seen = [];
+        $toInsert = array_values(array_filter($toInsert, function ($w) use (&$seen) {
+            $lw = strtolower($w);
+            if (isset($seen[$lw])) {
+                return false;
+            }
+            $seen[$lw] = true;
+            return true;
+        }));
 
         // Insert batch
         $now = now();
@@ -137,28 +173,44 @@ class BlacklistWordController extends Controller
             'file' => ['required', 'file', 'mimes:txt', 'max:10240'], // 10MB
             'active' => ['nullable', 'boolean'],
         ]);
-
+    
         $active = $request->boolean('active', true);
         $uploaded = $request->file('file');
         $content = file_get_contents($uploaded->getRealPath());
-
+    
         $lines = preg_split("/\r\n|\n|\r/", $content);
         $lines = array_map('trim', $lines);
         $lines = array_values(array_filter($lines, fn ($l) => $l !== ''));
-
+    
         // Deduplikasi exact-case agar konsisten dengan importLocal
         $unique = array_values(array_unique($lines, SORT_STRING));
         $total = count($unique);
-
+    
         // Cari kata yang sudah ada (case-insensitive)
-        $existingLower = BlacklistWord::all()->pluck('word')->map(fn($w) => strtolower($w))->all();
+        $existingLower = BlacklistWord::query()
+            ->selectRaw('LOWER(word) as w')
+            ->pluck('w')
+            ->all();
+    
+        // Filter yang belum ada di DB (case-insensitive)
         $toInsert = [];
         foreach ($unique as $word) {
-            if (!in_array(strtolower($word), $existingLower)) {
+            if (!in_array(strtolower($word), $existingLower, true)) {
                 $toInsert[] = $word;
             }
         }
-
+    
+        // Deduplikasi internal batch secara case-insensitive
+        $seen = [];
+        $toInsert = array_values(array_filter($toInsert, function ($w) use (&$seen) {
+            $lw = strtolower($w);
+            if (isset($seen[$lw])) {
+                return false;
+            }
+            $seen[$lw] = true;
+            return true;
+        }));
+    
         $now = now();
         $records = array_map(fn ($w) => [
             'word' => $w,
@@ -167,16 +219,16 @@ class BlacklistWordController extends Controller
             'created_at' => $now,
             'updated_at' => $now,
         ], $toInsert);
-
+    
         if (!empty($records)) {
             BlacklistWord::insert($records);
         }
-
+    
         Cache::forget('blacklist_words_active');
-
+    
         $inserted = count($records);
         $duplicates = $total - $inserted;
-
+    
         return redirect()->back()->with('success', "Import upload selesai. Total unik: {$total}, baru: {$inserted}, duplikat: {$duplicates}");
     }
 }

@@ -258,7 +258,6 @@ function importLocal() {
           <!-- Info -->
           <div class="mt-4 text-sm text-muted-foreground">
             <ul class="list-disc list-inside space-y-1">
-              <li>Matching case-sensitive; huruf besar/kecil harus persis.</li>
               <li>Status: Aktif = terdeteksi; Nonaktif = tidak terdeteksi.</li>
             </ul>
           </div>
