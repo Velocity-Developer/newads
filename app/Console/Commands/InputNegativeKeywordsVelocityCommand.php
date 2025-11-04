@@ -26,10 +26,7 @@ class InputNegativeKeywordsVelocityCommand extends Command
 
         $svc = new NegativeKeywordInputService();
         $notifier = app(\App\Services\Telegram\NotificationService::class);
-
-        // Log::info("Velocity Negative Keywords Input");
-        // Log::info("Source: {$source}, Mode: {$mode}, Batch size: {$batchSize}");
-
+        
         $sources = [];
         if ($source === 'terms' || $source === '') {
             $sources[] = 'terms';
@@ -40,9 +37,6 @@ class InputNegativeKeywordsVelocityCommand extends Command
 
         foreach ($sources as $src) {
             if ($src === 'terms') {
-                // Tambah debug nama database aktif
-                // Log::info('Debug: DB connection = ' . \DB::connection()->getDatabaseName());
-
                 // Preflight (validate) dan execute memakai filter IDENTIK (strict)
                 $query = NewTermsNegative0Click::needsGoogleAdsInput()
                     ->where('retry_count', '<', 3);
@@ -222,7 +216,7 @@ class InputNegativeKeywordsVelocityCommand extends Command
                 "🗒️ <b>Keywords:</b>\n\n{$list}\n";
         }
 
-        // $notifier->sendMessage($message);
+        $notifier->sendMessage($message);
         Log::info($message);
     }
 }

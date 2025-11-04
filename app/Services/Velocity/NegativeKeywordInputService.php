@@ -49,14 +49,14 @@ class NegativeKeywordInputService
             if (is_numeric($campaignId)) {
                 $campaignIdNormalized = (int) $campaignId;
             } else {
-                Log::warning('Invalid campaign_id provided, ignoring', ['campaign_id' => $campaignId]);
+                Log::warning('❌Invalid campaign_id provided, ignoring', ['campaign_id' => $campaignId]);
             }
         }
 
         $url = rtrim($this->inputApiUrl, '?&'); // jangan taruh mode di query
 
         // Logging ringan sebelum kirim
-        Log::info('Sending negative keywords to Velocity', [
+        Log::info('📩Sending negative keywords to Velocity', [
             'count' => count($terms),
             'match_type' => strtoupper($matchType),
             'mode' => strtolower($mode),

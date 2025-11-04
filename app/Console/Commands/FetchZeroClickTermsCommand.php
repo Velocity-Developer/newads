@@ -39,7 +39,7 @@ class FetchZeroClickTermsCommand extends Command
      */
     public function handle()
     {
-        Log::info('Starting to fetch zero-click terms from External Ads API...');
+        $this->info('Starting to fetch zero-click terms from External Ads API...');
         
         try {
             $limit = (int) $this->option('limit');
@@ -55,7 +55,7 @@ class FetchZeroClickTermsCommand extends Command
             // Store terms in database
             $storedCount = $this->searchTermFetcher->storeZeroClickTerms($terms);
             
-            Log::info("Successfully fetched and stored {$storedCount} zero-click terms.");
+            $this->info("Successfully fetched and stored {$storedCount} zero-click terms.");
             
             // Send Telegram notification
             // $this->notificationService->notifyNewTermsFetched($storedCount, count($terms));
@@ -64,13 +64,6 @@ class FetchZeroClickTermsCommand extends Command
             
         } catch (Exception $e) {
             Log::error("Error fetching zero-click terms: " . $e->getMessage());
-            
-            // Send error notification
-            // $this->notificationService->notifySystemError(
-            //     'Fetch Zero-Click Terms',
-            //     $e->getMessage()
-            // );
-            
             return 1;
         }
     }

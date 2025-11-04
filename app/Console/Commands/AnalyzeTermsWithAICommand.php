@@ -47,15 +47,15 @@ class AnalyzeTermsWithAICommand extends Command
 
             // Debug: Check total records first
             $totalRecords = NewTermsNegative0Click::count();
-            Log::info("Total records in database: {$totalRecords}");
+            $this->info("Total records in database: {$totalRecords}");
 
             // Debug: Check records with null hasil_cek_ai
             $nullAiCount = NewTermsNegative0Click::whereNull('hasil_cek_ai')->count();
-            Log::info("Records with null hasil_cek_ai: {$nullAiCount}");
+            $this->info("Records with null hasil_cek_ai: {$nullAiCount}");
 
             // Debug: Check records with status_input_google conditions
             $statusCount = NewTermsNegative0Click::whereIn('status_input_google', [null, 'gagal'])->count();
-            Log::info("Records with status_input_google null or gagal: {$statusCount}");
+            $this->info("Records with status_input_google null or gagal: {$statusCount}");
 
             // Get terms that need AI analysis
             $query = NewTermsNegative0Click::needsAiAnalysis();
@@ -64,14 +64,14 @@ class AnalyzeTermsWithAICommand extends Command
             }
             $terms = $query->get();
             
-            // Log::info("Records matching needsAiAnalysis scope: {$terms->count()}");
+            $this->info("Records matching needsAiAnalysis scope: {$terms->count()}");
             
             if ($terms->isEmpty()) {
-                Log::info('No terms found that need AI analysis.');
+                $this->info('No terms found that need AI analysis.');
                 return 0;
             }
             
-            // Log::info("Found {$terms->count()} terms to analyze.");
+            Log::info("Found {$terms->count()} terms to analyze.");
             
             $analyzedCount = 0;
             $positiveCount = 0;
@@ -80,7 +80,7 @@ class AnalyzeTermsWithAICommand extends Command
 
             foreach ($terms as $term) {
                 try {
-                    Log::info("Analyzing: {$term->terms}");
+                    // Log::info("Analyzing: {$term->terms}");
 
                     // Kembali memakai hasil terstruktur (relevan/negatif)
                     $result = $this->termAnalyzer->analyzeTerm($term->terms); // 'relevan' / 'negatif'
@@ -107,14 +107,14 @@ class AnalyzeTermsWithAICommand extends Command
                 }
             }
 
-            $displayLimit = 20;
-            // Log::info("Analysis completed. Total: {$analyzedCount}, Relevan: " . count($relevanTerms) . ", Negatif: " . count($negatifTerms));
-            if (!empty($relevanTerms)) {
-                Log::info("Relevan terms (max {$displayLimit}): " . implode(', ', array_slice($relevanTerms, 0, $displayLimit)));   
-            }
-            if (!empty($negatifTerms)) {
-                Log::info("Negatif terms (max {$displayLimit}): " . implode(', ', array_slice($negatifTerms, 0, $displayLimit)));
-            }
+            Log::info("Analysis completed. Total: {$analyzedCount}, Relevan: " . count($relevanTerms) . ", Negatif: " . count($negatifTerms));
+            // $displayLimit = 20;
+            // if (!empty($relevanTerms)) {
+            //     Log::info("Relevan terms (max {$displayLimit}): " . implode(', ', array_slice($relevanTerms, 0, $displayLimit)));   
+            // }
+            // if (!empty($negatifTerms)) {
+            //     Log::info("Negatif terms (max {$displayLimit}): " . implode(', ', array_slice($negatifTerms, 0, $displayLimit)));
+            // }
 
             return 0;
             

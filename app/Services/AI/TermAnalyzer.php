@@ -28,10 +28,10 @@ class TermAnalyzer
             $response = $this->callOpenAI($prompt);
             $result = $this->parseResponse($response);
 
-            Log::info('AI analysis completed', [
-                'term' => $term,
-                'result' => $result
-            ]);
+            // Log::info('AI analysis completed', [
+            //     'term' => $term,
+            //     'result' => $result
+            // ]);
 
             return $result;
 
