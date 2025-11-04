@@ -39,22 +39,22 @@ class AnalyzeTermsWithAICommand extends Command
      */
     public function handle()
     {
-        $this->info('Starting AI analysis of search terms...');
+        // Log::info('Starting AI analysis of search terms...');
         
         try {
             $batchSize = (int) $this->option('batch-size');
 
             // Debug: Check total records first
             $totalRecords = NewTermsNegative0Click::count();
-            $this->info("Total records in database: {$totalRecords}");
+            Log::info("Total records in database: {$totalRecords}");
 
             // Debug: Check records with null hasil_cek_ai
             $nullAiCount = NewTermsNegative0Click::whereNull('hasil_cek_ai')->count();
-            $this->info("Records with null hasil_cek_ai: {$nullAiCount}");
+            Log::info("Records with null hasil_cek_ai: {$nullAiCount}");
 
             // Debug: Check records with status_input_google conditions
             $statusCount = NewTermsNegative0Click::whereIn('status_input_google', [null, 'gagal'])->count();
-            $this->info("Records with status_input_google null or gagal: {$statusCount}");
+            Log::info("Records with status_input_google null or gagal: {$statusCount}");
 
             // Get terms that need AI analysis
             $query = NewTermsNegative0Click::needsAiAnalysis();
@@ -63,14 +63,14 @@ class AnalyzeTermsWithAICommand extends Command
             }
             $terms = $query->get();
             
-            $this->info("Records matching needsAiAnalysis scope: {$terms->count()}");
+            // Log::info("Records matching needsAiAnalysis scope: {$terms->count()}");
             
             if ($terms->isEmpty()) {
-                $this->info('No terms found that need AI analysis.');
+                Log::info('No terms found that need AI analysis.');
                 return 0;
             }
             
-            $this->info("Found {$terms->count()} terms to analyze.");
+            // Log::info("Found {$terms->count()} terms to analyze.");
             
             $analyzedCount = 0;
             $positiveCount = 0;
@@ -79,11 +79,11 @@ class AnalyzeTermsWithAICommand extends Command
 
             foreach ($terms as $term) {
                 try {
-                    $this->line("Analyzing: {$term->terms}");
+                    Log::info("Analyzing: {$term->terms}");
 
                     // Kembali memakai hasil terstruktur (relevan/negatif)
                     $result = $this->termAnalyzer->analyzeTerm($term->terms); // 'relevan' / 'negatif'
-                    $this->line("AI Result: {$result}");
+                    // Log::info("AI Result: {$result}");
                     // Simpan ke database
                     $term->update([
                         'hasil_cek_ai' => $result
@@ -96,29 +96,29 @@ class AnalyzeTermsWithAICommand extends Command
                         $negatifTerms[] = $term->terms;
                         $positiveCount++; // tetap dipakai untuk jumlah kandidat negatif
                     } else {
-                        $this->line("Unclear AI result for: {$term->terms} => '{$result}'");
+                        Log::info("Unclear AI result for: {$term->terms} => '{$result}'");
                     }
 
                     $analyzedCount++;
 
                 } catch (Exception $e) {
-                    $this->error("Error analyzing term '{$term->terms}': " . $e->getMessage());
+                    Log::error("Error analyzing term '{$term->terms}': " . $e->getMessage());
                 }
             }
 
             $displayLimit = 20;
-            $this->info("Analysis completed. Total: {$analyzedCount}, Relevan: " . count($relevanTerms) . ", Negatif: " . count($negatifTerms));
+            // Log::info("Analysis completed. Total: {$analyzedCount}, Relevan: " . count($relevanTerms) . ", Negatif: " . count($negatifTerms));
             if (!empty($relevanTerms)) {
-                $this->line("Relevan terms (max {$displayLimit}): " . implode(', ', array_slice($relevanTerms, 0, $displayLimit)));
+                Log::info("Relevan terms (max {$displayLimit}): " . implode(', ', array_slice($relevanTerms, 0, $displayLimit)));   
             }
             if (!empty($negatifTerms)) {
-                $this->line("Negatif terms (max {$displayLimit}): " . implode(', ', array_slice($negatifTerms, 0, $displayLimit)));
+                Log::info("Negatif terms (max {$displayLimit}): " . implode(', ', array_slice($negatifTerms, 0, $displayLimit)));
             }
 
             return 0;
             
         } catch (Exception $e) {
-            $this->error("Error during AI analysis: " . $e->getMessage());
+            Log::error("Error during AI analysis: " . $e->getMessage());
             
             // Send error notification
             // $this->notificationService->notifySystemError(

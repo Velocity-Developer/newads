@@ -13,7 +13,7 @@ class SafeTestFetchCommand extends Command
 
     public function handle()
     {
-        $this->info('🔍 Testing Search Terms Fetch (Safe Mode)...');
+        Log::info('🔍 Testing Search Terms Fetch (Safe Mode)...');
         $this->newLine();
 
         $fetcher = new SearchTermFetcher();
@@ -21,17 +21,17 @@ class SafeTestFetchCommand extends Command
         
         try {
             // Test fetch dengan limit kecil
-            $this->info("📥 Fetching up to {$limit} search terms...");
+            Log::info("📥 Fetching up to {$limit} search terms...");
             
             $result = $fetcher->testFetchZeroClickTerms($limit);
             
             if (!$result['success']) {
-                $this->error('❌ Fetch failed: ' . $result['error']);
+                Log::error('❌ Fetch failed: ' . $result['error']);
                 return 1;
             }
             
             $terms = $result['terms'];
-            $this->info("✅ Successfully fetched " . count($terms) . " terms");
+            Log::info("✅ Successfully fetched " . count($terms) . " terms");
             
             if (empty($terms)) {
                 $this->warn('⚠️ No terms found. This might be normal if:');
@@ -43,7 +43,7 @@ class SafeTestFetchCommand extends Command
             
             // Display sample terms
             $this->newLine();
-            $this->info('📋 Sample terms found:');
+            Log::info('📋 Sample terms found:');
             
             $tableData = [];
             foreach (array_slice($terms, 0, 10) as $index => $term) {
@@ -58,12 +58,12 @@ class SafeTestFetchCommand extends Command
             $this->table(['#', 'Search Term', 'Impressions', 'Clicks'], $tableData);
             
             if (count($terms) > 10) {
-                $this->info('... and ' . (count($terms) - 10) . ' more terms');
+                Log::info('... and ' . (count($terms) - 10) . ' more terms');
             }
             
             // Test filtering
             $this->newLine();
-            $this->info('🔍 Testing term filtering...');
+            Log::info('🔍 Testing term filtering...');
             
             $excludedWords = ['jasa', 'harga', 'buat', 'bikin', 'murah', 'pembuatan', 'biaya', 'beli', 'pesan', 'velocity'];
             $filteredTerms = [];
@@ -85,17 +85,17 @@ class SafeTestFetchCommand extends Command
             }
             
             $excludedCount = count($terms) - count($filteredTerms);
-            $this->info("📊 Filtering results:");
-            $this->info("- Total terms: " . count($terms));
-            $this->info("- Excluded terms: {$excludedCount}");
-            $this->info("- Terms to process: " . count($filteredTerms));
+            Log::info("📊 Filtering results:");
+            Log::info("- Total terms: " . count($terms));
+            Log::info("- Excluded terms: {$excludedCount}");
+            Log::info("- Terms to process: " . count($filteredTerms));
             
             if ($excludedCount > 0) {
-                $this->info("✅ Filtering working correctly");
+                Log::info("✅ Filtering working correctly");
             }
             
         } catch (\Exception $e) {
-            $this->error('❌ Test failed: ' . $e->getMessage());
+            Log::error('❌ Test failed: ' . $e->getMessage());
             Log::error('Safe fetch test failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
@@ -104,8 +104,8 @@ class SafeTestFetchCommand extends Command
         }
         
         $this->newLine();
-        $this->info('🎉 Safe fetch test completed successfully!');
-        $this->info('Next step: Run full system with php artisan fetch:zero-click-terms');
+        Log::info('🎉 Safe fetch test completed successfully!');
+        Log::info('Next step: Run full system with php artisan fetch:zero-click-terms');
         
         return 0;
     }

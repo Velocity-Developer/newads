@@ -26,8 +26,8 @@ class InputNegativeKeywordsVelocityCommand extends Command
         $svc = new NegativeKeywordInputService();
         $notifier = app(\App\Services\Telegram\NotificationService::class);
 
-        $this->info("Velocity Negative Keywords Input");
-        $this->line("Source: {$source}, Mode: {$mode}, Batch size: {$batchSize}");
+        // Log::info("Velocity Negative Keywords Input");
+        // Log::info("Source: {$source}, Mode: {$mode}, Batch size: {$batchSize}");
 
         $sources = [];
         if ($source === 'terms' || $source === '') {
@@ -40,13 +40,13 @@ class InputNegativeKeywordsVelocityCommand extends Command
         foreach ($sources as $src) {
             if ($src === 'terms') {
                 // Tambah debug nama database aktif
-                // $this->line('Debug: DB connection = ' . \DB::connection()->getDatabaseName());
+                // Log::info('Debug: DB connection = ' . \DB::connection()->getDatabaseName());
 
                 // Preflight (validate) dan execute memakai filter IDENTIK (strict)
                 $query = NewTermsNegative0Click::needsGoogleAdsInput()
                     ->where('retry_count', '<', 3);
 
-                $this->line('Debug: candidates (terms) = ' . $query->count());
+                // Log::info('Debug: candidates (terms) = ' . $query->count());
 
                 if ($batchSize > 0) {
                     $query->limit($batchSize);
@@ -56,14 +56,15 @@ class InputNegativeKeywordsVelocityCommand extends Command
                 $terms = $query
                     ->pluck('terms')
                     ->toArray();
-                $this->line('Debug: sample terms = ' . implode(', ', array_slice($terms, 0, 5)));
+                
+                // Log::info('Debug: sample terms = ' . implode(', ', array_slice($terms, 0, 5)));
 
                 $matchType = $svc->getMatchTypeForSource('terms');
 
                 if (empty($terms)) {
-                    $this->warn('Tidak ada terms untuk diproses.');
+                    Log::warning('Tidak ada terms untuk diproses.');
                 } else {
-                    $this->line("Mengirim " . count($terms) . " terms (match_type={$matchType})...");
+                    // Log::info("Mengirim " . count($terms) . " terms (match_type={$matchType})...");
                     $res = $svc->send($terms, $matchType, $mode, $campaignId);
 
                     $this->reportResult('terms', $res);
@@ -78,7 +79,7 @@ class InputNegativeKeywordsVelocityCommand extends Command
             if ($src === 'frasa') {
                 $query = NewFrasaNegative::needsGoogleAdsInput()
                     ->where('retry_count', '<', 3);
-                $this->line('Debug: candidates (frasa) = ' . $query->count());
+                // Log::info('Debug: candidates (frasa) = ' . $query->count());
                 if ($batchSize > 0) {
                     $query->limit($batchSize);
                 }
@@ -90,9 +91,9 @@ class InputNegativeKeywordsVelocityCommand extends Command
                 $matchType = $svc->getMatchTypeForSource('frasa');
 
                 if (empty($phrases)) {
-                    $this->warn('Tidak ada frasa untuk diproses.');
+                    Log::warning('Tidak ada frasa untuk diproses.');
                 } else {
-                    $this->line("Mengirim " . count($phrases) . " frasa (match_type={$matchType})...");
+                    // Log::info("Mengirim " . count($phrases) . " frasa (match_type={$matchType})...");
                     $res = $svc->send($phrases, $matchType, $mode, $campaignId);
 
                     $this->reportResult('frasa', $res);
@@ -119,16 +120,16 @@ class InputNegativeKeywordsVelocityCommand extends Command
         $validateOnly = $data['validate_only'] ?? null;
 
         if ($success) {
-            $this->info("✅ Berhasil Input Negative Keywords!");
-            $this->line("Status API: {$status}");
-            if ($count !== null) $this->line("Jumlah: {$count}");
-            if ($matchType !== null) $this->line("Match type (API): {$matchType}");
-            if ($validateOnly !== null) $this->line("Validate only: " . ($validateOnly ? 'true' : 'false'));
-            if ($campaignId !== null) $this->line("Campaign ID: {$campaignId}");
+            Log::info("✅ Berhasil Input Negative Keywords!");
+            Log::info("Status API: {$status}");
+            if ($count !== null) Log::info("Jumlah: {$count}");
+            if ($matchType !== null) Log::info("Match type (API): {$matchType}");
+            if ($validateOnly !== null) Log::info("Validate only: " . ($validateOnly ? 'true' : 'false'));
+            if ($campaignId !== null) Log::info("Campaign ID: {$campaignId}");
         } else {
             $error = $res['error'] ?? 'Unknown error';
-            $this->error("❌ Gagal Input Negative Keywords: {$error}");
-            $this->line("Status API: {$status}");
+            Log::error("❌ Gagal Input Negative Keywords: {$error}");
+            Log::info("Status API: {$status}");
         }
     }
 
@@ -203,7 +204,7 @@ class InputNegativeKeywordsVelocityCommand extends Command
                 "🧮 <b>Jumlah:</b> {$count} data\n" .
                 // "📝 <b>Match Type:</b> {$matchType}" . ($apiMatchType ? " (API={$apiMatchType})" : "") . "\n" .
                 "⚙️ <b>Mode:</b> {$mode}" . (is_bool($validateOnly) ? " (validate_only=" . ($validateOnly ? 'true' : 'false') . ")" : "") . "\n" .
-                // ($campaignId ? "📣 <b>Campaign ID:</b> {$campaignId}\n" : "") .
+                ($campaignId ? "📣 <b>Campaign ID:</b> {$campaignId}\n" : "") .
                 "⏰ <b>Waktu:</b> {$timestamp}\n" .
                 "🗒️ <b>Keywords:</b>\n{$list}\n";
         } else {
@@ -212,7 +213,7 @@ class InputNegativeKeywordsVelocityCommand extends Command
             $message = "❌ <b>Gagal Input Keywords Negative</b>\n\n" .
                 // "📦 <b>Sumber:</b> {$src}\n" .
                 "🧮 <b>Jumlah:</b> {$count} data\n" .
-                // "📝 <b>Match Type:</b> {$matchType}\n" .
+                "📝 <b>Match Type:</b> {$matchType}\n" .
                 "⚙️ <b>Mode:</b> {$mode}\n" .
                 "📡 <b>Status API:</b> {$status}\n" .
                 "❗ <b>Error:</b> {$error}\n" .
@@ -221,6 +222,6 @@ class InputNegativeKeywordsVelocityCommand extends Command
         }
 
         // $notifier->sendMessage($message);
-        $this->line($message);
+        Log::info($message);
     }
 }

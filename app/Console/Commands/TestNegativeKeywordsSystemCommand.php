@@ -46,7 +46,7 @@ class TestNegativeKeywordsSystemCommand extends Command
      */
     public function handle()
     {
-        $this->info('🧪 Testing Negative Keywords Automation System');
+        Log::info('🧪 Testing Negative Keywords Automation System');
         $this->newLine();
 
         $component = $this->option('component') ?? 'all';
@@ -82,7 +82,7 @@ class TestNegativeKeywordsSystemCommand extends Command
 
     private function testDatabase()
     {
-        $this->info('📊 Testing Database Components...');
+        Log::info('📊 Testing Database Components...');
         
         $results = [
             'migrations' => false,
@@ -94,9 +94,9 @@ class TestNegativeKeywordsSystemCommand extends Command
             // Test if tables exist
             if (\Schema::hasTable('new_terms_negative_0click') && \Schema::hasTable('new_frasa_negative')) {
                 $results['migrations'] = true;
-                $this->line('✅ Database tables exist');
+                Log::info('✅ Database tables exist');
             } else {
-                $this->error('❌ Database tables missing');
+                Log::error('❌ Database tables missing');
             }
 
             // Test models
@@ -105,7 +105,7 @@ class TestNegativeKeywordsSystemCommand extends Command
             
             if ($termModel && $phraseModel) {
                 $results['models'] = true;
-                $this->line('✅ Models instantiated successfully');
+                Log::info('✅ Models instantiated successfully');
             }
 
             // Test relationships - use updateOrCreate to avoid duplicate error
@@ -129,7 +129,7 @@ class TestNegativeKeywordsSystemCommand extends Command
 
             if ($testTerm->frasa()->count() > 0 && $testPhrase->parentTerm) {
                 $results['relationships'] = true;
-                $this->line('✅ Model relationships working');
+                Log::info('✅ Model relationships working');
             }
 
             // Cleanup test data
@@ -137,7 +137,7 @@ class TestNegativeKeywordsSystemCommand extends Command
             $testTerm->delete();
 
         } catch (Exception $e) {
-            $this->error("❌ Database test failed: " . $e->getMessage());
+            Log::error("❌ Database test failed: " . $e->getMessage());
         }
 
         return $results;
@@ -145,7 +145,7 @@ class TestNegativeKeywordsSystemCommand extends Command
 
     private function testGoogleAds()
     {
-        $this->info('🎯 Testing Google Ads Integration...');
+        Log::info('🎯 Testing Google Ads Integration...');
         
         $results = [
             'configuration' => false,
@@ -157,16 +157,16 @@ class TestNegativeKeywordsSystemCommand extends Command
             $config = $this->searchTermFetcher->getConfig();
             if (!empty($config['client_id']) && !empty($config['developer_token'])) {
                 $results['configuration'] = true;
-                $this->line('✅ Google Ads configuration found');
+                Log::info('✅ Google Ads configuration found');
             } else {
-                $this->error('❌ Google Ads configuration missing');
+                Log::error('❌ Google Ads configuration missing');
             }
 
             // Test connection (placeholder - would need actual API call)
-            $this->line('⚠️  Google Ads API connection test requires actual credentials');
+            Log::info('⚠️  Google Ads API connection test requires actual credentials');
             
         } catch (Exception $e) {
-            $this->error("❌ Google Ads test failed: " . $e->getMessage());
+            Log::error("❌ Google Ads test failed: " . $e->getMessage());
         }
 
         return $results;
@@ -174,7 +174,7 @@ class TestNegativeKeywordsSystemCommand extends Command
 
     private function testAI()
     {
-        $this->info('🤖 Testing AI Analysis Service...');
+        Log::info('🤖 Testing AI Analysis Service...');
         
         $results = [
             'configuration' => false,
@@ -185,22 +185,22 @@ class TestNegativeKeywordsSystemCommand extends Command
             // Test configuration
             if ($this->termAnalyzer->isConfigured()) {
                 $results['configuration'] = true;
-                $this->line('✅ AI service configured');
-                $this->line('🧩 Model GPT saat ini: ' . $this->termAnalyzer->getModel());
+                Log::info('✅ AI service configured');
+                Log::info('🧩 Model GPT saat ini: ' . $this->termAnalyzer->getModel());
             } else {
-                $this->error('❌ AI service not configured (missing OpenAI API key)');
+                Log::error('❌ AI service not configured (missing OpenAI API key)');
             }
 
             // Test service functionality
             if ($this->termAnalyzer->testService()) {
                 $results['service'] = true;
-                $this->line('✅ AI service test passed');
+                Log::info('✅ AI service test passed');
             } else {
-                $this->error('❌ AI service test failed');
+                Log::error('❌ AI service test failed');
             }
 
         } catch (Exception $e) {
-            $this->error("❌ AI test failed: " . $e->getMessage());
+            Log::error("❌ AI test failed: " . $e->getMessage());
         }
 
         return $results;
@@ -208,7 +208,7 @@ class TestNegativeKeywordsSystemCommand extends Command
 
     private function testTelegram()
     {
-        $this->info('📱 Testing Telegram Notifications...');
+        Log::info('📱 Testing Telegram Notifications...');
         
         $results = [
             'configuration' => false,
@@ -219,21 +219,21 @@ class TestNegativeKeywordsSystemCommand extends Command
             // Test configuration
             if ($this->notificationService->isConfigured()) {
                 $results['configuration'] = true;
-                $this->line('✅ Telegram service configured');
+                Log::info('✅ Telegram service configured');
             } else {
-                $this->error('❌ Telegram service not configured');
+                Log::error('❌ Telegram service not configured');
             }
 
             // Test connection
             if ($this->notificationService->testService()) {
                 $results['connection'] = true;
-                $this->line('✅ Telegram connection test passed');
+                Log::info('✅ Telegram connection test passed');
             } else {
-                $this->error('❌ Telegram connection test failed');
+                Log::error('❌ Telegram connection test failed');
             }
 
         } catch (Exception $e) {
-            $this->error("❌ Telegram test failed: " . $e->getMessage());
+            Log::error("❌ Telegram test failed: " . $e->getMessage());
         }
 
         return $results;
@@ -242,18 +242,18 @@ class TestNegativeKeywordsSystemCommand extends Command
     private function displayResults($results)
     {
         $this->newLine();
-        $this->info('📋 Test Results Summary:');
+        Log::info('📋 Test Results Summary:');
         $this->newLine();
 
         $allPassed = true;
 
         foreach ($results as $component => $componentResults) {
-            $this->line("🔧 {$component}:");
+            Log::info("🔧 {$component}:");
             
             if (is_array($componentResults)) {
                 foreach ($componentResults as $test => $passed) {
                     $status = $passed ? '✅' : '❌';
-                    $this->line("   {$status} {$test}");
+                    Log::info("   {$status} {$test}");
                     if (!$passed) $allPassed = false;
                 }
             }
@@ -261,16 +261,16 @@ class TestNegativeKeywordsSystemCommand extends Command
         }
 
         if ($allPassed) {
-            $this->info('🎉 All tests passed! System is ready for deployment.');
+            Log::info('🎉 All tests passed! System is ready for deployment.');
         } else {
-            $this->error('⚠️  Some tests failed. Please check configuration and fix issues before deployment.');
+            Log::error('⚠️  Some tests failed. Please check configuration and fix issues before deployment.');
         }
 
         $this->newLine();
-        $this->info('💡 Next steps:');
-        $this->line('1. Run migrations: php artisan migrate');
-        $this->line('2. Configure environment variables in .env');
-        $this->line('3. Set up cron job: * * * * * cd /path-to-your-project && php artisan schedule:run >> /dev/null 2>&1');
-        $this->line('4. Test individual commands manually before enabling automation');
+        Log::info('💡 Next steps:');
+        Log::info('1. Run migrations: php artisan migrate');
+        Log::info('2. Configure environment variables in .env');
+        Log::info('3. Set up cron job: * * * * * cd /path-to-your-project && php artisan schedule:run >> /dev/null 2>&1');
+        Log::info('4. Test individual commands manually before enabling automation');
     }
 }

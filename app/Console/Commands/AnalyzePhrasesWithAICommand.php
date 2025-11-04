@@ -14,7 +14,7 @@ class AnalyzePhrasesWithAICommand extends Command
     public function handle(FrasaAnalyzer $analyzer): int
     {
         if (!$analyzer->isConfigured()) {
-            $this->error('OpenAI belum dikonfigurasi. Set OPENAI_API_KEY.');
+            Log::error('OpenAI belum dikonfigurasi. Set OPENAI_API_KEY.');
             return 1;
         }
 
@@ -29,37 +29,37 @@ class AnalyzePhrasesWithAICommand extends Command
         $items = $query->get();
 
         if ($items->isEmpty()) {
-            $this->info('Tidak ada frasa yang perlu dianalisis AI.');
+            Log::info('Tidak ada frasa yang perlu dianalisis AI.');
             return 0;
         }
 
-        $this->info("Menganalisis {$items->count()} frasa...");
+        Log::info("Menganalisis {$items->count()} frasa...");
         $updated = 0;
         $luar = 0;
         $indonesia = 0;
 
         foreach ($items as $item) {
-            $this->line("Menganalisis: {$item->frasa}");
+            Log::info("Menganalisis: {$item->frasa}");
 
             if ($showRaw) {
                 $raw = $analyzer->analyzeFrasaRaw($item->frasa);
                 if (($raw['success'] ?? false) === true) {
-                    $this->line("RAW AI: " . ($raw['content'] ?? ''));
+                    Log::info('RAW AI response', $raw['content'] ?? '');
                 } else {
-                    $this->error("RAW gagal: " . ($raw['error'] ?? 'Unknown error'));
+                    Log::error('RAW AI error', $raw['error'] ?? 'Unknown error');
                 }
             }
 
             $result = $analyzer->analyzeFrasa($item->frasa);
             if ($result === null) {
-                $this->error("❌ Gagal/ambigu: {$item->frasa} - tidak disimpan");
+                Log::error('❌ AI analysis failed', ['frasa' => $item->frasa]);
                 continue;
             }
 
-            $this->info("✅ Hasil: {$item->frasa} → {$result}");
+            Log::info("✅ Hasil: {$item->frasa} → {$result}");
 
             if ($dryRun) {
-                $this->line("⏭️ Dry-run aktif: skip update database untuk {$item->frasa}");
+                Log::info("⏭️ Dry-run aktif: skip update database untuk {$item->frasa}");
             } else {
                 $item->update(['hasil_cek_ai' => $result]);
                 $updated++;
@@ -68,7 +68,7 @@ class AnalyzePhrasesWithAICommand extends Command
             }
         }
 
-        $this->info("Selesai. Diupdate: {$updated}, luar: {$luar}, indonesia: {$indonesia}");
+        Log::info("Selesai. Diupdate: {$updated}, luar: {$luar}, indonesia: {$indonesia}");
         return 0;
     }
 }

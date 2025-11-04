@@ -40,8 +40,6 @@ class ProcessIndividualPhrasesCommand extends Command
      */
     public function handle()
     {
-        $this->info('Starting to process individual phrases...');
-        
         try {
             $batchSize = (int) $this->option('batch-size');
 
@@ -56,24 +54,22 @@ class ProcessIndividualPhrasesCommand extends Command
             $terms = $query->get();
             
             if ($terms->isEmpty()) {
-                $this->info('No terms found that need phrase processing.');
-                $this->info('Skipping Google Ads input; use negative-keywords:input-velocity for submission.');
+                Log::info('No terms found that need phrase processing.');
+                Log::info('Skipping Google Ads input; use negative-keywords:input-velocity for submission.');
                 return 0;
             }
-            
-            $this->info("Found {$terms->count()} terms to break down into phrases.");
+
+            Log::info("Found {$terms->count()} terms to break down into phrases.");
             
             $totalPhrasesCreated = 0;
             
             foreach ($terms as $term) {
                 try {
-                    $this->line("Processing term: {$term->terms}");
-                    
                     // Extract allowed phrases from the term
                     $allowedPhrases = NewFrasaNegative::extractAllowedFrasa($term->terms);
                     
                     if (empty($allowedPhrases)) {
-                        $this->line("No valid phrases found in: {$term->terms}");
+                        Log::info("No valid phrases found in: {$term->terms}");
                         continue;
                     }
                     
@@ -98,19 +94,19 @@ class ProcessIndividualPhrasesCommand extends Command
                     }
                     
                     $totalPhrasesCreated += $phrasesCreated;
-                    $this->info("Created {$phrasesCreated} new phrases from: {$term->terms}");
+                    // Log::info("Created {$phrasesCreated} new phrases from: {$term->terms}");
                     
                 } catch (Exception $e) {
-                    $this->error("Error processing term '{$term->terms}': " . $e->getMessage());
+                    Log::error("Error processing term '{$term->terms}': " . $e->getMessage());
                 }
             }
             
-            $this->info("Phrase extraction completed. Total new phrases created: {$totalPhrasesCreated}");
-            $this->info('Google Ads input removed. Use negative-keywords:input-velocity to submit phrases.');
+            Log::info("Phrase extraction completed. Total new phrases created: {$totalPhrasesCreated}");
+            Log::info('Google Ads input removed. Use negative-keywords:input-velocity to submit phrases.');
             return 0;
             
         } catch (Exception $e) {
-            $this->error("Error during phrase processing: " . $e->getMessage());
+            Log::error("Error during phrase processing: " . $e->getMessage());
             return 1;
         }
     }

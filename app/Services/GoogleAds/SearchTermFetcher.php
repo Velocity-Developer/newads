@@ -97,11 +97,12 @@ class SearchTermFetcher
                 }
             }
 
-            Log::debug('📊Zero-click API payload', [
-                'top_level_keys' => array_keys($data),
-                'items_count' => is_array($items) ? count($items) : 0,
-                'first_item_keys' => (is_array($items) && isset($items[0]) && is_array($items[0])) ? array_keys($items[0]) : null,
-            ]);
+            // Log struktur data untuk debugging
+            // Log::debug('📊Zero-click API payload', [
+            //     'top_level_keys' => array_keys($data),
+            //     'items_count' => is_array($items) ? count($items) : 0,
+            //     'first_item_keys' => (is_array($items) && isset($items[0]) && is_array($items[0])) ? array_keys($items[0]) : null,
+            // ]);
 
             // Normalisasi data ke bentuk ['search_term' => string]
             $normalized = [];
