@@ -7,6 +7,7 @@ use App\Services\GoogleAds\SearchTermFetcher;
 use App\Services\Telegram\NotificationService;
 use App\Models\NewTermsNegative0Click;
 use App\Models\NewFrasaNegative;
+use Illuminate\Support\Facades\Log;
 use Exception;
 
 class ProcessIndividualPhrasesCommand extends Command

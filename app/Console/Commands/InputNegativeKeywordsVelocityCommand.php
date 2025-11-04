@@ -7,6 +7,7 @@ use App\Services\Velocity\NegativeKeywordInputService;
 use App\Models\NewTermsNegative0Click;
 use App\Models\NewFrasaNegative;
 use App\Services\Telegram\NotificationService;
+use Illuminate\Support\Facades\Log;
 
 class InputNegativeKeywordsVelocityCommand extends Command
 {

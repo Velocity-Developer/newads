@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Log;
 
 // Heartbeat: mencatat waktu eksekusi scheduler setiap menit
 Schedule::call(function () {
-    // Log::channel('schedule')->info('Schedule ini dijalankan pada jam: ' . now()->setTimezone('Asia/Jakarta')->format('Y-m-d H:i:s'));
+    Log::channel('schedule')->info('Schedule ini dijalankan pada jam: ' . now()->setTimezone('Asia/Jakarta')->format('Y-m-d H:i:s'));
     // Log::channel('telegram')->info('Schedule ini dijalankan pada jam: ' . now()->setTimezone('Asia/Jakarta')->format('Y-m-d H:i:s'));
     // Log::channel('schedule')->info('Versi Laravel: ' . app()->version());
     // Log::channel('telegram')->info('Versi Laravel: ' . app()->version());

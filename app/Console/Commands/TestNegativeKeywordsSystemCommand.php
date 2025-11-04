@@ -8,6 +8,7 @@ use App\Services\AI\TermAnalyzer;
 use App\Services\Telegram\NotificationService;
 use App\Models\NewTermsNegative0Click;
 use App\Models\NewFrasaNegative;
+use Illuminate\Support\Facades\Log;
 use Exception;
 
 class TestNegativeKeywordsSystemCommand extends Command

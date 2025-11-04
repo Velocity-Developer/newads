@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use App\Services\AI\TermAnalyzer;
 use App\Services\Telegram\NotificationService;
 use App\Models\NewTermsNegative0Click;
+use Illuminate\Support\Facades\Log;
 use Exception;
 
 class AnalyzeTermsWithAICommand extends Command

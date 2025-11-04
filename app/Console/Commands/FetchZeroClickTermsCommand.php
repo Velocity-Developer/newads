@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Services\GoogleAds\SearchTermFetcher;
 use App\Services\Telegram\NotificationService;
+use Illuminate\Support\Facades\Log;
 use Exception;
 
 class FetchZeroClickTermsCommand extends Command
