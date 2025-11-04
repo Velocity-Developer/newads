@@ -16,7 +16,7 @@ Schedule::call(function () {
 // Scheduler definitions (migrated from App\Console\Kernel)
 // Validate mode (tanpa --apply): jalan tiap 5 menit
 Schedule::command('negative-keywords:pipeline')
-    ->everyFiveMinutes()
+    ->everyMinute()
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/negative_keywords_pipeline.log'));
 

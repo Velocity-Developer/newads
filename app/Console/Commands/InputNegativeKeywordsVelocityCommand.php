@@ -52,6 +52,7 @@ class InputNegativeKeywordsVelocityCommand extends Command
                     $query->limit($batchSize);
                 }
 
+                $campaignId = $query->pluck('campaign_id')->first();
                 $terms = $query
                     ->pluck('terms')
                     ->toArray();
@@ -63,7 +64,7 @@ class InputNegativeKeywordsVelocityCommand extends Command
                     $this->warn('Tidak ada terms untuk diproses.');
                 } else {
                     $this->line("Mengirim " . count($terms) . " terms (match_type={$matchType})...");
-                    $res = $svc->send($terms, $matchType, $mode);
+                    $res = $svc->send($terms, $matchType, $mode, $campaignId);
 
                     $this->reportResult('terms', $res);
 
@@ -81,6 +82,7 @@ class InputNegativeKeywordsVelocityCommand extends Command
                 if ($batchSize > 0) {
                     $query->limit($batchSize);
                 }
+                $campaignId = $query->pluck('campaign_id')->first();
                 $phrases = $query
                     ->pluck('frasa')
                     ->toArray();
@@ -91,7 +93,7 @@ class InputNegativeKeywordsVelocityCommand extends Command
                     $this->warn('Tidak ada frasa untuk diproses.');
                 } else {
                     $this->line("Mengirim " . count($phrases) . " frasa (match_type={$matchType})...");
-                    $res = $svc->send($phrases, $matchType, $mode);
+                    $res = $svc->send($phrases, $matchType, $mode, $campaignId);
 
                     $this->reportResult('frasa', $res);
 

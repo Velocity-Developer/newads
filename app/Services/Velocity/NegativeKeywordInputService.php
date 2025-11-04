@@ -36,14 +36,33 @@ class NegativeKeywordInputService
      * @param string $mode 'validate' atau 'execute'
      * @return array {success: bool, status: int|null, json: mixed|null, error: string|null}
      */
-    public function send(array $terms, string $matchType, string $mode = 'validate'): array
+    public function send(array $terms, string $matchType, string $mode = 'validate', ?string $campaignId = null): array
     {
         $terms = array_values(array_filter(array_map('strval', $terms), fn($t) => trim($t) !== ''));
         if (empty($terms)) {
             return ['success' => false, 'status' => null, 'json' => null, 'error' => 'No terms provided'];
         }
 
+        // Normalisasi campaign_id: terima '0' sebagai valid
+        $campaignIdNormalized = null;
+        if ($campaignId !== null && $campaignId !== '') {
+            if (is_numeric($campaignId)) {
+                $campaignIdNormalized = (int) $campaignId;
+            } else {
+                Log::warning('Invalid campaign_id provided, ignoring', ['campaign_id' => $campaignId]);
+            }
+        }
+
         $url = rtrim($this->inputApiUrl, '?&'); // jangan taruh mode di query
+
+        // Logging ringan sebelum kirim
+        Log::info('Sending negative keywords to Velocity', [
+            'count' => count($terms),
+            'match_type' => strtoupper($matchType),
+            'mode' => strtolower($mode),
+            'campaign_id' => $campaignIdNormalized,
+            'sample_terms' => array_slice($terms, 0, 3),
+        ]);
 
         $headers = [
             'Accept' => 'application/json',
@@ -77,6 +96,13 @@ class NegativeKeywordInputService
                 'match_type' => strtoupper($matchType),
                 'mode' => strtolower($mode),
             ];
+
+            // Tambahkan campaign_id terpisah jika tersedia (termasuk 0)
+            if ($campaignIdNormalized !== null) {
+                $form['campaign_id'] = $campaignIdNormalized;
+            }
+
+            // Terms murni (tanpa prefix)
             foreach ($terms as $t) {
                 $form['terms'][] = $t;
             }

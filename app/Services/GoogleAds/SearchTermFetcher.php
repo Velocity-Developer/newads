@@ -97,7 +97,7 @@ class SearchTermFetcher
                 }
             }
 
-            Log::debug('Zero-click API payload', [
+            Log::debug('📊Zero-click API payload', [
                 'top_level_keys' => array_keys($data),
                 'items_count' => is_array($items) ? count($items) : 0,
                 'first_item_keys' => (is_array($items) && isset($items[0]) && is_array($items[0])) ? array_keys($items[0]) : null,
@@ -141,7 +141,7 @@ class SearchTermFetcher
                 $normalized = array_slice($normalized, 0, $limit);
             }
 
-            Log::info('Fetched zero-click terms (external API)', [
+            Log::info('📊Fetched zero-click terms (external API)', [
                 'total_results' => count($normalized),
                 'rejected' => $rejectedCount,
                 'api_url' => $apiUrl,
@@ -149,7 +149,7 @@ class SearchTermFetcher
 
             return $normalized;
         } catch (\Exception $e) {
-            Log::error('Failed to fetch zero-click terms (external API)', [
+            Log::error('❌Failed to fetch zero-click terms (external API)', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -164,30 +164,30 @@ class SearchTermFetcher
     {
         $t = trim($term);
         if ($t === '') {
-            $reason = 'empty after trim';
+            $reason = '❌empty after trim';
             return false;
         }
         if (strlen($t) > 500) {
-            $reason = 'too long (>500 chars)';
+            $reason = '❌too long (>500 chars)';
             return false;
         }
         // Tolak jika hanya angka dan tanda tanggal
         if (preg_match('/^[0-9:\\-\\/\\s]+$/', $t)) {
-            $reason = 'digits/date-like only';
+            $reason = '❌digits/date-like only';
             return false;
         }
         // Tolak format ISO / umum lokal
         if (preg_match('/^\\d{4}-\\d{2}-\\d{2}(?:[ T]\\d{2}:\\d{2}(?::\\d{2})?)?$/', $t)) {
-            $reason = 'ISO date/time';
+            $reason = '❌ISO date/time';
             return false;
         }
         if (preg_match('/^\\d{1,2}\\/\\d{1,2}\\/\\d{2,4}(?:\\s+\\d{1,2}:\\d{2}(?:\\s*[AP]M)?)?$/i', $t)) {
-            $reason = 'local date/time';
+            $reason = '❌local date/time';
             return false;
         }
         // Wajib ada minimal satu huruf
         if (!preg_match('/[A-Za-zÀ-ÖØ-öø-ÿ]/', $t)) {
-            $reason = 'no letters';
+            $reason = '❌no letters';
             return false;
         }
         $reason = null;
@@ -205,14 +205,14 @@ class SearchTermFetcher
             $searchTerm = $termData['search_term'] ?? '';
             $searchTerm = trim($searchTerm);
             if ($searchTerm === '') {
-                Log::debug('Skip empty term after trim');
+                Log::debug('❌Skip empty term after trim');
                 continue;
             }
 
             // Validasi format term, log alasan jika tidak valid
             $reason = null;
             if (!$this->isValidSearchTerm($searchTerm, $reason)) {
-                Log::warning('Skip invalid search term', [
+                Log::warning('❌Skip invalid search term', [
                     'term' => $searchTerm,
                     'reason' => $reason,
                 ]);
@@ -222,7 +222,7 @@ class SearchTermFetcher
             // Skip jika duplikat (exact match), log agar terlihat di monitoring
             if (NewTermsNegative0Click::where('terms', $searchTerm)->exists()) {
                 $campaignIdForLog = $termData['campaign_id'] ?? null;
-                Log::info('Skip duplicate search term', [
+                Log::info('❌Skip duplicate search term', [
                     'term' => $searchTerm,
                     'campaign_id' => is_numeric($campaignIdForLog) ? (int)$campaignIdForLog : null,
                 ]);
