@@ -32,6 +32,7 @@ const emit = defineEmits<{ (e: 'saved'): void }>();
 
 const isOpen = ref(false);
 const isSubmitting = ref(false);
+const errorMessage = ref<string | null>(null);
 
 // Prefill values for edit mode
 const initialWord = computed(() => (props.mode === 'edit' ? props.item?.word ?? '' : ''));
@@ -49,9 +50,15 @@ watch(
     word.value = initialWord.value;
     active.value = initialActive.value;
     notes.value = initialNotes.value;
+    errorMessage.value = null;
   },
   { immediate: true }
 );
+
+// Bersihkan error saat user mengetik ulang
+watch(word, () => {
+  if (errorMessage.value) errorMessage.value = null;
+});
 
 const resetForm = () => {
   word.value = '';
@@ -59,10 +66,17 @@ const resetForm = () => {
   notes.value = '';
 };
 
+const onCancel = () => {
+  resetForm();
+  errorMessage.value = null;
+  isOpen.value = false;
+};
+
 const submit = () => {
   if (!word.value.trim()) return;
 
   isSubmitting.value = true;
+  errorMessage.value = null;
 
   if (props.mode === 'create') {
     router.post(
@@ -80,6 +94,11 @@ const submit = () => {
           resetForm();
           isOpen.value = false;
           emit('saved');
+        },
+        onError: (errors: Record<string, any>) => {
+          // Tangkap error validasi dari server (mis. "Kata sudah ada")
+          const e = errors?.word;
+          errorMessage.value = Array.isArray(e) ? e[0] : (e || 'Gagal menyimpan kata.');
         },
       }
     );
@@ -100,6 +119,10 @@ const submit = () => {
           isOpen.value = false;
           emit('saved');
         },
+        onError: (errors: Record<string, any>) => {
+          const e = errors?.word;
+          errorMessage.value = Array.isArray(e) ? e[0] : (e || 'Gagal menyimpan kata.');
+        },
       }
     );
   }
@@ -113,7 +136,7 @@ const submit = () => {
         <Plus class="mr-2 h-4 w-4" />
         Tambah Kata
       </Button>
-      <Button v-else class="px-2 py-1 bg-[#007bff] text-white">
+      <Button v-else class="px-2 py-1 bg-[#1d2675] text-white">
         <Pen class="h-4 w-4" /></Button>
     </DialogTrigger>
 
@@ -124,6 +147,11 @@ const submit = () => {
           Input case-insensitive ("Halo" dan "halo" dianggap sama).
         </DialogDescription>
       </DialogHeader>
+
+      <!-- Alert error dari server -->
+      <div v-if="errorMessage" class="mb-3 rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+        {{ errorMessage }}
+      </div>
 
       <div class="grid gap-4">
         <div class="space-y-2">
@@ -150,7 +178,7 @@ const submit = () => {
       </div>
 
       <DialogFooter>
-        <Button variant="outline" @click="isOpen = false">
+        <Button variant="outline" @click="onCancel">
             <X class="mr-2 h-4 w-4" /> Batal
         </Button>
         <Button :disabled="isSubmitting || !word.trim()" @click="submit">

@@ -89,7 +89,8 @@ class ProcessIndividualPhrasesCommand extends Command
                                 'parent_term_id' => $term->id,
                                 'status_input_google' => null,
                                 'retry_count' => 0,
-                                'notif_telegram' => null
+                                'notif_telegram' => null,
+                                'campaign_id' => $term->campaign_id, // propagate campaign_id
                             ]);
                             
                             $phrasesCreated++;

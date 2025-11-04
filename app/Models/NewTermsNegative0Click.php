@@ -27,10 +27,12 @@ class NewTermsNegative0Click extends Model
         'status_input_google',
         'retry_count',
         'notif_telegram',
+        'campaign_id',
     ];
     
     protected $casts = [
         'retry_count' => 'integer',
+        'campaign_id' => 'integer',
     ];
     
     // Konstanta untuk enum values

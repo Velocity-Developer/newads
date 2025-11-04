@@ -107,47 +107,33 @@ class SearchTermFetcher
             $normalized = [];
             $rejectedCount = 0;
 
-            foreach ($items as $item) {
+            foreach ($items as $it) {
                 $term = '';
-
-                if (is_string($item)) {
-                    $reason = null;
-                    if ($this->isValidSearchTerm($item, $reason)) {
-                        $term = $item;
-                    } else {
-                        $rejectedCount++;
-                        Log::debug('Rejected search term', ['term' => $item, 'reason' => $reason]);
-                    }
-                } elseif (is_array($item)) {
-                    $candidates = [
-                        $item['search_term'] ?? null,
-                        $item['keyword'] ?? null,
-                        $item['term'] ?? null,
-                        $item['query'] ?? null,
-                        $item['text'] ?? null,
-                    ];
-
-                    $matched = false;
-                    foreach ($candidates as $cand) {
-                        if (is_string($cand)) {
-                            $reason = null;
-                            if ($this->isValidSearchTerm($cand, $reason)) {
-                                $term = $cand;
-                                $matched = true;
-                                break;
-                            } else {
-                                Log::debug('Rejected candidate from item', ['term' => $cand, 'reason' => $reason]);
-                            }
-                        }
-                    }
-                    if (!$matched) {
-                        $rejectedCount++;
-                    }
+                if (is_string($it)) {
+                    $term = $it;
+                } elseif (is_array($it)) {
+                    $term = $it['search_term'] ?? $it['term'] ?? $it['query'] ?? '';
                 }
 
-                if (!empty($term)) {
-                    $normalized[] = ['search_term' => $term];
+                $term = is_string($term) ? trim($term) : '';
+                if ($term === '') {
+                    $rejectedCount++;
+                    continue;
                 }
+
+                // Try to carry campaign_id if available in payload
+                $campaignId = null;
+                if (is_array($it)) {
+                    $campaignId = $it['campaign_id']
+                        ?? $it['campaignId']
+                        ?? ($it['campaign']['id'] ?? null)
+                        ?? null;
+                }
+
+                $normalized[] = [
+                    'search_term' => $term,
+                    'campaign_id' => is_numeric($campaignId) ? (int)$campaignId : null,
+                ];
             }
 
             // Batasi jumlah jika perlu
@@ -217,19 +203,34 @@ class SearchTermFetcher
         
         foreach ($terms as $termData) {
             $searchTerm = $termData['search_term'] ?? '';
-            // Log::debug('Processing term', ['term' => $searchTerm]);
-            
             $searchTerm = trim($searchTerm);
             if ($searchTerm === '') {
                 Log::debug('Skip empty term after trim');
                 continue;
             }
-            
-            // Skip if term already exists (exact match on trimmed value)
-            if (NewTermsNegative0Click::where('terms', $searchTerm)->exists()) {
+
+            // Validasi format term, log alasan jika tidak valid
+            $reason = null;
+            if (!$this->isValidSearchTerm($searchTerm, $reason)) {
+                Log::warning('Skip invalid search term', [
+                    'term' => $searchTerm,
+                    'reason' => $reason,
+                ]);
                 continue;
             }
-            
+        
+            // Skip jika duplikat (exact match), log agar terlihat di monitoring
+            if (NewTermsNegative0Click::where('terms', $searchTerm)->exists()) {
+                $campaignIdForLog = $termData['campaign_id'] ?? null;
+                Log::info('Skip duplicate search term', [
+                    'term' => $searchTerm,
+                    'campaign_id' => is_numeric($campaignIdForLog) ? (int)$campaignIdForLog : null,
+                ]);
+                continue;
+            }
+        
+            $campaignId = $termData['campaign_id'] ?? null;
+        
             try {
                 NewTermsNegative0Click::create([
                     'terms' => $searchTerm,
@@ -237,14 +238,20 @@ class SearchTermFetcher
                     'status_input_google' => null,
                     'retry_count' => 0,
                     'notif_telegram' => null,
+                    'campaign_id' => is_numeric($campaignId) ? (int)$campaignId : null,
                 ]);
-                
+        
                 $stored++;
-                
-            } catch (\Exception $e) {
-                Log::error('Failed to store term', [
+            } catch (\Throwable $e) {
+                Log::error('Failed to store zero-click term', [
                     'term' => $searchTerm,
-                    'error' => $e->getMessage()
+                    'campaign_id' => is_numeric($campaignId) ? (int)$campaignId : null,
+                    'exception_class' => get_class($e),
+                    'exception_code' => $e->getCode(),
+                    'error' => $e->getMessage(),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                    'trace' => $e->getTraceAsString(),
                 ]);
             }
         }

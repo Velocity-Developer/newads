@@ -29,11 +29,13 @@ class NewFrasaNegative extends Model {
         'hasil_cek_ai',
         'retry_count',
         'notif_telegram',
+        'campaign_id',
     ];
     
     protected $casts = [
         'retry_count' => 'integer',
         'parent_term_id' => 'integer',
+        'campaign_id' => 'integer',
     ];
     
     // Konstanta untuk enum values

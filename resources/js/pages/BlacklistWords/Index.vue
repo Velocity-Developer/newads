@@ -60,7 +60,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 // Badge variant untuk status
 const getStatusBadgeVariant = (active: boolean) => {
-  return active ? 'default' : 'secondary';
+  return active ? 'success' : 'secondary';
 };
 
 const formatDate = (dateString: string) => {
@@ -219,7 +219,7 @@ function importLocal() {
 
                       <!-- Hapus -->
                       <button 
-                        class="p-2 bg-yellow-500 text-white rounded hover:bg-yellow-600" 
+                        class="p-3 bg-[#333333] text-white rounded hover:bg-[#000000]" 
                         @click="removeWord(item)"
                         aria-label="Delete"
                       >
