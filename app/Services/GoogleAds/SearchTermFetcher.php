@@ -52,14 +52,34 @@ class SearchTermFetcher
                 ]);
             }
 
+            // Log pre-call agar terlihat di produksi
+            Log::info('🌐 Calling external zero-click API', [
+                'url' => $apiUrl,
+                'token_present' => !empty($apiToken),
+            ]);
+
             $response = $request->get($apiUrl);
 
             if (!$response->successful()) {
+                // Log detail status + cuplikan body untuk diagnosa cepat
+                Log::error('❌ External API HTTP error', [
+                    'url' => $apiUrl,
+                    'status' => $response->status(),
+                    'body_excerpt' => mb_substr((string) $response->body(), 0, 500),
+                    'headers' => $response->headers(),
+                ]);
                 throw new \Exception('External API error: HTTP ' . $response->status());
             }
 
+            $body = (string) $response->body();
             $data = $response->json();
+
             if (!is_array($data)) {
+                Log::error('❌ Invalid JSON response from external API', [
+                    'url' => $apiUrl,
+                    'content_type' => $response->header('Content-Type'),
+                    'body_excerpt' => mb_substr($body, 0, 500),
+                ]);
                 throw new \Exception('Invalid response format from external API');
             }
 

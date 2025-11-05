@@ -43,6 +43,14 @@ class FetchZeroClickTermsCommand extends Command
         
         try {
             $limit = (int) $this->option('limit');
+
+            // Tambahkan visibilitas konfigurasi sebelum fetch
+            $cfg = $this->searchTermFetcher->getConfig();
+            Log::info('🔍 Preflight fetch zero-click terms', [
+                'limit' => $limit,
+                'api_url' => $cfg['api_url'] ?? null,
+                'token_present' => !empty($cfg['api_token']),
+            ]);
             
             // Fetch zero-click terms
             $terms = $this->searchTermFetcher->fetchZeroClickTerms($limit);
@@ -62,8 +70,15 @@ class FetchZeroClickTermsCommand extends Command
             
             return 0;
             
-        } catch (Exception $e) {
-            Log::error("Error fetching zero-click terms: " . $e->getMessage());
+        } catch (\Throwable $e) {
+            Log::error("❌ Error fetching zero-click terms", [
+                'exception_class' => get_class($e),
+                'code' => $e->getCode(),
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+            Log::error($e->getTraceAsString());
             return 1;
         }
     }
