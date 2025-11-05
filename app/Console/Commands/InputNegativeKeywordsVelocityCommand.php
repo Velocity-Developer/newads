@@ -20,13 +20,57 @@ class InputNegativeKeywordsVelocityCommand extends Command
 
     public function handle()
     {
-        $source = strtolower((string)$this->option('source') ?? '');
-        $mode = strtolower((string)$this->option('mode') ?? 'validate');
+        $source = strtolower($this->option('source') ?? 'terms');
+        $mode = strtolower($this->option('mode') ?? 'validate');
+
+        // Bangun query sesuai sumber, sertakan campaign_id untuk pengelompokan
+        if ($source === 'terms') {
+            $query = \App\Models\NewTermsNegative0Click::query()
+                ->select(['terms', 'campaign_id'])
+                ->whereNotNull('terms');
+        } else {
+            $query = \App\Models\NewFrasaNegative::query()
+                ->select(['frasa as terms', 'campaign_id'])
+                ->whereNotNull('frasa');
+        }
+
+        $rows = $query->get();
+
+        // Kelompokkan per campaign_id (termasuk null)
+        $groups = $rows->groupBy(function ($row) {
+            return $row->campaign_id === null ? 'null' : (string)$row->campaign_id;
+        });
+
+        $service = app(\App\Services\Velocity\NegativeKeywordInputService::class);
+        $matchType = $service->getMatchTypeForSource($source);
+
+        foreach ($groups as $cidKey => $group) {
+            $terms = $group->pluck('terms')
+                ->map(fn($t) => trim((string)$t))
+                ->filter(fn($t) => $t !== '')
+                ->values()
+                ->all();
+
+            if (empty($terms)) {
+                continue;
+            }
+
+            // Cast aman: 0 valid, hindari empty()
+            $campaignId = $cidKey === 'null' ? null : (int)$cidKey;
+
+            $result = $service->send($terms, $matchType, $mode, $campaignId);
+
+            if ($result['success']) {
+                $this->info("Sent " . count($terms) . " {$source} to Velocity (campaign_id=" . ($campaignId ?? 'null') . ")");
+            } else {
+                $this->error("Failed sending {$source} (campaign_id=" . ($campaignId ?? 'null') . "): " . ($result['error'] ?? 'unknown'));
+            }
+        }
         $batchSize = (int)$this->option('batch-size');
 
         $svc = new NegativeKeywordInputService();
         $notifier = app(\App\Services\Telegram\NotificationService::class);
-        
+
         $sources = [];
         if ($source === 'terms' || $source === '') {
             $sources[] = 'terms';
@@ -217,6 +261,6 @@ class InputNegativeKeywordsVelocityCommand extends Command
         }
 
         $notifier->sendMessage($message);
-        Log::info($message);
+        // Log::info($message);
     }
 }

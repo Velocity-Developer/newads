@@ -26,13 +26,17 @@ class BlacklistWordController extends Controller
         $perPage = $request->input('per_page', 15);
         $perPage = in_array($perPage, [10, 15, 25, 50, 100]) ? $perPage : 15;
 
-        $items = $query->orderBy('word')->paginate($perPage)->withQueryString();
+        $items = $query->orderBy($request->get('sort_by', 'id'), $request->get('sort_order', 'desc'))
+            ->paginate($perPage)
+            ->withQueryString();
 
         return Inertia::render('BlacklistWords/Index', [
             'items' => $items,
             'filters' => [
                 'active' => $request->input('active'),
                 'q' => $request->input('q'),
+                'sort_by' => $request->get('sort_by', 'id'),
+                'sort_order' => $request->get('sort_order', 'desc'),
             ],
         ]);
     }

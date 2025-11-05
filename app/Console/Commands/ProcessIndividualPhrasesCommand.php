@@ -70,7 +70,7 @@ class ProcessIndividualPhrasesCommand extends Command
                     $allowedPhrases = NewFrasaNegative::extractAllowedFrasa($term->terms);
                     
                     if (empty($allowedPhrases)) {
-                        Log::info("No valid phrases found in: {$term->terms}");
+                        // Log::info("No valid phrases found in: {$term->terms}");
                         continue;
                     }
                     
@@ -103,7 +103,7 @@ class ProcessIndividualPhrasesCommand extends Command
             }
             
             Log::info("Phrase extraction completed. Total new phrases created: {$totalPhrasesCreated}");
-            Log::info('Google Ads input removed. Use negative-keywords:input-velocity to submit phrases.');
+            // Log::info('Google Ads input removed. Use negative-keywords:input-velocity to submit phrases.');
             return 0;
             
         } catch (Exception $e) {

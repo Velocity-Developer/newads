@@ -40,7 +40,7 @@ class AnalyzePhrasesWithAICommand extends Command
         $indonesia = 0;
 
         foreach ($items as $item) {
-            Log::info("Menganalisis: {$item->frasa}");
+            // Log::info("Menganalisis: {$item->frasa}");
 
             if ($showRaw) {
                 $raw = $analyzer->analyzeFrasaRaw($item->frasa);
