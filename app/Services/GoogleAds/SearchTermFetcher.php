@@ -243,10 +243,10 @@ class SearchTermFetcher
             // Skip jika duplikat (exact match), log agar terlihat di monitoring
             if (NewTermsNegative0Click::where('terms', $searchTerm)->exists()) {
                 $campaignIdForLog = $termData['campaign_id'] ?? null;
-                Log::info('❌Skip duplicate search term', [
-                    'term' => $searchTerm,
-                    'campaign_id' => is_numeric($campaignIdForLog) ? (int)$campaignIdForLog : null,
-                ]);
+                // Log::info('❌Skip duplicate search term', [
+                //     'term' => $searchTerm,
+                //     'campaign_id' => is_numeric($campaignIdForLog) ? (int)$campaignIdForLog : null,
+                // ]);
                 continue;
             }
         

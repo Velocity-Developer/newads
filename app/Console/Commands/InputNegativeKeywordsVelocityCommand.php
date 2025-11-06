@@ -159,12 +159,12 @@ class InputNegativeKeywordsVelocityCommand extends Command
         $validateOnly = $data['validate_only'] ?? null;
 
         if ($success) {
-            Log::info("✅ Berhasil Input Negative Keywords!");
-            Log::info("Status API: {$status}");
-            if ($count !== null) Log::info("Jumlah: {$count}");
-            if ($matchType !== null) Log::info("Match type (API): {$matchType}");
-            if ($validateOnly !== null) Log::info("Validate only: " . ($validateOnly ? 'true' : 'false'));
-            if ($campaignId !== null) Log::info("Campaign ID: {$campaignId}");
+            // Log::info("✅ Berhasil Input Negative Keywords!");
+            // Log::info("Status API: {$status}");
+            // if ($count !== null) Log::info("Jumlah: {$count}");
+            // if ($matchType !== null) Log::info("Match type (API): {$matchType}");
+            // if ($validateOnly !== null) Log::info("Validate only: " . ($validateOnly ? 'true' : 'false'));
+            // if ($campaignId !== null) Log::info("Campaign ID: {$campaignId}");
         } else {
             $error = $res['error'] ?? 'Unknown error';
             Log::error("❌ Gagal Input Negative Keywords: {$error}");

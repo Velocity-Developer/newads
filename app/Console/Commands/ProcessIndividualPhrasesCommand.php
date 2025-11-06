@@ -102,7 +102,7 @@ class ProcessIndividualPhrasesCommand extends Command
                 }
             }
             
-            Log::info("Phrase extraction completed. Total new phrases created: {$totalPhrasesCreated}");
+            // Log::info("Phrase extraction completed. Total new phrases created: {$totalPhrasesCreated}");
             // Log::info('Google Ads input removed. Use negative-keywords:input-velocity to submit phrases.');
             return 0;
             
