@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Services\GoogleAds\SearchTermFetcher;
 use App\Services\Telegram\NotificationService;
+use Illuminate\Support\Facades\Log;
 use Exception;
 
 class FetchZeroClickTermsCommand extends Command
@@ -42,6 +43,14 @@ class FetchZeroClickTermsCommand extends Command
         
         try {
             $limit = (int) $this->option('limit');
+
+            // Tambahkan visibilitas konfigurasi sebelum fetch
+            $cfg = $this->searchTermFetcher->getConfig();
+            Log::info('🔍 Preflight fetch zero-click terms', [
+                'limit' => $limit,
+                'api_url' => $cfg['api_url'] ?? null,
+                'token_present' => !empty($cfg['api_token']),
+            ]);
             
             // Fetch zero-click terms
             $terms = $this->searchTermFetcher->fetchZeroClickTerms($limit);
@@ -62,8 +71,14 @@ class FetchZeroClickTermsCommand extends Command
             return 0;
             
         } catch (Exception $e) {
-            $this->error("Error fetching zero-click terms: " . $e->getMessage());
-            
+            Log::error("❌ Error fetching zero-click terms", [
+                'exception_class' => get_class($e),
+                'code' => $e->getCode(),
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+            Log::error($e->getTraceAsString());
             // Send error notification
             // $this->notificationService->notifySystemError(
             //     'Fetch Zero-Click Terms',
