@@ -14,20 +14,14 @@ Schedule::call(function () {
 })->everyMinute();
 
 // Scheduler definitions (migrated from App\Console\Kernel)
-// Validate mode (tanpa --apply): jalan tiap 5 menit
+// Validate mode (tanpa --apply): jalan tiap 10 menit
 Schedule::command('negative-keywords:pipeline')
-    ->everyFiveMinutes()
+    ->everyTenMinutes()
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/negative_keywords_pipeline.log'));
 
 // Apply mode: contoh 1 (pakai string flag --apply)
 // Schedule::command('negative-keywords:pipeline --apply')
-//     ->everyMinute() // atur sesuai kebutuhan: hourly(), dailyAt('02:00'), dll.
-//     ->withoutOverlapping()
-//     ->appendOutputTo(storage_path('logs/negative_keywords_pipeline_apply.log'));
-
-// Apply mode: contoh 2 (pakai array opsi)
-// Schedule::command('negative-keywords:pipeline', ['--apply' => true])
-//     ->everyMinute()
+//     ->everyTenMinutes() // atur sesuai kebutuhan: hourly(), dailyAt('02:00'), dll.
 //     ->withoutOverlapping()
 //     ->appendOutputTo(storage_path('logs/negative_keywords_pipeline_apply.log'));

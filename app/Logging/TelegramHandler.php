@@ -27,7 +27,7 @@ class TelegramHandler extends AbstractProcessingHandler
 
         $levelName = $record->level->getName();
 
-        $message = "<b>[TEST LOG]</b>\n\n";
+        $message = "<b>[LARAVEL LOG]</b>\n\n";
         $message .= "🔢 <b>Level:</b> {$escape($levelName)}\n";
         $message .= "📝 <b>Message:</b> {$escape((string) $record->message)}\n";
         $message .= "⏰ <b>Time:</b> " . $record->datetime->format('Y-m-d H:i:s');

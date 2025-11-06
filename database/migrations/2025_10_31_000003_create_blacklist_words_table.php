@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
+        if (Schema::hasTable('blacklist_words')) {
+            return; // skip jika tabel sudah ada
+        }
         Schema::create('blacklist_words', function (Blueprint $table) {
             $table->id();
             // Gunakan collation case-sensitive; sesuaikan dengan versi MySQL/MariaDB Anda

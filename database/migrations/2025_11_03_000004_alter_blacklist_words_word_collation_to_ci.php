@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
 return new class extends Migration {
-    public function up(): void
+    public function up()
     {
         // 1) Bersihkan duplikat case-insensitive sebelum ubah kolasi
         //    Keep ID terkecil, hapus sisanya agar unique constraint aman.
@@ -24,11 +24,15 @@ return new class extends Migration {
         }
 
         // 2) Ubah kolom menjadi case-insensitive collation (MySQL 8)
-        DB::statement("
+        // Deteksi dukungan collation 0900 (MySQL 8.0+). Jika tidak tersedia, fallback ke unicode_ci.
+        $supports0900 = \DB::select('SHOW COLLATION LIKE "utf8mb4_0900_ai_ci"');
+        $collation = !empty($supports0900) ? 'utf8mb4_0900_ai_ci' : 'utf8mb4_unicode_ci';
+
+        \DB::statement("
             ALTER TABLE `blacklist_words`
             MODIFY `word` VARCHAR(255)
             CHARACTER SET utf8mb4
-            COLLATE utf8mb4_0900_ai_ci
+            COLLATE utf8mb4_unicode_ci
             NOT NULL
         ");
 
