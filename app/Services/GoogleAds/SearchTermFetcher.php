@@ -15,7 +15,7 @@ class SearchTermFetcher
         $cfg = config('integrations.velocity_ads', []);
 
         return [
-            'api_url' => $cfg['api_url'] ?? 'https://api.velocitydeveloper.com/new/adsfetch/test_dita.php',
+            'api_url' => $cfg['api_url'] ?? 'https://api.velocitydeveloper.com/new/adsfetch/multi_campaign_fetch_terms.php',
             'api_token' => $cfg['api_token'] ?? null,
         ];
     }
