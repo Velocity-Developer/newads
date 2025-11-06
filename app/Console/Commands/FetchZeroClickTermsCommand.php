@@ -46,11 +46,11 @@ class FetchZeroClickTermsCommand extends Command
 
             // Tambahkan visibilitas konfigurasi sebelum fetch
             $cfg = $this->searchTermFetcher->getConfig();
-            Log::info('🔍 Preflight fetch zero-click terms', [
-                'limit' => $limit,
-                'api_url' => $cfg['api_url'] ?? null,
-                'token_present' => !empty($cfg['api_token']),
-            ]);
+            // Log::info('🔍 Preflight fetch zero-click terms', [
+            //     'limit' => $limit,
+            //     'api_url' => $cfg['api_url'] ?? null,
+            //     'token_present' => !empty($cfg['api_token']),
+            // ]);
             
             // Fetch zero-click terms
             $terms = $this->searchTermFetcher->fetchZeroClickTerms($limit);

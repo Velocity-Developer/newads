@@ -81,66 +81,82 @@ class InputNegativeKeywordsVelocityCommand extends Command
 
         foreach ($sources as $src) {
             if ($src === 'terms') {
-                // Preflight (validate) dan execute memakai filter IDENTIK (strict)
                 $query = NewTermsNegative0Click::needsGoogleAdsInput()
-                    ->where('retry_count', '<', 3);
-
-                // Log::info('Debug: candidates (terms) = ' . $query->count());
+                    ->where('retry_count', '<', 3)
+                    ->select(['terms', 'campaign_id']);
 
                 if ($batchSize > 0) {
                     $query->limit($batchSize);
                 }
 
-                $campaignId = $query->pluck('campaign_id')->first();
-                $terms = $query
-                    ->pluck('terms')
-                    ->toArray();
-                
-                // Log::info('Debug: sample terms = ' . implode(', ', array_slice($terms, 0, 5)));
+                $rows = $query->get();
+
+                // Kelompokkan per campaign_id (termasuk null)
+                $groups = $rows->groupBy(function ($row) {
+                    return $row->campaign_id === null ? 'null' : (string)$row->campaign_id;
+                });
 
                 $matchType = $svc->getMatchTypeForSource('terms');
 
-                if (empty($terms)) {
-                    Log::warning('Tidak ada terms untuk diproses.');
-                } else {
-                    // Log::info("Mengirim " . count($terms) . " terms (match_type={$matchType})...");
+                foreach ($groups as $cidKey => $group) {
+                    $terms = $group->pluck('terms')
+                        ->map(fn($t) => trim((string)$t))
+                        ->filter(fn($t) => $t !== '')
+                        ->unique()
+                        ->values()
+                        ->all();
+
+                    if (empty($terms)) {
+                        continue;
+                    }
+
+                    $campaignId = $cidKey === 'null' ? null : (int)$cidKey;
+
                     $res = $svc->send($terms, $matchType, $mode, $campaignId);
 
                     $this->reportResult('terms', $res);
-
-                    // Kirim notifikasi Telegram untuk terms
                     $this->notifyTelegram($notifier, 'terms', $terms, $matchType, $mode, $res);
-
-                    $this->updateStatusesForTerms($terms, $res['success']);
+                    $this->updateStatusesForTerms($terms, $res['success'], $campaignId);
                 }
             }
 
             if ($src === 'frasa') {
                 $query = NewFrasaNegative::needsGoogleAdsInput()
-                    ->where('retry_count', '<', 3);
-                // Log::info('Debug: candidates (frasa) = ' . $query->count());
+                    ->where('retry_count', '<', 3)
+                    ->select(['frasa', 'campaign_id']);
+
                 if ($batchSize > 0) {
                     $query->limit($batchSize);
                 }
-                $campaignId = $query->pluck('campaign_id')->first();
-                $phrases = $query
-                    ->pluck('frasa')
-                    ->toArray();
+
+                $rows = $query->get();
+
+                // Kelompokkan per campaign_id (termasuk null)
+                $groups = $rows->groupBy(function ($row) {
+                    return $row->campaign_id === null ? 'null' : (string)$row->campaign_id;
+                });
 
                 $matchType = $svc->getMatchTypeForSource('frasa');
 
-                if (empty($phrases)) {
-                    Log::warning('Tidak ada frasa untuk diproses.');
-                } else {
-                    // Log::info("Mengirim " . count($phrases) . " frasa (match_type={$matchType})...");
+                foreach ($groups as $cidKey => $group) {
+                    $phrases = $group->pluck('frasa')
+                        ->map(fn($t) => trim((string)$t))
+                        ->filter(fn($t) => $t !== '')
+                        ->unique()
+                        ->values()
+                        ->all();
+
+                    if (empty($phrases)) {
+                        continue;
+                    }
+
+                    $campaignId = $cidKey === 'null' ? null : (int)$cidKey;
+
                     $res = $svc->send($phrases, $matchType, $mode, $campaignId);
 
                     $this->reportResult('frasa', $res);
-
-                    // Kirim notifikasi Telegram untuk frasa
                     $this->notifyTelegram($notifier, 'frasa', $phrases, $matchType, $mode, $res);
-
-                    $this->updateStatusesForFrasa($phrases, $res['success']);
+                    $this->updateStatusesForFrasa($phrases, $res['success'], $campaignId);
                 }
             }
         }
@@ -172,16 +188,23 @@ class InputNegativeKeywordsVelocityCommand extends Command
         }
     }
 
-    private function updateStatusesForTerms(array $terms, bool $success): void
+    private function updateStatusesForTerms(array $terms, bool $success, ?int $campaignId = null): void
     {
         if ($success) {
-            NewTermsNegative0Click::whereIn('terms', $terms)
-                ->update([
-                    'status_input_google' => NewTermsNegative0Click::STATUS_BERHASIL,
-                    'notif_telegram' => NewTermsNegative0Click::NOTIF_BERHASIL,
-                ]);
+            $q = NewTermsNegative0Click::whereIn('terms', $terms);
+            if (!is_null($campaignId)) {
+                $q->where('campaign_id', $campaignId);
+            }
+            $q->update([
+                'status_input_google' => NewTermsNegative0Click::STATUS_BERHASIL,
+                'notif_telegram' => NewTermsNegative0Click::NOTIF_BERHASIL,
+            ]);
         } else {
-            $rows = NewTermsNegative0Click::whereIn('terms', $terms)->get();
+            $q = NewTermsNegative0Click::whereIn('terms', $terms);
+            if (!is_null($campaignId)) {
+                $q->where('campaign_id', $campaignId);
+            }
+            $rows = $q->get();
             foreach ($rows as $row) {
                 $row->incrementRetry();
                 if ($row->retry_count >= 3) {
@@ -193,16 +216,23 @@ class InputNegativeKeywordsVelocityCommand extends Command
         }
     }
 
-    private function updateStatusesForFrasa(array $phrases, bool $success): void
+    private function updateStatusesForFrasa(array $phrases, bool $success, ?int $campaignId = null): void
     {
         if ($success) {
-            NewFrasaNegative::whereIn('frasa', $phrases)
-                ->update([
-                    'status_input_google' => NewFrasaNegative::STATUS_BERHASIL,
-                    'notif_telegram' => NewFrasaNegative::NOTIF_BERHASIL,
-                ]);
+            $q = NewFrasaNegative::whereIn('frasa', $phrases);
+            if (!is_null($campaignId)) {
+                $q->where('campaign_id', $campaignId);
+            }
+            $q->update([
+                'status_input_google' => NewFrasaNegative::STATUS_BERHASIL,
+                'notif_telegram' => NewFrasaNegative::NOTIF_BERHASIL,
+            ]);
         } else {
-            $rows = NewFrasaNegative::whereIn('frasa', $phrases)->get();
+            $q = NewFrasaNegative::whereIn('frasa', $phrases);
+            if (!is_null($campaignId)) {
+                $q->where('campaign_id', $campaignId);
+            }
+            $rows = $q->get();
             foreach ($rows as $row) {
                 $row->incrementRetry();
                 if ($row->retry_count >= 3) {

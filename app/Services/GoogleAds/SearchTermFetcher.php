@@ -53,10 +53,10 @@ class SearchTermFetcher
             }
 
             // Log pre-call agar terlihat di produksi
-            Log::info('🌐 Calling external zero-click API', [
-                'url' => $apiUrl,
-                'token_present' => !empty($apiToken),
-            ]);
+            // Log::info('🌐 Calling external zero-click API', [
+            //     'url' => $apiUrl,
+            //     'token_present' => !empty($apiToken),
+            // ]);
 
             $response = $request->get($apiUrl);
 
