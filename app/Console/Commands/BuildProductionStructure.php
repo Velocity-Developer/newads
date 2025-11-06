@@ -46,7 +46,7 @@ class BuildProductionStructure extends Command
         elseif ($includeVendor && $includeStorage) $buildType = 'Full Production';
         elseif ($includeVendor) $buildType = 'Production with Vendor';
 
-        Log::info("Building {$buildType} structure...");
+        $this->info("Building {$buildType} structure...");
 
         $distPath = base_path('dist');
         $laravelPath = $distPath.'/laravel';
@@ -59,27 +59,27 @@ class BuildProductionStructure extends Command
         File::makeDirectory($laravelPath, 0755, true, true);
         File::makeDirectory($publicHtmlPath, 0755, true, true);
 
-        Log::info('Created dist directories');
+        $this->info('Created dist directories');
 
         // Copy Laravel files (excluding public directory)
         $this->copyLaravelFiles($laravelPath, $includeVendor, $includeStorage, $minimal);
-        Log::info('Copied Laravel files');
+        $this->info('Copied Laravel files');
 
         // Copy public files to public_html
         $this->copyPublicFiles($publicHtmlPath, $minimal);
-        Log::info('Copied public files to public_html');
+        $this->info('Copied public files to public_html');
 
         // Create public directory in Laravel folder and copy build assets
         $this->createLaravelPublicBuild($laravelPath, $publicHtmlPath);
-        Log::info('Created Laravel public/build directory');
+        $this->info('Created Laravel public/build directory');
 
         // Modify index.php for production structure
         $this->modifyIndexPhpForProduction($publicHtmlPath, $includeVendor);
-        Log::info('Modified index.php for production structure');
+        $this->info('Modified index.php for production structure');
 
         // Create production.zip (output ke dist/zip)
         $this->createZip($distPath, $buildType, $zipDir, $zipOutput, $maxCompress, $includeVendor, $includeStorage, $minimal);
-        Log::info('Created production ZIP');
+        $this->info('Created production ZIP');
 
         // Jika zip-only, hapus folder laravel/ dan public_html/ agar hanya ZIP yang tersisa
         if ($zipOnly) {
@@ -89,7 +89,7 @@ class BuildProductionStructure extends Command
             if (File::exists($publicHtmlPath)) {
                 File::deleteDirectory($publicHtmlPath);
             }
-            Log::info('Removed dist folders; kept only ZIP artifact');
+            $this->info('Removed dist folders; kept only ZIP artifact');
         }
 
         // Show build summary (menunjukkan lokasi ZIP baru)
@@ -100,7 +100,7 @@ class BuildProductionStructure extends Command
 
     private function copyLaravelFiles(string $destination, bool $includeVendor = false, bool $includeStorage = false, bool $minimal = false): void
     {
-        Log::info('Copying essential Laravel files...');
+        $this->info('Copying essential Laravel files...');
 
         // Define essential files and directories to copy
         $essentialPaths = [
@@ -144,7 +144,7 @@ class BuildProductionStructure extends Command
         if ($includeVendor) {
             $vendorPath = $basePath.'/vendor';
             if (File::exists($vendorPath)) {
-                Log::info('Including vendor folder...');
+                $this->info('Including vendor folder...');  
                 $this->copyDirectory($vendorPath, $destination.'/vendor');
             }
         }
@@ -153,11 +153,11 @@ class BuildProductionStructure extends Command
         if ($includeStorage) {
             $storagePath = $basePath.'/storage';
             if (File::exists($storagePath)) {
-                Log::info('Including storage folder...');
+                $this->info('Including storage folder...');
                 $this->copyDirectory($storagePath, $destination.'/storage');
     
                 // Pangkas log dan cache runtime agar artefak produksi tetap kecil
-                Log::info('Pruning storage logs and runtime caches...');
+                $this->info('Pruning storage logs and runtime caches...');
                 $pruneDirs = [
                     'logs',
                     'framework/cache',
@@ -175,7 +175,7 @@ class BuildProductionStructure extends Command
             }
         } else {
             // Create necessary storage directories
-            Log::info('Creating storage directories...');
+            $this->info('Creating storage directories...');
             $storageDirs = [
                 'app/public',
                 'framework/cache/data',
@@ -197,7 +197,7 @@ class BuildProductionStructure extends Command
             File::copy($envProduction, $destination.'/.env');
         }
 
-        Log::info('Essential Laravel files copied successfully');
+        $this->info('Essential Laravel files copied successfully');
     }
 
     private function copyDirectory(string $source, string $destination): void
@@ -287,7 +287,7 @@ class BuildProductionStructure extends Command
         $indexPhpPath = $publicHtmlPath.'/index.php';
 
         if (!File::exists($indexPhpPath)) {
-            Log::error('index.php not found in public_html directory');
+            $this->error('index.php not found in public_html directory');
             return;
         }
 
@@ -489,8 +489,8 @@ class BuildProductionStructure extends Command
         string $zipDir = 'zip'
     ): void
     {
-        Log::info('✅ ' . $buildType . ' build completed successfully!');
-        Log::info('📁 Files created in: ' . $distPath);
+        $this->info('✅ ' . $buildType . ' build completed successfully!');
+        $this->info('📁 Files created in: ' . $distPath);
     
         // Tentukan zip filename dan lokasi baru
         $zipName = $zipOutput ?: ($buildType === 'Production' ? 'production.zip' : strtolower(str_replace(' ', '-', $buildType)).'.zip');
@@ -498,50 +498,50 @@ class BuildProductionStructure extends Command
     
         if (File::exists($zipPath)) {
             $zipSize = $this->formatBytes(File::size($zipPath));
-            Log::info('📦 Production archive: ' . $zipPath . ' (' . $zipSize . ')');
+            $this->info('📦 Production archive: ' . $zipPath . ' (' . $zipSize . ')');
         }
     
-        Log::info('');
-        Log::info('📋 Build Configuration:');
-        Log::info('   • Build Type: ' . $buildType);
-        Log::info('   • Vendor Folder: ' . ($includeVendor ? '✅ Included' : '❌ Excluded'));
-        Log::info('   • Storage Folder: ' . ($includeStorage ? '✅ Included' : '❌ Excluded'));
-        Log::info('   • Development Mode: ' . ($development ? '✅ Enabled' : '❌ Disabled'));
-        Log::info('   • Minimal Build: ' . ($minimal ? '✅ Enabled' : '❌ Disabled'));
+        $this->info('');
+        $this->info('📋 Build Configuration:');
+        $this->info('   • Build Type: ' . $buildType);
+        $this->info('   • Vendor Folder: ' . ($includeVendor ? '✅ Included' : '❌ Excluded'));
+        $this->info('   • Storage Folder: ' . ($includeStorage ? '✅ Included' : '❌ Excluded'));
+        $this->info('   • Development Mode: ' . ($development ? '✅ Enabled' : '❌ Disabled'));
+        $this->info('   • Minimal Build: ' . ($minimal ? '✅ Enabled' : '❌ Disabled'));
     
-        Log::info('');
-        Log::info('📁 Production structure:');
+        $this->info('');
+        $this->info('📁 Production structure:');
     
         $laravelSize = $this->getDirectorySize($distPath . '/laravel');
         $publicHtmlSize = $this->getDirectorySize($distPath . '/public_html');
     
-        Log::info('   📂 laravel/ (' . $this->formatBytes($laravelSize) . ')');
-        Log::info('   📂 public_html/ (' . $this->formatBytes($publicHtmlSize) . ')');
+        $this->info('   📂 laravel/ (' . $this->formatBytes($laravelSize) . ')');
+        $this->info('   📂 public_html/ (' . $this->formatBytes($publicHtmlSize) . ')');        
     
         if ($includeVendor) {
-            Log::info('       └── vendor/ (Included)');
+            $this->info('       └── vendor/ (Included)');
         }
     
         if ($includeStorage) {
-            Log::info('       └── storage/ (Included)');
+            $this->info('       └── storage/ (Included)');
         }
     
-        Log::info('');
-        Log::info('🚀 Deployment Instructions:');
+        $this->info('');
+        $this->info('🚀 Deployment Instructions:');
     
         if ($includeVendor) {
-            Log::info('   1. Extract ZIP to server');
-            Log::info('   2. Run: php artisan key:generate');
-            Log::info('   3. Run: php artisan migrate');
+            $this->info('   1. Extract ZIP to server');
+            $this->info('   2. Run: php artisan key:generate');
+            $this->info('   3. Run: php artisan migrate');
         } else {
-            Log::info('   1. Extract ZIP to server');
-            Log::info('   2. Run: composer install --no-dev --optimize-autoloader');
-            Log::info('   3. Run: php artisan key:generate');
-            Log::info('   4. Run: php artisan migrate');
+            $this->info('   1. Extract ZIP to server');
+            $this->info('   2. Run: composer install --no-dev --optimize-autoloader');
+            $this->info('   3. Run: php artisan key:generate');
+            $this->info('   4. Run: php artisan migrate');
         }
     
-        Log::info('   5. Configure .env file');
-        Log::info('   6. Set file permissions');
+        $this->info('   5. Configure .env file');
+        $this->info('   6. Set file permissions');
     }
 
     private function formatBytes($bytes, $precision = 2): string
