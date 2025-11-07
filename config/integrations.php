@@ -17,7 +17,7 @@ return [
     ],
 
     'velocity_ads' => [
-        'api_url' => env('VELOCITY_ADS_API_URL', 'https://api.velocitydeveloper.com/new/adsfetch/fetch_terms_negative0click_secure.php'),
+        'api_url' => env('VELOCITY_ADS_API_URL', 'https://api.velocitydeveloper.com/new/adsfetch/multi_campaign_fetch_terms.php'),
         // Simpan token mentah dari .env (tanpa "Bearer ")
         'api_token' => env('VELOCITY_ADS_API_TOKEN'),
         // Konfigurasi input negative keywords ke Velocity

@@ -36,49 +36,45 @@ class NegativeKeywordInputService
      * @param string $mode 'validate' atau 'execute'
      * @return array {success: bool, status: int|null, json: mixed|null, error: string|null}
      */
-    public function send(array $terms, string $matchType, string $mode = 'validate'): array
+    public function send(array $terms, string $matchType, string $mode = 'validate', ?string $campaignId = null): array
     {
         $terms = array_values(array_filter(array_map('strval', $terms), fn($t) => trim($t) !== ''));
         if (empty($terms)) {
             return ['success' => false, 'status' => null, 'json' => null, 'error' => 'No terms provided'];
         }
 
-        $url = rtrim($this->inputApiUrl, '?&'); // jangan taruh mode di query
-
-        $headers = [
-            'Accept' => 'application/json',
-            // Jangan set Content-Type manual, biarkan multipart mengatur boundary
-        ];
-        if (!empty($this->apiToken)) {
-            $headers['Authorization'] = $this->apiToken;
+        // Normalisasi campaign_id: terima '0' sebagai valid
+        $campaignIdNormalized = null;
+        if ($campaignId !== null && $campaignId !== '') {
+            if (is_numeric($campaignId)) {
+                $campaignIdNormalized = (int) $campaignId;
+            } else {
+                Log::warning('Invalid campaign_id provided, ignoring', ['campaign_id' => $campaignId]);
+            }
         }
 
-        // Kirim sebagai multipart form-data:
-        // - terms: JSON array string
-        // - match_type: EXACT/PHRASE (uppercase)
-        // - mode: validate/execute (lowercase)
-        $multipart = [
-            [
-                'name' => 'terms',
-                'contents' => json_encode($terms, JSON_UNESCAPED_UNICODE),
-            ],
-            [
-                'name' => 'match_type',
-                'contents' => strtoupper($matchType),
-            ],
-            [
-                'name' => 'mode',
-                'contents' => strtolower($mode),
-            ],
-        ];
+        $url = rtrim($this->inputApiUrl, '?&'); // jangan taruh mode di query
+
+        // Preflight log sebelum kirim
+        Log::info('📩Sending negative keywords to Velocity', [
+            'count' => count($terms),
+            'match_type' => strtoupper($matchType),
+            'mode' => strtolower($mode),
+            'campaign_id' => $campaignIdNormalized,
+            'sample_terms' => array_slice($terms, 0, 3),
+        ]);
 
         try {
+            // Bangun form payload
             $form = [
                 'match_type' => strtoupper($matchType),
                 'mode' => strtolower($mode),
             ];
             foreach ($terms as $t) {
                 $form['terms'][] = $t;
+            }
+            if ($campaignIdNormalized !== null) {
+                $form['campaign_id'] = $campaignIdNormalized;
             }
 
             // Tambahkan header Authorization Bearer jika token tersedia
@@ -99,9 +95,23 @@ class NegativeKeywordInputService
             try {
                 $json = $resp->json();
             } catch (Exception $e) {
-                // jika bukan JSON
                 $json = null;
             }
+
+            // Log metrik selalu ditulis (tidak bergantung parse JSON)
+            // Log::info('METRIC:API_REQUEST ' . json_encode([
+            //     'date' => now()->toDateString(),
+            //     'timestamp' => now()->toIso8601String(),
+            //     'component' => 'velocity_input',
+            //     'target' => 'google-ads',
+            //     'request_count' => 1,
+            //     'terms_count' => count($terms),
+            //     'mode' => strtolower($mode),
+            //     'match_type' => strtoupper($matchType),
+            //     'campaign_id' => $campaignIdNormalized,
+            //     'status' => $status,
+            //     'api_success' => is_array($json) && array_key_exists('success', $json) ? (bool)$json['success'] : null,
+            // ], JSON_UNESCAPED_UNICODE));
 
             $ok = $resp->ok();
             $apiSuccess = is_array($json) && array_key_exists('success', $json) ? (bool)$json['success'] : null;
@@ -119,10 +129,14 @@ class NegativeKeywordInputService
                 'success' => $success,
                 'status' => $status,
                 'json' => $json,
-                'error' => $success ? null : ($json['error'] ?? 'Unknown error'),
+                'error' => $success ? null : (is_array($json) && array_key_exists('error', $json) ? (string)$json['error'] : 'Unknown error'),
             ];
         } catch (Exception $e) {
-            Log::error('Velocity input API exception', ['error' => $e->getMessage()]);
+            Log::error('Velocity input API exception', [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
             return ['success' => false, 'status' => null, 'json' => null, 'error' => $e->getMessage()];
         }
     }
