@@ -116,10 +116,10 @@ class SearchTermFetcher
 
             $filteredResults = $normalized;
 
-            Log::info('Fetched zero-click terms (external API)', [
+            Log::info('📊Fetced zero-click terms (external API)', [
                 'total_results' => count($normalized),
                 'filtered_results' => count($filteredResults),
-                'api_url' => $apiUrl,
+                // 'api_url' => $apiUrl,
             ]);
 
             return $filteredResults;
