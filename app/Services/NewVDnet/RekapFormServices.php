@@ -12,19 +12,35 @@ class RekapFormServices
 
     public function __construct()
     {
-        $this->rekapApiUrl = 'https://new.velocitydeveloper.net/api/api/public';
-        $this->apiToken = env('NEW_VDNET_API_TOKEN');
+        $this->rekapApiUrl = config('services.newvdnet.api_url');
+        $this->apiToken   = config('services.newvdnet.api_token');
     }
 
     //get list rekap form
-    public function get_list(array $params = []): array
+    public function get_list(array $params = [])
     {
-        $url = $this->rekapApiUrl . '/rekap_form';
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $this->apiToken,
-        ])->get($url, $params);
+        $url = $this->rekapApiUrl . '/rekap-form-konversi-ads';
 
-        return $response->json();
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $this->apiToken,
+            ])->get($url, $params);
+
+            if ($response->failed()) {
+                return [
+                    'success' => false,
+                    'status'  => $response->status(),
+                    'body'    => $response->body(),
+                ];
+            }
+
+            return $response->json();
+        } catch (\Throwable $e) {
+            return [
+                'success' => false,
+                'error'   => $e->getMessage(),
+            ];
+        }
     }
 
     //get by id

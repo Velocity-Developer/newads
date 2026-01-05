@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Log;
+use App\Services\NewVDnet\RekapFormServices;
 
 
 class KirimKonversiController extends Controller
@@ -84,5 +85,14 @@ class KirimKonversiController extends Controller
 
         return Redirect::route('kirim-konversi.index')
             ->with('success', 'Berhasil menghapus data kirim konversi.');
+    }
+
+    //get list rekap form
+    public function get_list_rekap_forms(Request $request)
+    {
+        $params = $request->query();
+        $rekapFormServices = app()->make(RekapFormServices::class);
+        $rekapForms = $rekapFormServices->get_list($params);
+        return response()->json($rekapForms);
     }
 }

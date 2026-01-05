@@ -5,8 +5,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/vue3';
+import { ref } from 'vue';
 
 interface KirimKonversi {
     id: number;
@@ -160,6 +169,44 @@ const deleteKirimKonversi = (item: KirimKonversi) => {
         },
     });
 };
+
+// Modal state and functions
+const isModalOpen = ref(false);
+const rekapFormData = ref<any>(null);
+const isLoadingRekapForms = ref(false);
+const errorRekapForms = ref<string | null>(null);
+
+const fetchRekapForms = async () => {
+    isLoadingRekapForms.value = true;
+    errorRekapForms.value = null;
+
+    try {
+        const response = await fetch('/kirim_konversi/get_list_rekap_forms', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+            },
+            credentials: 'same-origin', 
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        rekapFormData.value = data;
+    } catch (err) {
+        errorRekapForms.value = err instanceof Error ? err.message : 'An error occurred';
+        console.error('Error fetching rekap forms:', err);
+    } finally {
+        isLoadingRekapForms.value = false;
+    }
+};
+
+const openModal = () => {
+    isModalOpen.value = true;
+    fetchRekapForms();
+};
 </script>
 
 <template>
@@ -247,7 +294,44 @@ const deleteKirimKonversi = (item: KirimKonversi) => {
             <!-- Kirim Konversi Table -->
             <Card>
                 <CardHeader>
-                    <CardTitle>Kirim Konversi Data</CardTitle>
+                    <div class="flex items-center justify-between">
+                        <CardTitle>Kirim Konversi Data</CardTitle>
+                        <Dialog v-model:open="isModalOpen">
+                            <DialogTrigger as-child>
+                                <Button @click="openModal">Get Update</Button>
+                            </DialogTrigger>
+                            <DialogContent class="max-w-2xl max-h-[80vh] overflow-y-auto">
+                                <DialogHeader>
+                                    <DialogTitle>Rekap Forms List</DialogTitle>
+                                    <DialogDescription>
+                                        List of rekap forms from the API
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div class="mt-4">
+                                    <!-- Loading State -->
+                                    <div v-if="isLoadingRekapForms" class="flex items-center justify-center py-8">
+                                        <div class="text-muted-foreground">Loading...</div>
+                                    </div>
+
+                                    <!-- Error State -->
+                                    <div v-else-if="errorRekapForms" class="bg-destructive/10 text-destructive p-4 rounded-md">
+                                        <p class="font-medium">Error loading data</p>
+                                        <p class="text-sm">{{ errorRekapForms }}</p>
+                                    </div>
+
+                                    <!-- Data Display -->
+                                    <div v-else-if="rekapFormData" class="space-y-4">
+                                        <pre class="bg-muted p-4 rounded-md overflow-x-auto text-sm">{{ JSON.stringify(rekapFormData, null, 2) }}</pre>
+                                    </div>
+
+                                    <!-- Empty State -->
+                                    <div v-else class="text-center py-8 text-muted-foreground">
+                                        No data available
+                                    </div>
+                                </div>
+                            </DialogContent>
+                        </Dialog>
+                    </div>
                     
                     <!-- Per Page Selector -->
                     <div class="md:flex items-center justify-between mt-5">

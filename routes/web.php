@@ -54,5 +54,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/blacklist-words/import-upload', [BlacklistWordController::class, 'importUpload'])->name('blacklist.importUpload');
 });
 
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/kirim_konversi/get_list_rekap_forms', [KirimKonversiController::class, 'get_list_rekap_forms']);
+});
+
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
