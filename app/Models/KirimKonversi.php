@@ -3,11 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class KirimKonversi extends Model
 {
-    //
-    protected $table = 'kirim_konversis';
+    use HasFactory;
+
     protected $fillable = [
         'gclid',
         'jobid',
@@ -16,5 +17,10 @@ class KirimKonversi extends Model
         'response',
         'source',
         'rekap_form_id',
+    ];
+
+    // cast response to json
+    protected $casts = [
+        'response' => 'json',
     ];
 }

@@ -239,13 +239,12 @@ const deleteKirimKonversi = (item: KirimKonversi) => {
                         <table class="w-full border-collapse">
                             <thead class="bg-muted/50">
                                 <tr class="border-b">
-                                    <th class="text-left p-2 font-medium">ID</th>
+                                    <th class="text-left p-2 font-medium">No</th>
                                     <th class="text-left p-2 font-medium">GCLID</th>
                                     <th class="text-left p-2 font-medium">Job ID</th>
                                     <th class="text-left p-2 font-medium">Waktu</th>
                                     <th class="text-left p-2 font-medium">Status</th>
                                     <th class="text-left p-2 font-medium">Source</th>
-                                    <th class="text-left p-2 font-medium">Response</th>
                                     <th class="text-left p-2 font-medium">Created At</th>
                                     <th class="text-left p-2 font-medium">Actions</th>
                                 </tr>
@@ -253,7 +252,7 @@ const deleteKirimKonversi = (item: KirimKonversi) => {
                             <tbody>
                                 <tr v-for="item in kirimKonversis.data" :key="item.id" class="border-b hover:bg-muted/50">
                                     <td class="p-2">
-                                        <div class="font-medium">{{ item.id }}</div>
+                                        <div class="font-medium">{{ kirimKonversis.data.indexOf(item) + kirimKonversis.from }}</div>
                                     </td>
                                     <td class="p-2">
                                         <div class="font-mono text-sm">{{ item.gclid }}</div>
@@ -275,11 +274,6 @@ const deleteKirimKonversi = (item: KirimKonversi) => {
                                             {{ item.source }}
                                         </Badge>
                                         <span v-else class="text-muted-foreground">-</span>
-                                    </td>
-                                    <td class="p-2">
-                                        <div v-if="item.response" class="text-sm max-w-xs truncate" :title="item.response">
-                                            {{ formatText(item.response) }}
-                                        </div>
                                     </td>
                                     <td class="p-2">
                                         <span class="text-sm text-muted-foreground">
