@@ -187,17 +187,17 @@ const changePerPage = (event: Event) => {
                                         </div>
                                     </td>
                                     <td class="p-2">
-                                        <Badge :variant="getAiBadgeVariant(term.hasil_cek_ai)">
+                                        <Badge v-if="term.hasil_cek_ai" :variant="getAiBadgeVariant(term.hasil_cek_ai)">
                                             {{ term.hasil_cek_ai }}
                                         </Badge>
                                     </td>
                                     <td class="p-2">
-                                        <Badge :variant="getGoogleBadgeVariant(term.status_input_google)">
+                                        <Badge v-if="term.status_input_google" :variant="getGoogleBadgeVariant(term.status_input_google)">
                                             {{ term.status_input_google }}
                                         </Badge>
                                     </td>
                                     <td class="p-2">
-                                        <Badge :variant="getTelegramBadgeVariant(term.notif_telegram)">
+                                        <Badge v-if="term.notif_telegram" :variant="getTelegramBadgeVariant(term.notif_telegram)">
                                             {{ term.notif_telegram }}
                                         </Badge>
                                     </td>
