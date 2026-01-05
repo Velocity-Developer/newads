@@ -300,11 +300,11 @@ const openModal = () => {
                             <DialogTrigger as-child>
                                 <Button @click="openModal">Get Update</Button>
                             </DialogTrigger>
-                            <DialogContent class="max-w-2xl max-h-[80vh] overflow-y-auto">
+                            <DialogContent class="!max-w-4xl max-h-[80vh] overflow-y-auto">
                                 <DialogHeader>
-                                    <DialogTitle>Rekap Forms List</DialogTitle>
+                                    <DialogTitle>Rekap Forms 'Greeting Ads' </DialogTitle>
                                     <DialogDescription>
-                                        List of rekap forms from the API
+                                        List rekap form dari 'Greeting Ads' VDnet
                                     </DialogDescription>
                                 </DialogHeader>
                                 <div class="mt-4">
@@ -321,7 +321,39 @@ const openModal = () => {
 
                                     <!-- Data Display -->
                                     <div v-else-if="rekapFormData" class="space-y-4">
-                                        <pre class="bg-muted p-4 rounded-md overflow-x-auto text-sm">{{ JSON.stringify(rekapFormData, null, 2) }}</pre>
+                                        <div class="overflow-auto max-h-[60vh]">
+                                            <table class="table text-xs w-full">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="bg-slate-200 px-4 py-2 border border-b text-left font-medium">No</th>
+                                                        <th class="bg-slate-200 px-4 py-2 border border-b text-left font-medium">Form ID</th>
+                                                        <th class="bg-slate-200 px-4 py-2 border border-b text-left font-medium">Status</th>
+                                                        <th class="bg-slate-200 px-4 py-2 border border-b text-left font-medium">gclid</th>
+                                                        <th class="bg-slate-200 px-4 py-2 border border-b text-left font-medium">Created At</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr v-for="(data, index) in rekapFormData" :key="data.id">
+                                                        <td class="px-4 py-2 border border-b">
+                                                            {{ parseInt(index) + 1 }}
+                                                        </td>
+                                                        <td class="px-4 py-2 border border-b">
+                                                            {{ data.id }}
+                                                        </td>
+                                                        <td class="px-4 py-2 border border-b">
+                                                            {{ data.status }}
+                                                        </td>
+                                                        <td class="px-4 py-2 border border-b">
+                                                            {{ data.gclid }}
+                                                        </td>
+                                                        <td class="px-4 py-2 border border-b">
+                                                            {{ data.created_at }}
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <!-- <pre class="bg-muted p-4 rounded-md overflow-x-auto text-sm">{{ JSON.stringify(rekapFormData, null, 2) }}</pre> -->
                                     </div>
 
                                     <!-- Empty State -->
