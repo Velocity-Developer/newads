@@ -110,6 +110,30 @@ const changePerPage = (event: Event) => {
     });
 };
 
+const changeSort = (event: Event) => {
+    const target = event.target as HTMLSelectElement;
+    const sortBy = target.value;
+    const params: Record<string, any> = { ...props.filters };
+    params.sort_by = sortBy;
+    
+    router.get('/kirim-konversi', params, {
+        preserveState: true,
+        preserveScroll: true,
+    });
+};
+
+const changeSortOrder = (event: Event) => {
+    const target = event.target as HTMLSelectElement;
+    const sortOrder = target.value;
+    const params: Record<string, any> = { ...props.filters };
+    params.sort_order = sortOrder;
+    
+    router.get('/kirim-konversi', params, {
+        preserveState: true,
+        preserveScroll: true,
+    });
+};
+
 const deleteKirimKonversi = (item: KirimKonversi) => {
     if (!confirm(`Hapus data Kirim Konversi dengan ID ${item.id}?`)) {
         return;
@@ -214,22 +238,45 @@ const deleteKirimKonversi = (item: KirimKonversi) => {
                     <CardTitle>Kirim Konversi Data</CardTitle>
                     
                     <!-- Per Page Selector -->
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <span class="text-sm text-muted-foreground">Items per page:</span>
-                            <select
-                                :value="kirimKonversis.per_page"
-                                @change="changePerPage($event)"
-                                class="flex h-8 w-20 rounded-md border border-input bg-background px-2 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                            >
-                                <option value="10">10</option>
-                                <option value="15">15</option>
-                                <option value="25">25</option>
-                                <option value="50">50</option>
-                                <option value="100">100</option>
-                            </select>
+                    <div class="md:flex items-center justify-between mt-5">
+                        <div class="flex items-center justify-end md:justify-start gap-4 mb-2 md:mb-0">
+                            <div class="flex items-center gap-2">                                
+                                <Select v-model="kirimKonversis.per_page" @update:modelValue="(value) => changePerPage({ target: { value } })">
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Items per page" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="10">10</SelectItem>
+                                        <SelectItem value="15">15</SelectItem>
+                                        <SelectItem value="25">25</SelectItem>
+                                        <SelectItem value="50">50</SelectItem>
+                                        <SelectItem value="100">100</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <Select v-model="filters.sort_by" @change="changeSort($event)">
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Sort by" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="created_at">Created At</SelectItem>
+                                        <SelectItem value="gclid">GCLID</SelectItem>
+                                        <SelectItem value="jobid">Job ID</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <Select v-model="filters.sort_order" @change="changeSortOrder($event)">
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Sort order" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="desc">Descending</SelectItem>
+                                        <SelectItem value="asc">Ascending</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </div>
-                        <div class="text-sm text-muted-foreground">
+                        <div class="text-sm text-end md:text-start text-muted-foreground">
                             Showing {{ kirimKonversis.from }} to {{ kirimKonversis.to }} of {{ kirimKonversis.total }} results
                         </div>
                     </div>
