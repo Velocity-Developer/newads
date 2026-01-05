@@ -14,7 +14,7 @@ import {
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { LayoutGrid, List, MegaphoneOff } from 'lucide-vue-next';
+import { LayoutGrid, List, MegaphoneOff, Send } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
 const mainNavItems: NavItem[] = [
@@ -37,6 +37,11 @@ const mainNavItems: NavItem[] = [
         title: 'Blacklist Words',
         href: '/blacklist-words',
         icon: MegaphoneOff,
+    },
+    {
+        title: 'Kirim Konversi',
+        href: '/kirim-konversi',
+        icon: Send,
     },
 ];
 

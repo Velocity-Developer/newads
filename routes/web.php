@@ -5,6 +5,7 @@ use App\Http\Controllers\BlacklistWordController;
 use App\Http\Controllers\TermsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AdminToolsController;
+use App\Http\Controllers\KirimKonversiController;
 
 // Redirect root to dashboard to avoid 404
 Route::redirect('/', '/dashboard');
@@ -16,6 +17,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Frasa Negative page
     Route::get('/frasa', [\App\Http\Controllers\FrasaController::class, 'index'])->name('frasa.index');
+
+    // Kirim Konversi pages
+    Route::get('/kirim-konversi', [KirimKonversiController::class, 'index'])->name('kirim-konversi.index');
+    Route::get('/kirim-konversi/{kirimKonversi}', [KirimKonversiController::class, 'show'])->name('kirim-konversi.show');
+    Route::delete('/kirim-konversi/{kirimKonversi}', [KirimKonversiController::class, 'destroy'])->name('kirim-konversi.destroy');
 });
 
 // Restore dashboard route
@@ -48,5 +54,5 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/blacklist-words/import-upload', [BlacklistWordController::class, 'importUpload'])->name('blacklist.importUpload');
 });
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';
