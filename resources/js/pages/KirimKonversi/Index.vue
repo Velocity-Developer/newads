@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router, usePage } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 
 interface KirimKonversi {
     id: number;
@@ -48,6 +48,18 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
+const urlParams = new URLSearchParams(window.location.search);
+
+const filters = {
+    search: props.filters.search || urlParams.get('search') || '',
+    status: props.filters.status || urlParams.get('status') || 'all',
+    source: props.filters.source || urlParams.get('source') || 'all',
+    sort_by: props.filters.sort_by || urlParams.get('sort_by') || 'created_at',
+    sort_order: props.filters.sort_order || urlParams.get('sort_order') || 'desc',
+    date_from: props.filters.date_from || urlParams.get('date_from') || '',
+    date_to: props.filters.date_to || urlParams.get('date_to') || '',
+};
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -239,42 +251,13 @@ const deleteKirimKonversi = (item: KirimKonversi) => {
                     
                     <!-- Per Page Selector -->
                     <div class="md:flex items-center justify-between mt-5">
-                        <div class="flex items-center justify-end md:justify-start gap-4 mb-2 md:mb-0">
-                            <div class="flex items-center gap-2">                                
-                                <Select v-model="kirimKonversis.per_page" @update:modelValue="(value) => changePerPage({ target: { value } })">
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Items per page" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="10">10</SelectItem>
-                                        <SelectItem value="15">15</SelectItem>
-                                        <SelectItem value="25">25</SelectItem>
-                                        <SelectItem value="50">50</SelectItem>
-                                        <SelectItem value="100">100</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <Select v-model="filters.sort_by" @change="changeSort($event)">
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Sort by" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="created_at">Created At</SelectItem>
-                                        <SelectItem value="gclid">GCLID</SelectItem>
-                                        <SelectItem value="jobid">Job ID</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <Select v-model="filters.sort_order" @change="changeSortOrder($event)">
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Sort order" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="desc">Descending</SelectItem>
-                                        <SelectItem value="asc">Ascending</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
+                        <div class="flex items-center justify-end md:justify-start gap-4 mb-2 md:mb-0">                       
+                            <select v-model="kirimKonversis.per_page" @change="changePerPage($event)" class="border rounded text-sm px-3 py-2">
+                                <option value="10">10</option>
+                                <option value="15">15</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
                         </div>
                         <div class="text-sm text-end md:text-start text-muted-foreground">
                             Showing {{ kirimKonversis.from }} to {{ kirimKonversis.to }} of {{ kirimKonversis.total }} results
