@@ -157,7 +157,7 @@ const deleteKirimKonversi = (item: KirimKonversi) => {
                                     <SelectValue placeholder="Select Status" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="">All Status</SelectItem>
+                                    <SelectItem value="all">All Status</SelectItem>
                                     <SelectItem value="success">Success</SelectItem>
                                     <SelectItem value="failed">Failed</SelectItem>
                                     <SelectItem value="pending">Pending</SelectItem>
@@ -174,11 +174,9 @@ const deleteKirimKonversi = (item: KirimKonversi) => {
                                     <SelectValue placeholder="Select Source" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="">All Sources</SelectItem>
-                                    <SelectItem value="google">Google</SelectItem>
-                                    <SelectItem value="facebook">Facebook</SelectItem>
-                                    <SelectItem value="website">Website</SelectItem>
-                                    <SelectItem value="api">API</SelectItem>
+                                    <SelectItem value="all">All Sources</SelectItem>
+                                    <SelectItem value="greetingads">Greeting Ads</SelectItem>
+                                    <SelectItem value="manual">Manual</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
