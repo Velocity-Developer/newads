@@ -231,30 +231,29 @@ function formatLocalDate(dateString : string) {
 
   return `${get('day')}/${get('month')}/${get('year')} ${get('hour')}:${get('minute')}:${get('second')}`
 }
-const checkedItems = ref<number[]>([]);
+const checkedItems = ref<any[]>([]);
 
 // Computed for select all functionality
 const isAllSelected = computed(() => {
     if (!rekapFormData.value || !rekapFormData.value.data || rekapFormData.value.data.length === 0) {
         return false;
     }
-    return rekapFormData.value.data.every((item: any) => checkedItems.value.includes(item.id));
+    return rekapFormData.value.data.every((item: any) => checkedItems.value.some(checked => checked.id === item.id));
 });
 
 const isSomeSelected = computed(() => {
     if (!rekapFormData.value || !rekapFormData.value.data || rekapFormData.value.data.length === 0) {
         return false;
     }
-    return rekapFormData.value.data.some((item: any) => checkedItems.value.includes(item.id));
+    return rekapFormData.value.data.some((item: any) => checkedItems.value.some(checked => checked.id === item.id));
 });
 
 const toggleSelectAll = (checked: boolean | string) => {
     if (!rekapFormData.value || !rekapFormData.value.data) return;
 
     if (checked === true) {
-        // Select all
-        const allIds = rekapFormData.value.data.map((item: any) => item.id);
-        checkedItems.value = allIds;
+        // Select all - store entire objects
+        checkedItems.value = [...rekapFormData.value.data];
     } else {
         // Deselect all
         checkedItems.value = [];
@@ -387,32 +386,33 @@ const toggleSelectAll = (checked: boolean | string) => {
                                             <table class="table text-xs w-full">
                                                 <thead>
                                                     <tr>
-                                                        <th class="bg-slate-200 dark:bg-slate-700 px-4 py-2 border border-b text-left font-medium">
+                                                        <th class="bg-gray-200 dark:bg-gray-700 px-4 py-2 border border-b text-left font-medium">
                                                             <Checkbox
                                                                 :model-value="isAllSelected"
                                                                 :indeterminate="isSomeSelected && !isAllSelected"
                                                                 @update:model-value="toggleSelectAll"
+                                                                class="bg-white dark:bg-gray-700"
                                                             />
                                                         </th>
-                                                        <th class="bg-slate-200 dark:bg-slate-700 px-4 py-2 border border-b text-left font-medium">No</th>
-                                                        <th class="bg-slate-200 dark:bg-slate-700 px-4 py-2 border border-b text-left font-medium">Form ID</th>
-                                                        <th class="bg-slate-200 dark:bg-slate-700 px-4 py-2 border border-b text-left font-medium">Status</th>
-                                                        <th class="bg-slate-200 dark:bg-slate-700 px-4 py-2 border border-b text-left font-medium">gclid</th>
-                                                        <th class="bg-slate-200 dark:bg-slate-700 px-4 py-2 border border-b text-left font-medium">Created At</th>
-                                                        <th class="bg-slate-200 dark:bg-slate-700 px-4 py-2 border border-b text-left font-medium">Nama</th>
-                                                        <th class="bg-slate-200 dark:bg-slate-700 px-4 py-2 border border-b text-left font-medium">No Wa</th>
+                                                        <th class="bg-gray-200 dark:bg-gray-700 px-4 py-2 border border-b text-left font-medium">No</th>
+                                                        <th class="bg-gray-200 dark:bg-gray-700 px-4 py-2 border border-b text-left font-medium">Form ID</th>
+                                                        <th class="bg-gray-200 dark:bg-gray-700 px-4 py-2 border border-b text-left font-medium">Status</th>
+                                                        <th class="bg-gray-200 dark:bg-gray-700 px-4 py-2 border border-b text-left font-medium">gclid</th>
+                                                        <th class="bg-gray-200 dark:bg-gray-700 px-4 py-2 border border-b text-left font-medium">Created At</th>
+                                                        <th class="bg-gray-200 dark:bg-gray-700 px-4 py-2 border border-b text-left font-medium">Nama</th>
+                                                        <th class="bg-gray-200 dark:bg-gray-700 px-4 py-2 border border-b text-left font-medium">No Wa</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     <tr v-for="(data, index) in rekapFormData.data" :key="data.id">
                                                         <td class="px-4 py-2 border border-b">
                                                             <Checkbox
-                                                                :model-value="checkedItems.includes(data.id)"
+                                                                :model-value="checkedItems.some(item => item.id === data.id)"
                                                                 @update:model-value="(checked: boolean | string) => {
                                                                     if (checked === true) {
-                                                                        checkedItems.push(data.id);
+                                                                        checkedItems.push(data);
                                                                     } else {
-                                                                        const idx = checkedItems.indexOf(data.id);
+                                                                        const idx = checkedItems.findIndex(item => item.id === data.id);
                                                                         if (idx > -1) {
                                                                             checkedItems.splice(idx, 1);
                                                                         }
