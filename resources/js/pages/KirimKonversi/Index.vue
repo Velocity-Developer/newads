@@ -207,6 +207,27 @@ const openModal = () => {
     isModalOpen.value = true;
     fetchRekapForms();
 };
+
+function formatLocalDate(dateString : string) {
+  const date = new Date(dateString)
+
+  const options = {
+    timeZone: 'Asia/Jakarta',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  } as any
+
+  const parts = new Intl.DateTimeFormat('en-GB', options).formatToParts(date)
+  const get = (type : string) => parts.find(p => p.type === type)?.value
+
+  return `${get('day')}/${get('month')}/${get('year')} ${get('hour')}:${get('minute')}:${get('second')}`
+}
+
 </script>
 
 <template>
@@ -330,12 +351,14 @@ const openModal = () => {
                                                         <th class="bg-slate-200 px-4 py-2 border border-b text-left font-medium">Status</th>
                                                         <th class="bg-slate-200 px-4 py-2 border border-b text-left font-medium">gclid</th>
                                                         <th class="bg-slate-200 px-4 py-2 border border-b text-left font-medium">Created At</th>
+                                                        <th class="bg-slate-200 px-4 py-2 border border-b text-left font-medium">Nama</th>
+                                                        <th class="bg-slate-200 px-4 py-2 border border-b text-left font-medium">No Wa</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    <tr v-for="(data, index) in rekapFormData" :key="data.id">
+                                                    <tr v-for="(data, index) in rekapFormData.data" :key="data.id">
                                                         <td class="px-4 py-2 border border-b">
-                                                            {{ parseInt(index) + 1 }}
+                                                            {{ Number(index) + 1 }}
                                                         </td>
                                                         <td class="px-4 py-2 border border-b">
                                                             {{ data.id }}
@@ -344,10 +367,18 @@ const openModal = () => {
                                                             {{ data.status }}
                                                         </td>
                                                         <td class="px-4 py-2 border border-b">
-                                                            {{ data.gclid }}
+                                                            <div :title="data.gclid" class="max-w-[200px] overflow-hidden text-ellipsis whitespace-nowrap">
+                                                                {{ data.gclid }}
+                                                            </div>
                                                         </td>
                                                         <td class="px-4 py-2 border border-b">
-                                                            {{ data.created_at }}
+                                                            {{ formatLocalDate(data.created_at) }}
+                                                        </td>
+                                                        <td class="px-4 py-2 border border-b">
+                                                            {{ data.nama }}
+                                                        </td>
+                                                        <td class="px-4 py-2 border border-b">
+                                                            {{ data.no_whatsapp }}
                                                         </td>
                                                     </tr>
                                                 </tbody>
