@@ -13,9 +13,10 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog';
+import { Checkbox } from '@/components/ui/checkbox';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 
 interface KirimKonversi {
     id: number;
@@ -227,6 +228,12 @@ function formatLocalDate(dateString : string) {
 
   return `${get('day')}/${get('month')}/${get('year')} ${get('hour')}:${get('minute')}:${get('second')}`
 }
+const checkedItems = ref<number[]>([]);
+
+//watch checkedItems
+watch(checkedItems, (newValue) => {
+    console.log('Checked items:', newValue);
+});
 
 </script>
 
@@ -328,7 +335,13 @@ function formatLocalDate(dateString : string) {
                                         List rekap form dari 'Greeting Ads' VDnet
                                     </DialogDescription>
                                 </DialogHeader>
-                                <div class="mt-4">
+
+                                <div class="mt-2 flex justify-end gap-1">                              
+                                    <Button>Kirim Konversi</Button>                     
+                                    <Button @click="fetchRekapForms">Reload</Button>
+                                </div>
+
+                                <div class="mt-2">
                                     <!-- Loading State -->
                                     <div v-if="isLoadingRekapForms" class="flex items-center justify-center py-8">
                                         <div class="text-muted-foreground">Loading...</div>
@@ -346,17 +359,21 @@ function formatLocalDate(dateString : string) {
                                             <table class="table text-xs w-full">
                                                 <thead>
                                                     <tr>
-                                                        <th class="bg-slate-200 px-4 py-2 border border-b text-left font-medium">No</th>
-                                                        <th class="bg-slate-200 px-4 py-2 border border-b text-left font-medium">Form ID</th>
-                                                        <th class="bg-slate-200 px-4 py-2 border border-b text-left font-medium">Status</th>
-                                                        <th class="bg-slate-200 px-4 py-2 border border-b text-left font-medium">gclid</th>
-                                                        <th class="bg-slate-200 px-4 py-2 border border-b text-left font-medium">Created At</th>
-                                                        <th class="bg-slate-200 px-4 py-2 border border-b text-left font-medium">Nama</th>
-                                                        <th class="bg-slate-200 px-4 py-2 border border-b text-left font-medium">No Wa</th>
+                                                        <th class="bg-slate-200 dark:bg-slate-700 px-4 py-2 border border-b text-left font-medium"></th>
+                                                        <th class="bg-slate-200 dark:bg-slate-700 px-4 py-2 border border-b text-left font-medium">No</th>
+                                                        <th class="bg-slate-200 dark:bg-slate-700 px-4 py-2 border border-b text-left font-medium">Form ID</th>
+                                                        <th class="bg-slate-200 dark:bg-slate-700 px-4 py-2 border border-b text-left font-medium">Status</th>
+                                                        <th class="bg-slate-200 dark:bg-slate-700 px-4 py-2 border border-b text-left font-medium">gclid</th>
+                                                        <th class="bg-slate-200 dark:bg-slate-700 px-4 py-2 border border-b text-left font-medium">Created At</th>
+                                                        <th class="bg-slate-200 dark:bg-slate-700 px-4 py-2 border border-b text-left font-medium">Nama</th>
+                                                        <th class="bg-slate-200 dark:bg-slate-700 px-4 py-2 border border-b text-left font-medium">No Wa</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     <tr v-for="(data, index) in rekapFormData.data" :key="data.id">
+                                                        <td class="px-4 py-2 border border-b">
+                                                            <Checkbox id="checkedItems" />
+                                                        </td>
                                                         <td class="px-4 py-2 border border-b">
                                                             {{ Number(index) + 1 }}
                                                         </td>
