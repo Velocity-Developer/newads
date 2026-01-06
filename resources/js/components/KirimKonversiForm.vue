@@ -13,6 +13,8 @@ import {
 } from '@/components/ui/dialog';
 import { CloudUpload, Send, CalendarClock,Binoculars, BinocularsIcon  } from 'lucide-vue-next';
 import { Form } from '@inertiajs/vue3'
+import axios from 'axios';
+import { toast } from 'vue-sonner'
 
 const isModalOpen = ref(false);
 const form = ref({
@@ -23,6 +25,22 @@ const form = ref({
 const openModal = () => {
     isModalOpen.value = true;
 };
+
+const loading = ref(false);
+const cekTimeZone = async () => {
+    loading.value = true;
+    try {
+        const response = await axios.get('/kirim_konversi/cek_time_zone', {
+            params: form.value
+        });
+        form.value.conversion_time = response.data.time_zone;
+    } catch (error : any) {
+        console.error('Error fetching time zone:', error);
+        toast.error(error.response?.data?.message || 'Error fetching time zone')
+    } finally {
+        loading.value = false;
+    }
+}
 
 </script>
 
@@ -38,6 +56,11 @@ const openModal = () => {
             <DialogHeader>
                 <DialogTitle>Kirim Konversi Manual</DialogTitle>
             </DialogHeader>
+
+            <!-- loading -->
+             <div v-if="loading">
+                loading...
+             </div>
             
             <Form 
                 action="/kirim_konversi/kirim_konversi_google_ads" 
@@ -60,7 +83,7 @@ const openModal = () => {
                         <Button type="submit" class="!bg-blue-600 text-white dark:!bg-blue-800">
                             <Binoculars /> Cek GCLID
                         </Button>
-                        <Button type="submit" class="!bg-green-600 text-white dark:!bg-green-800">
+                        <Button type="button" @click="cekTimeZone" class="!bg-green-600 text-white dark:!bg-green-800">
                             <CalendarClock /> Cek TimeZone Akun
                         </Button>                        
                         <Button type="submit">

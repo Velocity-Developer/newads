@@ -105,4 +105,13 @@ class KirimKonversiController extends Controller
         return Redirect::route('kirim-konversi.index')
             ->with('success', 'Berhasil mengirim data konversi ke Google Ads.');
     }
+
+    //cek time zone
+    public function cek_time_zone(Request $request)
+    {
+        $params = $request->query();
+        $kirimKonversiService = app()->make(KirimKonversiService::class);
+        $response = $kirimKonversiService->get_time_zone($params);
+        return response()->json($response);
+    }
 }

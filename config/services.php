@@ -43,4 +43,12 @@ return [
         'api_url'   => 'https://new.velocitydeveloper.net/api/api/public',
         'api_token' => env('NEWVDNET_API_PUBLIC_KEY'),
     ],
+    'googleads' => [
+        'client_id' => env('GOOGLEADS_CLIENT_ID'),
+        'client_secret' => env('GOOGLEADS_CLIENT_SECRET'),
+        'developer_token' => env('GOOGLEADS_DEVELOPER_TOKEN'),
+        'customer_id' => env('GOOGLEADS_CUSTOMER_ID'),
+        'campaign_id' => env('GOOGLEADS_CAMPAIGN_ID'),
+        'refresh_token' => env('GOOGLEADS_REFRESH_TOKEN'),
+    ],
 ];

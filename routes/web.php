@@ -58,6 +58,8 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/kirim_konversi/get_list_rekap_forms', [KirimKonversiController::class, 'get_list_rekap_forms']);
     Route::post('/kirim_konversi/kirim_konversi_google_ads', [KirimKonversiController::class, 'kirim_konversi_google_ads']);
+    //cek time zone
+    Route::get('/kirim_konversi/cek_time_zone', [KirimKonversiController::class, 'cek_time_zone']);
 });
 
 require __DIR__ . '/settings.php';
