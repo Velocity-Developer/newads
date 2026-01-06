@@ -16,7 +16,8 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
+import { Send } from 'lucide-vue-next';
 
 interface KirimKonversi {
     id: number;
@@ -207,6 +208,8 @@ const fetchRekapForms = async () => {
 const openModal = () => {
     isModalOpen.value = true;
     fetchRekapForms();
+    //kosongkan checkedItems
+    checkedItems.value = [];
 };
 
 function formatLocalDate(dateString : string) {
@@ -230,13 +233,33 @@ function formatLocalDate(dateString : string) {
 }
 const checkedItems = ref<number[]>([]);
 
-//watch checkedItems
-watch(checkedItems, (newValue, oldValue) => {
-    console.log('Checked items changed:');
-    console.log('New value:', newValue);
-    console.log('Old value:', oldValue);
-    console.log('Total selected:', newValue.length);
-}, { deep: true });
+// Computed for select all functionality
+const isAllSelected = computed(() => {
+    if (!rekapFormData.value || !rekapFormData.value.data || rekapFormData.value.data.length === 0) {
+        return false;
+    }
+    return rekapFormData.value.data.every((item: any) => checkedItems.value.includes(item.id));
+});
+
+const isSomeSelected = computed(() => {
+    if (!rekapFormData.value || !rekapFormData.value.data || rekapFormData.value.data.length === 0) {
+        return false;
+    }
+    return rekapFormData.value.data.some((item: any) => checkedItems.value.includes(item.id));
+});
+
+const toggleSelectAll = (checked: boolean | string) => {
+    if (!rekapFormData.value || !rekapFormData.value.data) return;
+
+    if (checked === true) {
+        // Select all
+        const allIds = rekapFormData.value.data.map((item: any) => item.id);
+        checkedItems.value = allIds;
+    } else {
+        // Deselect all
+        checkedItems.value = [];
+    }
+};
 
 </script>
 
@@ -340,7 +363,9 @@ watch(checkedItems, (newValue, oldValue) => {
                                 </DialogHeader>
 
                                 <div class="mt-2 flex justify-end gap-1">                              
-                                    <Button>Kirim Konversi</Button>                     
+                                    <Button v-if="checkedItems && checkedItems.length > 0">
+                                        <Send /> Kirim Konversi
+                                    </Button>                     
                                     <Button @click="fetchRekapForms">Reload</Button>
                                 </div>
 
@@ -362,7 +387,13 @@ watch(checkedItems, (newValue, oldValue) => {
                                             <table class="table text-xs w-full">
                                                 <thead>
                                                     <tr>
-                                                        <th class="bg-slate-200 dark:bg-slate-700 px-4 py-2 border border-b text-left font-medium"></th>
+                                                        <th class="bg-slate-200 dark:bg-slate-700 px-4 py-2 border border-b text-left font-medium">
+                                                            <Checkbox
+                                                                :model-value="isAllSelected"
+                                                                :indeterminate="isSomeSelected && !isAllSelected"
+                                                                @update:model-value="toggleSelectAll"
+                                                            />
+                                                        </th>
                                                         <th class="bg-slate-200 dark:bg-slate-700 px-4 py-2 border border-b text-left font-medium">No</th>
                                                         <th class="bg-slate-200 dark:bg-slate-700 px-4 py-2 border border-b text-left font-medium">Form ID</th>
                                                         <th class="bg-slate-200 dark:bg-slate-700 px-4 py-2 border border-b text-left font-medium">Status</th>
