@@ -231,9 +231,12 @@ function formatLocalDate(dateString : string) {
 const checkedItems = ref<number[]>([]);
 
 //watch checkedItems
-watch(checkedItems, (newValue) => {
-    console.log('Checked items:', newValue);
-});
+watch(checkedItems, (newValue, oldValue) => {
+    console.log('Checked items changed:');
+    console.log('New value:', newValue);
+    console.log('Old value:', oldValue);
+    console.log('Total selected:', newValue.length);
+}, { deep: true });
 
 </script>
 
@@ -372,7 +375,19 @@ watch(checkedItems, (newValue) => {
                                                 <tbody>
                                                     <tr v-for="(data, index) in rekapFormData.data" :key="data.id">
                                                         <td class="px-4 py-2 border border-b">
-                                                            <Checkbox id="checkedItems" />
+                                                            <Checkbox
+                                                                :model-value="checkedItems.includes(data.id)"
+                                                                @update:model-value="(checked: boolean | string) => {
+                                                                    if (checked === true) {
+                                                                        checkedItems.push(data.id);
+                                                                    } else {
+                                                                        const idx = checkedItems.indexOf(data.id);
+                                                                        if (idx > -1) {
+                                                                            checkedItems.splice(idx, 1);
+                                                                        }
+                                                                    }
+                                                                }"
+                                                            />
                                                         </td>
                                                         <td class="px-4 py-2 border border-b">
                                                             {{ Number(index) + 1 }}
