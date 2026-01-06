@@ -8,7 +8,7 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Log;
 use App\Services\NewVDnet\RekapFormServices;
-
+use App\Services\GoogleAds\KirimKonversiService;
 
 class KirimKonversiController extends Controller
 {
@@ -94,5 +94,15 @@ class KirimKonversiController extends Controller
         $rekapFormServices = app()->make(RekapFormServices::class);
         $rekapForms = $rekapFormServices->get_list($params);
         return response()->json($rekapForms);
+    }
+
+    //kirim konversi ke Google Ads
+    public function kirim_konversi_google_ads(Request $request)
+    {
+        $params = $request->query();
+        // $kirimKonversiService = app()->make(KirimKonversiService::class);
+        // $response = $kirimKonversiService->kirim_konversi($params);
+        return Redirect::route('kirim-konversi.index')
+            ->with('success', 'Berhasil mengirim data konversi ke Google Ads.');
     }
 }

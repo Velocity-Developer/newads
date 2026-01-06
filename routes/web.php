@@ -57,6 +57,7 @@ Route::middleware(['auth'])->group(function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/kirim_konversi/get_list_rekap_forms', [KirimKonversiController::class, 'get_list_rekap_forms']);
+    Route::post('/kirim_konversi/kirim_konversi_google_ads', [KirimKonversiController::class, 'kirim_konversi_google_ads']);
 });
 
 require __DIR__ . '/settings.php';

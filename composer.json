@@ -10,7 +10,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
-        "google/apiclient": "*",
+        "google/apiclient": "^2.18",
         "googleads/google-ads-php": "^31.1",
         "inertiajs/inertia-laravel": "^2.0",
         "laravel/fortify": "^1.30",

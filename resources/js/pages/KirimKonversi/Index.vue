@@ -18,6 +18,7 @@ import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ref, watch, computed } from 'vue';
 import { Send } from 'lucide-vue-next';
+import KirimKonversiForm from '@/components/KirimKonversiForm.vue';
 
 interface KirimKonversi {
     id: number;
@@ -348,115 +349,118 @@ const toggleSelectAll = (checked: boolean | string) => {
             <Card>
                 <CardHeader>
                     <div class="flex items-center justify-between">
-                        <CardTitle>Kirim Konversi Data</CardTitle>
-                        <Dialog v-model:open="isModalOpen">
-                            <DialogTrigger as-child>
-                                <Button @click="openModal">Get Update</Button>
-                            </DialogTrigger>
-                            <DialogContent class="!max-w-4xl max-h-[80vh] overflow-y-auto">
-                                <DialogHeader>
-                                    <DialogTitle>Rekap Forms 'Greeting Ads' </DialogTitle>
-                                    <DialogDescription>
-                                        List rekap form dari 'Greeting Ads' VDnet
-                                    </DialogDescription>
-                                </DialogHeader>
+                        <CardTitle>Riwayat Kirim Konversi</CardTitle>
+                        <div class="flex items-center justify-end gap-1">
+                            <KirimKonversiForm />
+                            <Dialog v-model:open="isModalOpen">
+                                <DialogTrigger as-child>
+                                    <Button @click="openModal">Get Update</Button>
+                                </DialogTrigger>
+                                <DialogContent class="!max-w-4xl max-h-[80vh] overflow-y-auto">
+                                    <DialogHeader>
+                                        <DialogTitle>Rekap Forms 'Greeting Ads' </DialogTitle>
+                                        <DialogDescription>
+                                            List rekap form dari 'Greeting Ads' VDnet
+                                        </DialogDescription>
+                                    </DialogHeader>
 
-                                <div class="mt-2 flex justify-end gap-1">                              
-                                    <Button v-if="checkedItems && checkedItems.length > 0">
-                                        <Send /> Kirim Konversi
-                                    </Button>                     
-                                    <Button @click="fetchRekapForms">Reload</Button>
-                                </div>
-
-                                <div class="mt-2">
-                                    <!-- Loading State -->
-                                    <div v-if="isLoadingRekapForms" class="flex items-center justify-center py-8">
-                                        <div class="text-muted-foreground">Loading...</div>
+                                    <div class="mt-2 flex justify-end gap-1">                              
+                                        <Button v-if="checkedItems && checkedItems.length > 0">
+                                            <Send /> Kirim Konversi
+                                        </Button>                     
+                                        <Button @click="fetchRekapForms">Reload</Button>
                                     </div>
 
-                                    <!-- Error State -->
-                                    <div v-else-if="errorRekapForms" class="bg-destructive/10 text-destructive p-4 rounded-md">
-                                        <p class="font-medium">Error loading data</p>
-                                        <p class="text-sm">{{ errorRekapForms }}</p>
-                                    </div>
-
-                                    <!-- Data Display -->
-                                    <div v-else-if="rekapFormData" class="space-y-4">
-                                        <div class="overflow-auto max-h-[60vh]">
-                                            <table class="table text-xs w-full">
-                                                <thead>
-                                                    <tr>
-                                                        <th class="bg-gray-200 dark:bg-gray-700 px-4 py-2 border border-b text-left font-medium">
-                                                            <Checkbox
-                                                                :model-value="isAllSelected"
-                                                                :indeterminate="isSomeSelected && !isAllSelected"
-                                                                @update:model-value="toggleSelectAll"
-                                                                class="bg-white dark:bg-gray-700"
-                                                            />
-                                                        </th>
-                                                        <th class="bg-gray-200 dark:bg-gray-700 px-4 py-2 border border-b text-left font-medium">No</th>
-                                                        <th class="bg-gray-200 dark:bg-gray-700 px-4 py-2 border border-b text-left font-medium">Form ID</th>
-                                                        <th class="bg-gray-200 dark:bg-gray-700 px-4 py-2 border border-b text-left font-medium">Status</th>
-                                                        <th class="bg-gray-200 dark:bg-gray-700 px-4 py-2 border border-b text-left font-medium">gclid</th>
-                                                        <th class="bg-gray-200 dark:bg-gray-700 px-4 py-2 border border-b text-left font-medium">Created At</th>
-                                                        <th class="bg-gray-200 dark:bg-gray-700 px-4 py-2 border border-b text-left font-medium">Nama</th>
-                                                        <th class="bg-gray-200 dark:bg-gray-700 px-4 py-2 border border-b text-left font-medium">No Wa</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr v-for="(data, index) in rekapFormData.data" :key="data.id">
-                                                        <td class="px-4 py-2 border border-b">
-                                                            <Checkbox
-                                                                :model-value="checkedItems.some(item => item.id === data.id)"
-                                                                @update:model-value="(checked: boolean | string) => {
-                                                                    if (checked === true) {
-                                                                        checkedItems.push(data);
-                                                                    } else {
-                                                                        const idx = checkedItems.findIndex(item => item.id === data.id);
-                                                                        if (idx > -1) {
-                                                                            checkedItems.splice(idx, 1);
-                                                                        }
-                                                                    }
-                                                                }"
-                                                            />
-                                                        </td>
-                                                        <td class="px-4 py-2 border border-b">
-                                                            {{ Number(index) + 1 }}
-                                                        </td>
-                                                        <td class="px-4 py-2 border border-b">
-                                                            {{ data.id }}
-                                                        </td>
-                                                        <td class="px-4 py-2 border border-b">
-                                                            {{ data.status }}
-                                                        </td>
-                                                        <td class="px-4 py-2 border border-b">
-                                                            <div :title="data.gclid" class="max-w-[200px] overflow-hidden text-ellipsis whitespace-nowrap">
-                                                                {{ data.gclid }}
-                                                            </div>
-                                                        </td>
-                                                        <td class="px-4 py-2 border border-b">
-                                                            {{ formatLocalDate(data.created_at) }}
-                                                        </td>
-                                                        <td class="px-4 py-2 border border-b">
-                                                            {{ data.nama }}
-                                                        </td>
-                                                        <td class="px-4 py-2 border border-b">
-                                                            {{ data.no_whatsapp }}
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
+                                    <div class="mt-2">
+                                        <!-- Loading State -->
+                                        <div v-if="isLoadingRekapForms" class="flex items-center justify-center py-8">
+                                            <div class="text-muted-foreground">Loading...</div>
                                         </div>
-                                        <!-- <pre class="bg-muted p-4 rounded-md overflow-x-auto text-sm">{{ JSON.stringify(rekapFormData, null, 2) }}</pre> -->
-                                    </div>
 
-                                    <!-- Empty State -->
-                                    <div v-else class="text-center py-8 text-muted-foreground">
-                                        No data available
+                                        <!-- Error State -->
+                                        <div v-else-if="errorRekapForms" class="bg-destructive/10 text-destructive p-4 rounded-md">
+                                            <p class="font-medium">Error loading data</p>
+                                            <p class="text-sm">{{ errorRekapForms }}</p>
+                                        </div>
+
+                                        <!-- Data Display -->
+                                        <div v-else-if="rekapFormData" class="space-y-4">
+                                            <div class="overflow-auto max-h-[60vh]">
+                                                <table class="table text-xs w-full">
+                                                    <thead>
+                                                        <tr>
+                                                            <th class="bg-gray-200 dark:bg-gray-700 px-4 py-2 border border-b text-left font-medium">
+                                                                <Checkbox
+                                                                    :model-value="isAllSelected"
+                                                                    :indeterminate="isSomeSelected && !isAllSelected"
+                                                                    @update:model-value="toggleSelectAll"
+                                                                    class="bg-white dark:bg-gray-700"
+                                                                />
+                                                            </th>
+                                                            <th class="bg-gray-200 dark:bg-gray-700 px-4 py-2 border border-b text-left font-medium">No</th>
+                                                            <th class="bg-gray-200 dark:bg-gray-700 px-4 py-2 border border-b text-left font-medium">Form ID</th>
+                                                            <th class="bg-gray-200 dark:bg-gray-700 px-4 py-2 border border-b text-left font-medium">Status</th>
+                                                            <th class="bg-gray-200 dark:bg-gray-700 px-4 py-2 border border-b text-left font-medium">gclid</th>
+                                                            <th class="bg-gray-200 dark:bg-gray-700 px-4 py-2 border border-b text-left font-medium">Created At</th>
+                                                            <th class="bg-gray-200 dark:bg-gray-700 px-4 py-2 border border-b text-left font-medium">Nama</th>
+                                                            <th class="bg-gray-200 dark:bg-gray-700 px-4 py-2 border border-b text-left font-medium">No Wa</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr v-for="(data, index) in rekapFormData.data" :key="data.id">
+                                                            <td class="px-4 py-2 border border-b">
+                                                                <Checkbox
+                                                                    :model-value="checkedItems.some(item => item.id === data.id)"
+                                                                    @update:model-value="(checked: boolean | string) => {
+                                                                        if (checked === true) {
+                                                                            checkedItems.push(data);
+                                                                        } else {
+                                                                            const idx = checkedItems.findIndex(item => item.id === data.id);
+                                                                            if (idx > -1) {
+                                                                                checkedItems.splice(idx, 1);
+                                                                            }
+                                                                        }
+                                                                    }"
+                                                                />
+                                                            </td>
+                                                            <td class="px-4 py-2 border border-b">
+                                                                {{ Number(index) + 1 }}
+                                                            </td>
+                                                            <td class="px-4 py-2 border border-b">
+                                                                {{ data.id }}
+                                                            </td>
+                                                            <td class="px-4 py-2 border border-b">
+                                                                {{ data.status }}
+                                                            </td>
+                                                            <td class="px-4 py-2 border border-b">
+                                                                <div :title="data.gclid" class="max-w-[200px] overflow-hidden text-ellipsis whitespace-nowrap">
+                                                                    {{ data.gclid }}
+                                                                </div>
+                                                            </td>
+                                                            <td class="px-4 py-2 border border-b">
+                                                                {{ formatLocalDate(data.created_at) }}
+                                                            </td>
+                                                            <td class="px-4 py-2 border border-b">
+                                                                {{ data.nama }}
+                                                            </td>
+                                                            <td class="px-4 py-2 border border-b">
+                                                                {{ data.no_whatsapp }}
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <!-- <pre class="bg-muted p-4 rounded-md overflow-x-auto text-sm">{{ JSON.stringify(rekapFormData, null, 2) }}</pre> -->
+                                        </div>
+
+                                        <!-- Empty State -->
+                                        <div v-else class="text-center py-8 text-muted-foreground">
+                                            No data available
+                                        </div>
                                     </div>
-                                </div>
-                            </DialogContent>
-                        </Dialog>
+                                </DialogContent>
+                            </Dialog>
+                        </div>
                     </div>
                     
                     <!-- Per Page Selector -->
