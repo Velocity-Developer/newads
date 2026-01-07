@@ -15,10 +15,10 @@ Schedule::call(function () {
 
 // Scheduler definitions (migrated from App\Console\Kernel)
 // Validate mode (tanpa --apply): jalan tiap 10 menit
-Schedule::command('negative-keywords:pipeline')
-    ->everyTenMinutes()
-    ->withoutOverlapping()
-    ->appendOutputTo(storage_path('logs/negative_keywords_pipeline.log'));
+// Schedule::command('negative-keywords:pipeline')
+//     ->everyTenMinutes()
+//     ->withoutOverlapping()
+//     ->appendOutputTo(storage_path('logs/negative_keywords_pipeline.log'));
 
 // Apply mode: contoh 1 (pakai string flag --apply)
 // Schedule::command('negative-keywords:pipeline --apply')
