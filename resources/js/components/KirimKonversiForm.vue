@@ -39,7 +39,13 @@ const dataResponse = ref(null) as any;
 const submitForm = async () => {
 
     //jika action click_conversion, conversion_time dan gclid harus diisi
-    if (form.value.action == 'click_conversion' && (form.value.conversion_time == '' || form.value.gclid == '')) {
+    if (form.value.action == 'click_conversion' && form.value.conversion_time == '' || form.value.action == 'click_conversion' && form.value.gclid == '') {
+        toast.error('Wajib isi Waktu Konversi dan GCLID');
+        return;
+    }
+    
+    //jika action check_gclid, conversion_time dan gclid harus diisi
+    if (form.value.action == 'check_gclid' && form.value.conversion_time == '' || form.value.action == 'check_gclid' && form.value.gclid == '') {
         toast.error('Wajib isi Waktu Konversi dan GCLID');
         return;
     }
@@ -70,17 +76,47 @@ const submitForm = async () => {
                 <CloudUpload/>Kirim Konversi Manual
             </Button>
         </DialogTrigger>
-         <DialogContent class="!max-w-2xl max-h-[80vh] overflow-y-auto">
+         <DialogContent class="!max-w-2xl md:!max-w-4xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
                 <DialogTitle>Kirim Konversi Manual</DialogTitle>
+                <DialogDescription>
+                    Kirim Konversi Manual ke Google Ads.
+                </DialogDescription>
             </DialogHeader>
+
+            
+            <form method="post" @submit.prevent="submitForm">
+                <div class="flex flex-col gap-4">
+                    <div>
+                        <Label class="mb-2" for="gclid">Masukkan GCLID:</Label>
+                        <Textarea id="gclid" type="text" name="gclid" v-model="form.gclid" />
+                    </div>
+                    <div>
+                        <Label class="mb-2" for="conversion_time">Waktu Konversi (24 Jam):</Label>
+                        <Input id="conversion_time" type="datetime-local" name="conversion_time" v-model="form.conversion_time" />
+                    </div>
+                    <div class="flex flex-col xl:flex-row  justify-end gap-1">                       
+                        <Button type="button" @click="form.action = 'click_conversion'; submitForm()" class="mb-4 xl:mb-0 cursor-pointer !bg-blue-600 hover:!bg-blue-700 text-white dark:!bg-blue-800 dark:hover:!bg-blue-900">
+                            <Send /> Kirim ke Google Ads
+                        </Button>
+
+                        <Button type="button" @click="form.action = 'check_gclid'; submitForm()" class="cursor-pointer">
+                            <Binoculars /> Cek GCLID
+                        </Button>
+                        <Button type="button" @click="form.action = 'timezone'; submitForm()" class="!bg-green-600 cursor-pointer text-white dark:!bg-green-800">
+                            <CalendarClock /> Cek TimeZone Akun
+                        </Button> 
+                    </div>
+                </div>
+            </form>
+
 
             <!-- loading -->
              <div v-if="loading" class="flex items-center justify-center gap-2 bg-blue-100 dark:bg-muted-foreground p-4 rounded">
                 <Loader class="animate-spin" />
                 loading...
              </div>
-
+            
              <!-- response -->
             <template v-if="dataResponse">
                 
@@ -96,37 +132,12 @@ const submitForm = async () => {
                 </div>
 
                 <div v-if="dataResponse.result && dataResponse.success">
-                    <div class="p-4 mb-4 rounded text-slate-700 border bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-400 text-xs break-all w-full">
+                    <div class="p-4 mb-4 rounded text-slate-700 border bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-400 text-xs">
                         <pre>{{ JSON.stringify(dataResponse.result, null, 2) }}</pre>
                     </div>
                 </div>
 
             </template>
-            
-            <form method="post" @submit.prevent="submitForm">
-                <div class="flex flex-col gap-4">
-                    <div>
-                        <Label class="mb-2" for="gclid">Masukkan GCLID:</Label>
-                        <Textarea id="gclid" type="text" name="gclid" v-model="form.gclid" />
-                    </div>
-                    <div>
-                        <Label class="mb-2" for="conversion_time">Waktu Konversi (24 Jam):</Label>
-                        <Input id="conversion_time" type="text" name="conversion_time" v-model="form.conversion_time" />
-                    </div>
-                    <div class="flex flex-col justify-end gap-1">                       
-                        <Button type="button" @click="form.action = 'click_conversion'; submitForm()" class="mb-4 !py-6 cursor-pointer !bg-blue-600 hover:!bg-blue-700 text-white dark:!bg-blue-800 dark:hover:!bg-blue-900">
-                            <Send /> Kirim ke Google Ads
-                        </Button>
-
-                        <Button type="button" @click="form.action = 'check_gclid'; submitForm()" class="cursor-pointer">
-                            <Binoculars /> Cek GCLID
-                        </Button>
-                        <Button type="button" @click="form.action = 'timezone'; submitForm()" class="!bg-green-600 cursor-pointer text-white dark:!bg-green-800">
-                            <CalendarClock /> Cek TimeZone Akun
-                        </Button> 
-                    </div>
-                </div>
-            </form>
 
             <div class="mt-5 text-xs text-muted-foreground p-2 rounded bg-muted dark:bg-muted-foreground">
                 Catatan: Picker menampilkan waktu format 24 jam (HH:MM).<br>Sistem PHP tetap mengirim ke Google Ads dalam format: <code class="bg-gray-300 text-amber-700 px-2">Y-m-d H:i:sP</code> (dengan offset +07:00).
