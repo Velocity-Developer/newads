@@ -26,5 +26,7 @@ return [
             'terms' => env('VELOCITY_ADS_MATCH_TYPE_TERMS', 'EXACT'),
             'frasa' => env('VELOCITY_ADS_MATCH_TYPE_FRASA', 'PHRASE'),
         ],
+        // Konfigurasi secret key untuk autentikasi
+        'api_secret_key' => env('VELOCITY_ADS_API_SECRET_KEY'),
     ],
 ];

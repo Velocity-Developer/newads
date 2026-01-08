@@ -8,7 +8,7 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Log;
 use App\Services\NewVDnet\RekapFormServices;
-use App\Services\GoogleAds\KirimKonversiService;
+use App\Services\Velocity\KirimKonversiService;
 
 class KirimKonversiController extends Controller
 {
@@ -96,22 +96,16 @@ class KirimKonversiController extends Controller
         return response()->json($rekapForms);
     }
 
-    //kirim konversi ke Google Ads
-    public function kirim_konversi_google_ads(Request $request)
+    //kirim konversi ke Velocity Ads
+    public function kirim_konversi_velocity(Request $request)
     {
-        $params = $request->query();
-        // $kirimKonversiService = app()->make(KirimKonversiService::class);
-        // $response = $kirimKonversiService->kirim_konversi($params);
-        return Redirect::route('kirim-konversi.index')
-            ->with('success', 'Berhasil mengirim data konversi ke Google Ads.');
-    }
+        $kirimKonversiService = new KirimKonversiService();
 
-    //cek time zone
-    public function cek_time_zone(Request $request)
-    {
-        $params = $request->query();
-        $kirimKonversiService = app()->make(KirimKonversiService::class);
-        $response = $kirimKonversiService->get_time_zone($params);
+        $response = $kirimKonversiService->kirimKonversi(
+            $request->input('action'),
+            $request->input('gclid'),
+            $request->input('conversion_time')
+        );
         return response()->json($response);
     }
 }
