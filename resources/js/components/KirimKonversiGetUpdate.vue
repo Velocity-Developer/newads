@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
-import { Send,Trash2,Eye, Trash } from 'lucide-vue-next';
+import { Send, Loader2 } from 'lucide-vue-next';
 import axios from 'axios';
 import { toast } from 'vue-sonner'
 
@@ -126,11 +126,18 @@ const sendKonversi = async () => {
                 </DialogDescription>
             </DialogHeader>
 
-            <div class="mt-2 flex justify-end gap-1">                              
-                <Button v-if="checkedItems && checkedItems.length > 0" @click="sendKonversi" class="cursor-pointer !bg-blue-600 hover:!bg-blue-700 text-white dark:!bg-blue-800 dark:hover:!bg-blue-90">
-                    <Send /> Kirim Konversi
-                </Button>                     
-                <Button @click="fetchRekapForms">Reload</Button>
+            <div class="mt-2 flex justify-between gap-1">  
+                <div v-if="rekapFormData">
+                    <div class="border px-4 py-2 rounded">
+                        Total : {{ rekapFormData.total }}
+                    </div>
+                </div>
+                <div class="mt-2 md:mt-0 flex justify-end gap-1">                              
+                    <Button v-if="checkedItems && checkedItems.length > 0" @click="sendKonversi" class="cursor-pointer !bg-blue-600 hover:!bg-blue-700 text-white dark:!bg-blue-800 dark:hover:!bg-blue-90">
+                        <Send /> Kirim Konversi
+                    </Button>                     
+                    <Button @click="fetchRekapForms"> <Loader2 :class="isLoadingRekapForms?'animate-spin':''"/> Reload</Button>
+                </div>
             </div>
 
             <div class="mt-2">
