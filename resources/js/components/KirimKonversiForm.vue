@@ -117,7 +117,7 @@ const submitForm = async () => {
 
 
             <!-- loading -->
-             <div v-if="loading" class="flex items-center justify-center gap-2 bg-blue-100 dark:bg-muted-foreground p-4 rounded">
+             <div v-if="loading" class="flex items-center justify-center gap-2 text-blue-600 dark:text-blue-300 bg-blue-100 dark:bg-blue-800 p-4 rounded">
                 <Loader class="animate-spin" />
                 loading...
              </div>
@@ -137,15 +137,15 @@ const submitForm = async () => {
                 </div>
 
                 <div v-if="dataResponse.result && dataResponse.success">
-                    <div class="p-4 mb-4 rounded text-slate-700 border bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-400 text-xs">
+                    <div class="p-4 mb-4 rounded text-slate-700 dark:text-slate-300 border bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-400 text-xs">
                         <pre>{{ JSON.stringify(dataResponse.result, null, 2) }}</pre>
                     </div>
                 </div>
 
             </template>
 
-            <div class="mt-5 text-xs text-muted-foreground p-2 rounded bg-muted dark:bg-muted-foreground">
-                Catatan: Picker menampilkan waktu format 24 jam (HH:MM).<br>Sistem PHP tetap mengirim ke Google Ads dalam format: <code class="bg-gray-300 text-amber-700 px-2">Y-m-d H:i:sP</code> (dengan offset +07:00).
+            <div class="mt-5 text-xs text-muted-foreground dark:text-muted-foreground p-2 rounded bg-muted dark:bg-gray-800">
+                Catatan: Picker menampilkan waktu format 24 jam (HH:MM).<br>Sistem PHP tetap mengirim ke Google Ads dalam format: <code class="bg-gray-300 dark:bg-gray-700 text-amber-700 px-2">Y-m-d H:i:sP</code> (dengan offset +07:00).
             </div>
 
          </DialogContent>
