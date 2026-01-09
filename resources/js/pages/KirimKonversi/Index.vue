@@ -272,6 +272,16 @@ const sendKonversi = async () => {
     loadingSendKonversi.value = true;
 }
 
+// Update data response when form is submitted
+const updateDataResponse = (data: any) => {
+    //reload data
+    router.get('/kirim-konversi', { ...props.filters, per_page: props.kirimKonversis.per_page }, {
+        preserveScroll: true,
+    });
+}
+
+
+
 </script>
 
 <template>
@@ -362,7 +372,7 @@ const sendKonversi = async () => {
                     <div class="flex items-center justify-between">
                         <CardTitle>Riwayat Kirim Konversi</CardTitle>
                         <div class="flex items-center justify-end gap-1">
-                            <KirimKonversiForm />
+                            <KirimKonversiForm @update="updateDataResponse" />
                             <Dialog v-model:open="isModalOpen">
                                 <DialogTrigger as-child>
                                     <Button @click="openModal">Get Update</Button>

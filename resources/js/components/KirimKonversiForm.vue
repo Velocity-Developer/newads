@@ -16,6 +16,8 @@ import { CloudUpload, Send, CalendarClock,Binoculars, BinocularsIcon, Loader  } 
 import axios from 'axios';
 import { toast } from 'vue-sonner'
 
+const emit = defineEmits(['update']);
+
 const isModalOpen = ref(false);
 const form = ref({
     gclid: '',
@@ -58,6 +60,9 @@ const submitForm = async () => {
             ...form.value
         });
         dataResponse.value = response.data;
+        if (form.value.action == 'click_conversion') {
+            emit('update', dataResponse.value);
+        }
     } catch (error : any) {
         console.error('Error fetching time zone:', error);
         toast.error(error.response?.data?.message || 'Error fetching time zone')
