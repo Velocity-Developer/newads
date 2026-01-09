@@ -103,12 +103,44 @@ const toggleSelectAll = (checked: boolean | string) => {
 };
 
 const loadingSendKonversi = ref(false);
+const countcheckedItems = ref(0);
+const countProccess = ref(0);
 const sendKonversi = async () => { 
     if (checkedItems.value.length === 0) {
         toast.error('Pilih data yang akan dikirim');
         return;
     }
+
     loadingSendKonversi.value = true;
+    countcheckedItems.value = checkedItems.value.length;
+    countProccess.value = 0;
+
+    //loop checkedItems
+    for (const item of checkedItems.value) {
+        try {
+            //kirim konversi dari rekap form ke Velocity Ads
+            const response = await axios.post('/kirim_konversi/kirim_konversi_dari_rekap_form', {
+                rekapform: item,
+            });
+            //tambahkan toast success
+            toast.success(`Konversi dari rekap form ${item.nama} berhasil dikirim`);
+        } catch (error) {
+            //tambahkan toast error
+            toast.error(`Konversi dari rekap form ${item.nama} gagal dikirim`);
+        } finally {
+            //tambahkan countProccess
+            countProccess.value++;
+        }
+
+        //jika semua data selesai diproses
+        if (countProccess.value === countcheckedItems.value) {
+            //tambahkan toast success
+            toast.success(`Semua data selesai diproses`);
+            loadingSendKonversi.value = false;
+            fetchRekapForms();
+        }
+    }
+
 }
 
 </script>
@@ -127,7 +159,7 @@ const sendKonversi = async () => {
             </DialogHeader>
 
             <div class="mt-2 flex justify-between gap-1">  
-                <div v-if="rekapFormData">
+                <div v-if="rekapFormData" class=":mt-0 flex justify-start gap-1">
                     <div class="border px-4 py-2 rounded">
                         Total : {{ rekapFormData.total }}
                     </div>
@@ -141,6 +173,12 @@ const sendKonversi = async () => {
             </div>
 
             <div class="mt-2">
+                
+                <!-- Loading Kirim Konversi -->
+                <div v-if="loadingSendKonversi" class="flex items-center justify-center py-8">
+                    <Loader2 class="animate-spin"/> Kirim konversi : {{ countProccess }}/{{ countcheckedItems }}...
+                </div>
+
                 <!-- Loading State -->
                 <div v-if="isLoadingRekapForms" class="flex items-center justify-center py-8">
                     <div class="text-muted-foreground">Loading...</div>

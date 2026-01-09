@@ -109,4 +109,16 @@ class KirimKonversiController extends Controller
 
         return response()->json($response);
     }
+
+    //kirim konversi dari rekap form ke Velocity Ads
+    public function kirim_konversi_dari_rekap_form(Request $request)
+    {
+        $kirimKonversiService = new KirimKonversiService();
+
+        $response = $kirimKonversiService->kirimKonversiDariRekapForm(
+            $request->input('rekapform')
+        );
+
+        return response()->json($response);
+    }
 }

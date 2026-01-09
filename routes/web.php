@@ -58,6 +58,7 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/kirim_konversi/get_list_rekap_forms', [KirimKonversiController::class, 'get_list_rekap_forms']);
     Route::post('/kirim_konversi/kirim_konversi_velocity', [KirimKonversiController::class, 'kirim_konversi_velocity']);
+    Route::post('/kirim_konversi/kirim_konversi_dari_rekap_form', [KirimKonversiController::class, 'kirim_konversi_dari_rekap_form']);
 });
 
 require __DIR__ . '/settings.php';

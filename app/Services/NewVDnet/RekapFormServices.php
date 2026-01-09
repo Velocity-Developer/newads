@@ -43,6 +43,19 @@ class RekapFormServices
         }
     }
 
+    //update_cek_konversi
+    public function update_cek_konversi(array $data)
+    {
+        $url = $this->rekapApiUrl . '/rekap-form-update-konversi-ads';
+        $payload['data'] = $data;
+
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $this->apiToken,
+        ])->post($url, $payload);
+
+        return $response->json();
+    }
+
     //get by id
     public function get_by_id(int $id): array
     {
