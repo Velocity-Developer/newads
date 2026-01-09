@@ -19,6 +19,8 @@ import { Head, Link, router } from '@inertiajs/vue3';
 import { ref, watch, computed } from 'vue';
 import { Send } from 'lucide-vue-next';
 import KirimKonversiForm from '@/components/KirimKonversiForm.vue';
+import axios from 'axios';
+import { toast } from 'vue-sonner'
 
 interface KirimKonversi {
     id: number;
@@ -261,6 +263,15 @@ const toggleSelectAll = (checked: boolean | string) => {
     }
 };
 
+const loadingSendKonversi = ref(false);
+const sendKonversi = async () => { 
+    if (checkedItems.value.length === 0) {
+        toast.error('Pilih data yang akan dikirim');
+        return;
+    }
+    loadingSendKonversi.value = true;
+}
+
 </script>
 
 <template>
@@ -365,7 +376,7 @@ const toggleSelectAll = (checked: boolean | string) => {
                                     </DialogHeader>
 
                                     <div class="mt-2 flex justify-end gap-1">                              
-                                        <Button v-if="checkedItems && checkedItems.length > 0">
+                                        <Button v-if="checkedItems && checkedItems.length > 0" @click="sendKonversi" class="cursor-pointer !bg-blue-600 hover:!bg-blue-700 text-white dark:!bg-blue-800 dark:hover:!bg-blue-90">
                                             <Send /> Kirim Konversi
                                         </Button>                     
                                         <Button @click="fetchRekapForms">Reload</Button>

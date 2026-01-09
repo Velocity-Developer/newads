@@ -106,6 +106,7 @@ class KirimKonversiController extends Controller
             $request->input('gclid'),
             $request->input('conversion_time')
         );
+
         return response()->json($response);
     }
 }

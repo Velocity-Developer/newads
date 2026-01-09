@@ -4,6 +4,7 @@ namespace App\Services\Velocity;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use App\Models\KirimKonversi;
 
 class KirimKonversiService
 {
@@ -45,6 +46,19 @@ class KirimKonversiService
             'Authorization' => 'Bearer ' . $this->secret_key,
             'X-Time' => $this->time,
         ])->post($this->api_url, $data);
+
+        //jika respon success, tambahkan data ke table kirim_konversi
+        $dataRes = $response ?? [];
+        if ($dataRes['success'] && $action == 'click_conversion') {
+            KirimKonversi::create([
+                'gclid'         => $dataRes['result']['results'][0]['gclid'],
+                'jobid'         => $dataRes['result']['jobId'],
+                'waktu'         => $dataRes['result']['results'][0]['conversionDateTime'],
+                'status'        => 'success',
+                'response'      => $dataRes['result'],
+                'source'        => 'manual',
+            ]);
+        }
 
         return $response->json();
     }
