@@ -2,6 +2,7 @@
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
+import ThemeToggle from '@/components/ThemeToggle.vue';
 import {
     Sidebar,
     SidebarContent,
@@ -68,6 +69,7 @@ const footerNavItems: NavItem[] = [];
 
         <SidebarFooter>
             <NavFooter :items="footerNavItems" />
+            <ThemeToggle />
             <NavUser />
         </SidebarFooter>
     </Sidebar>
