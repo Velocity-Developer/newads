@@ -17,10 +17,12 @@ class KirimKonversi extends Model
         'response',
         'source',
         'rekap_form_id',
+        'tercatat',
     ];
 
     // cast response to json
     protected $casts = [
         'response' => 'json',
+        'tercatat' => 'boolean',
     ];
 }

@@ -49,14 +49,15 @@ class KirimKonversiService
 
         //jika respon success, tambahkan data ke table kirim_konversi
         $dataRes = $response ?? [];
-        if ($dataRes['success'] && $action == 'click_conversion') {
+        if ($action == 'click_conversion') {
             KirimKonversi::create([
                 'gclid'         => $dataRes['result']['results'][0]['gclid'],
                 'jobid'         => $dataRes['result']['jobId'],
                 'waktu'         => $dataRes['result']['results'][0]['conversionDateTime'],
-                'status'        => 'success',
+                'status'        => $dataRes['success'] ? 'success' : 'failed',
                 'response'      => $dataRes['result'],
                 'source'        => 'manual',
+                'tercatat'      => $dataRes['tercatat'] !== 'tidak' ? 1 : 0,
             ]);
         }
 

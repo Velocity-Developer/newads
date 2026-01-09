@@ -18,6 +18,7 @@ interface KirimKonversi {
     rekap_form_id: string | null;
     created_at: string;
     updated_at: string;
+    tercatat: boolean | null;
 }
 
 interface Props {
@@ -88,9 +89,9 @@ const formatJson = (text: string | null) => {
             </div>
 
             <!-- Main Information -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <!-- Basic Information -->
-                <Card>
+                <Card class="lg:col-span-2">
                     <CardHeader>
                         <CardTitle>Basic Information</CardTitle>
                         <CardDescription>Core details of the conversion submission</CardDescription>
@@ -103,7 +104,7 @@ const formatJson = (text: string | null) => {
                             </div>
                             <div>
                                 <label class="text-sm font-medium text-muted-foreground">GCLID</label>
-                                <p class="font-mono text-sm">{{ kirimKonversi.gclid }}</p>
+                                <p class="font-mono text-sm break-all">{{ kirimKonversi.gclid }}</p>
                             </div>
                             <div>
                                 <label class="text-sm font-medium text-muted-foreground">Job ID</label>
@@ -148,8 +149,8 @@ const formatJson = (text: string | null) => {
                                 <p class="text-sm">{{ kirimKonversi.waktu || '-' }}</p>
                             </div>
                             <div>
-                                <label class="text-sm font-medium text-muted-foreground">Created At</label>
-                                <p class="text-sm">{{ formatDate(kirimKonversi.created_at) }}</p>
+                                <label class="text-sm font-medium text-muted-foreground">Tercatat</label>
+                                <p class="text-sm">{{ kirimKonversi.tercatat ? 'Ya' : 'Tidak' }}</p>
                             </div>
                         </div>
                     </CardContent>

@@ -17,7 +17,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ref, watch, computed } from 'vue';
-import { Send } from 'lucide-vue-next';
+import { Send,Trash2,Eye, Trash } from 'lucide-vue-next';
 import KirimKonversiForm from '@/components/KirimKonversiForm.vue';
 import axios from 'axios';
 import { toast } from 'vue-sonner'
@@ -510,7 +510,9 @@ const sendKonversi = async () => {
                                         <div class="font-medium">{{ kirimKonversis.data.indexOf(item) + kirimKonversis.from }}</div>
                                     </td>
                                     <td class="p-2">
-                                        <div class="font-mono text-sm">{{ item.gclid }}</div>
+                                        <div :title="item.gclid" class="font-mono text-sm max-w-40 overflow-hidden text-ellipsis whitespace-nowrap">
+                                            {{ item.gclid }}
+                                        </div>
                                     </td>
                                     <td class="p-2">
                                         <div class="font-mono text-sm">{{ item.jobid || '-' }}</div>
@@ -538,10 +540,12 @@ const sendKonversi = async () => {
                                     <td class="p-2">
                                         <div class="flex gap-2">
                                             <Button variant="outline" size="sm" as-child>
-                                                <Link :href="`/kirim-konversi/${item.id}`">View</Link>
+                                                <Link :href="`/kirim-konversi/${item.id}`">
+                                                    <Eye/>
+                                                </Link>
                                             </Button>
-                                            <Button variant="destructive" size="sm" @click="deleteKirimKonversi(item)">
-                                                Delete
+                                            <Button variant="destructive" size="sm" @click="deleteKirimKonversi(item)">                                                
+                                                <Trash/>
                                             </Button>
                                         </div>
                                     </td>
