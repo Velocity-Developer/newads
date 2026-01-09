@@ -50,6 +50,7 @@ class KirimKonversiService
 
         //jika respon success, tambahkan data ke table kirim_konversi
         $dataRes = $response ? $response->json() : [];
+
         if ($action == 'click_conversion') {
             $datakirim = KirimKonversi::create([
                 'gclid'         => $dataRes['result']['results'][0]['gclid'],
@@ -94,12 +95,10 @@ class KirimKonversiService
         // sample : 2026-01-09 04:40:35+07:00
         // ditambahkan 15 menit, menjadi 2026-01-09 04:55:35+07:00
         // pertahankan format Y-m-d H:i
-        $conversion_time = date('Y-m-d H:i', strtotime($conversion_time . ' +15 minutes'));
+        $conversion_time = date('Y-m-d H:i', strtotime($conversion_time . ' +5 minutes'));
 
         //kirim konversi click_conversion
         $dataRes = $this->kirimKonversi('click_conversion', $gclid, $conversion_time, $rekapform);
-
-        $dataRes = json_decode($dataRes, true);
 
         //update ke Vdnet melalui RekapFormServices
         $rekapFormServices = new RekapFormServices();
