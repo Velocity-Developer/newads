@@ -36,6 +36,8 @@ class KirimKonversiCommand extends Command
             return self::SUCCESS;
         }
 
+        Log::info('[CRON] kirim-konversi:sync-vdnet START');
+
         //catat last run time
         Setting::set('schedule_last_run_kirim_konversi_sync_vdnet', now());
 

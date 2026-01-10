@@ -25,3 +25,6 @@ Schedule::call(function () {
 //     ->everyTenMinutes() // atur sesuai kebutuhan: hourly(), dailyAt('02:00'), dll.
 //     ->withoutOverlapping()
 //     ->appendOutputTo(storage_path('logs/negative_keywords_pipeline_apply.log'));
+
+// Schedule::command('kirim-konversi:sync-vdnet')
+//     ->everyFiveMinutes();
