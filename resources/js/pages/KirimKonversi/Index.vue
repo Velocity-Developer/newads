@@ -4,11 +4,10 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ref, watch, computed } from 'vue';
-import { Send,Trash2,Eye, Trash } from 'lucide-vue-next';
+import { Eye, Trash } from 'lucide-vue-next';
 import KirimKonversiForm from '@/components/KirimKonversiForm.vue';
 import KirimKonversiGetUpdate from '@/components/KirimKonversiGetUpdate.vue';
 
@@ -101,6 +100,7 @@ const formatText = (text: string | null, maxLength: number = 50) => {
 
 const applyFilters = () => {
     const params: Record<string, any> = { ...props.filters };
+    console.log(filters)
     router.get('/kirim-konversi', params, {
         preserveState: true,
         preserveScroll: true,
@@ -203,33 +203,23 @@ const updateDataResponse = (data: any) => {
                         <!-- Status Filter -->
                         <div>
                             <label class="text-sm font-medium mb-2 block">Status</label>
-                            <Select v-model="filters.status">
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select Status" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Status</SelectItem>
-                                    <SelectItem value="success">Success</SelectItem>
-                                    <SelectItem value="failed">Failed</SelectItem>
-                                    <SelectItem value="pending">Pending</SelectItem>
-                                    <SelectItem value="error">Error</SelectItem>
-                                </SelectContent>
-                            </Select>
+                            <select id="status" name="status" placeholder="Select Status" v-model="filters.status" class="border p-2 rounded text-sm w-full">
+                                <option value="all">All Status</option>
+                                <option value="success">Success</option>
+                                <option value="failed">Failed</option>
+                                <option value="pending">Pending</option>
+                                <option value="error">Error</option>
+                            </select>
                         </div>
                         
                         <!-- Source Filter -->
                         <div>
                             <label class="text-sm font-medium mb-2 block">Source</label>
-                            <Select v-model="filters.source">
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select Source" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Sources</SelectItem>
-                                    <SelectItem value="greetingads">Greeting Ads</SelectItem>
-                                    <SelectItem value="manual">Manual</SelectItem>
-                                </SelectContent>
-                            </Select>
+                            <select id="source" name="source" placeholder="Select Status" v-model="filters.source" class="border p-2 rounded text-sm w-full">
+                                <option value="">All Sources</option>
+                                <option value="greetingads">Greeting Ads</option>
+                                <option value="manual">Manual</option>
+                            </select>
                         </div>
                         
                         <!-- Date From -->
