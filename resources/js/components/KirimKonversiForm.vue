@@ -12,7 +12,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog';
-import { CloudUpload, Send, CalendarClock,Binoculars, BinocularsIcon, Loader  } from 'lucide-vue-next';
+import { CloudUpload, Send, CalendarClock,Binoculars, Loader } from 'lucide-vue-next';
 import axios from 'axios';
 import { toast } from 'vue-sonner'
 
@@ -78,7 +78,7 @@ const submitForm = async () => {
     <Dialog v-model:open="isModalOpen">
         <DialogTrigger as-child>
             <Button @click="openModal" class="!bg-blue-700 text-white dark:!bg-blue-800"> 
-                <CloudUpload/>Kirim Konversi Manual
+                <CloudUpload/>Konversi Manual
             </Button>
         </DialogTrigger>
          <DialogContent class="!max-w-2xl md:!max-w-4xl max-h-[80vh] overflow-y-auto">

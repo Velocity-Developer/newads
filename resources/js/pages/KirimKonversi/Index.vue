@@ -4,10 +4,20 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ref, watch, computed } from 'vue';
-import { Eye, Trash } from 'lucide-vue-next';
+import { Eye, Trash, Filter } from 'lucide-vue-next';
 import KirimKonversiForm from '@/components/KirimKonversiForm.vue';
 import KirimKonversiGetUpdate from '@/components/KirimKonversiGetUpdate.vue';
 
@@ -234,86 +244,21 @@ const updateDataResponse = (data: any) => {
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-6">
-            <!-- Filters Section -->
-            <Card>
-                <CardHeader>
-                    <CardTitle>Filters</CardTitle>
-                    <CardDescription>Filter data Kirim Konversi</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <!-- Search -->
-                        <div>
-                            <label class="text-sm font-medium mb-2 block">Search</label>
-                            <Input
-                                v-model="filters.search"
-                                placeholder="Search GCLID, Job ID, Status, Source..."
-                                @keyup.enter="applyFilters"
-                            />
-                        </div>
-                        
-                        <!-- Status Filter -->
-                        <div>
-                            <label class="text-sm font-medium mb-2 block">Status</label>
-                            <select id="status" name="status" placeholder="Select Status" v-model="filters.status" class="border p-2 rounded text-sm w-full">
-                                <option value="all">All Status</option>
-                                <option value="success">Success</option>
-                                <option value="failed">Failed</option>
-                                <option value="pending">Pending</option>
-                                <option value="error">Error</option>
-                            </select>
-                        </div>
-                        
-                        <!-- Source Filter -->
-                        <div>
-                            <label class="text-sm font-medium mb-2 block">Source</label>
-                            <select id="source" name="source" placeholder="Select Status" v-model="filters.source" class="border p-2 rounded text-sm w-full">
-                                <option value="">All Sources</option>
-                                <option value="greetingads">Greeting Ads</option>
-                                <option value="manual">Manual</option>
-                            </select>
-                        </div>
-                        
-                        <!-- Date From -->
-                        <div>
-                            <label class="text-sm font-medium mb-2 block">Date From</label>
-                            <Input
-                                v-model="filters.date_from"
-                                type="date"
-                            />
-                        </div>
-                        
-                        <!-- Date To -->
-                        <div>
-                            <label class="text-sm font-medium mb-2 block">Date To</label>
-                            <Input
-                                v-model="filters.date_to"
-                                type="date"
-                            />
-                        </div>
-                        
-                        <!-- Action Buttons -->
-                        <div class="flex items-end gap-2">
-                            <Button @click="applyFilters">Apply Filters</Button>
-                            <Button variant="outline" @click="clearFilters">Clear</Button>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
+            
+            <div class="mt-2 md:mt-0 flex items-center justify-end gap-1">
+                <KirimKonversiForm @update="updateDataResponse" />
+                <KirimKonversiGetUpdate @update="updateDataResponse" />                            
+            </div>
 
             <!-- Kirim Konversi Table -->
             <Card>
                 <CardHeader>
-                    <div class="flex items-center justify-between">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between">
                         <CardTitle>Riwayat Kirim Konversi</CardTitle>
-                        <div class="flex items-center justify-end gap-1">
-                            <KirimKonversiForm @update="updateDataResponse" />
-                            <KirimKonversiGetUpdate @update="updateDataResponse" />                            
-                        </div>
                     </div>
                     
                     <!-- Per Page Selector -->
-                    <div class="md:flex items-center justify-between mt-5">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between mt-5">
                         <div class="flex items-center justify-end md:justify-start gap-4 mb-2 md:mb-0">                       
                             <select v-model="kirimKonversis.per_page" @change="changePerPage($event)" class="border rounded text-sm px-3 py-2">
                                 <option value="10">10</option>
@@ -321,9 +266,84 @@ const updateDataResponse = (data: any) => {
                                 <option value="50">50</option>
                                 <option value="100">100</option>
                             </select>
+                            <Dialog>                                
+                                <DialogTrigger as-child>
+                                    <Button variant="outline">
+                                        <Filter /> Filters
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent class="sm:max-w-xl">
+                                    <DialogHeader>
+                                        <DialogTitle>Filters</DialogTitle>
+                                    </DialogHeader>
+                                    <!-- Filters Section -->
+           
+                                    <div class="grid grid-cols-1 gap-4">
+                                        <!-- Search -->
+                                        <div>
+                                            <label class="text-sm font-medium mb-2 block">Search</label>
+                                            <Input
+                                                v-model="filters.search"
+                                                placeholder="Search GCLID, Job ID, Status, Source..."
+                                                @keyup.enter="applyFilters"
+                                            />
+                                        </div>
+                                        
+                                        <!-- Status Filter -->
+                                        <div>
+                                            <label class="text-sm font-medium mb-2 block">Status</label>
+                                            <select id="status" name="status" placeholder="Select Status" v-model="filters.status" class="border p-2 rounded text-sm w-full">
+                                                <option value="all">All Status</option>
+                                                <option value="success">Success</option>
+                                                <option value="failed">Failed</option>
+                                                <option value="pending">Pending</option>
+                                                <option value="error">Error</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <!-- Source Filter -->
+                                        <div>
+                                            <label class="text-sm font-medium mb-2 block">Source</label>
+                                            <select id="source" name="source" placeholder="Select Status" v-model="filters.source" class="border p-2 rounded text-sm w-full">
+                                                <option value="">All Sources</option>
+                                                <option value="greetingads">Greeting Ads</option>
+                                                <option value="manual">Manual</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <!-- Date From -->
+                                        <div>
+                                            <label class="text-sm font-medium mb-2 block">Date From</label>
+                                            <Input
+                                                v-model="filters.date_from"
+                                                type="date"
+                                            />
+                                        </div>
+                                        
+                                        <!-- Date To -->
+                                        <div>
+                                            <label class="text-sm font-medium mb-2 block">Date To</label>
+                                            <Input
+                                                v-model="filters.date_to"
+                                                type="date"
+                                            />
+                                        </div>
+                                        
+                                        <!-- Action Buttons -->
+                                        <div class="flex items-end justify-end gap-2">   
+                                            <Button variant="outline" @click="clearFilters">Clear</Button>                                         
+                                            <DialogClose as-child>                                                
+                                                <Button @click="applyFilters()">Apply Filters</Button>
+                                            </DialogClose>
+                                        </div>
+                                    </div>
+
+                                </DialogContent>
+                            </Dialog>
+                            <Button v-if="filters.search || filters.status || filters.source || filters.date_from || filters.date_to" variant="outline" @click="clearFilters">Clear</Button>
                         </div>
-                        <div class="text-sm text-end md:text-start text-muted-foreground">
-                            Showing {{ kirimKonversis.from }} to {{ kirimKonversis.to }} of {{ kirimKonversis.total }} results
+                        <div class="flex justify-end">
+                            <Button @click="applyFilters">Reload</Button>
                         </div>
                     </div>
                 </CardHeader>
@@ -398,9 +418,12 @@ const updateDataResponse = (data: any) => {
                     </div>
 
                     <!-- Pagination -->
-                    <div v-if="kirimKonversis.last_page > 1" class="flex items-center justify-center gap-4 mt-4">
+                    <div v-if="kirimKonversis.last_page > 1" class="flex items-center justify-between gap-4 mt-4">
                         <div class="text-sm text-muted-foreground">
-                            Page {{ kirimKonversis.current_page }} of {{ kirimKonversis.last_page }}
+                            Page {{ kirimKonversis.current_page }} of {{ kirimKonversis.last_page }}                            
+                            <div class="text-sm text-end md:text-start text-muted-foreground">
+                                Showing {{ kirimKonversis.from }} to {{ kirimKonversis.to }} of {{ kirimKonversis.total }} results
+                            </div>
                         </div>
                         <div class="flex gap-2">
                             <Link

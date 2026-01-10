@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
-import { Send, Loader2 } from 'lucide-vue-next';
+import { Send, Loader2, CloudDownload } from 'lucide-vue-next';
 import axios from 'axios';
 import { toast } from 'vue-sonner'
 
@@ -148,7 +148,9 @@ const sendKonversi = async () => {
 <template>
     <Dialog v-model:open="isModalOpen">
         <DialogTrigger as-child>
-            <Button @click="openModal">Get Update</Button>
+            <Button @click="openModal">
+                <CloudDownload/> Get Update
+            </Button>
         </DialogTrigger>
         <DialogContent class="!max-w-4xl lg:!max-w-7xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
