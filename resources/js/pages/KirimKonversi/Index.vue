@@ -99,8 +99,16 @@ const formatText = (text: string | null, maxLength: number = 50) => {
 };
 
 const applyFilters = () => {
-    const params: Record<string, any> = { ...props.filters };
-    console.log(filters)
+    const params: Record<string, any> = {};
+
+    if (filters.search) params.search = filters.search;
+    if (filters.status && filters.status !== 'all') params.status = filters.status;
+    if (filters.source && filters.source !== 'all') params.source = filters.source;
+    if (filters.date_from) params.date_from = filters.date_from;
+    if (filters.date_to) params.date_to = filters.date_to;
+    params.sort_by = filters.sort_by;
+    params.sort_order = filters.sort_order;
+
     router.get('/kirim-konversi', params, {
         preserveState: true,
         preserveScroll: true,
@@ -117,9 +125,17 @@ const clearFilters = () => {
 const changePerPage = (event: Event) => {
     const target = event.target as HTMLSelectElement;
     const perPage = parseInt(target.value);
-    const params: Record<string, any> = { ...props.filters };
+    const params: Record<string, any> = {};
+
+    if (filters.search) params.search = filters.search;
+    if (filters.status && filters.status !== 'all') params.status = filters.status;
+    if (filters.source && filters.source !== 'all') params.source = filters.source;
+    if (filters.date_from) params.date_from = filters.date_from;
+    if (filters.date_to) params.date_to = filters.date_to;
+    params.sort_by = filters.sort_by;
+    params.sort_order = filters.sort_order;
     params.per_page = perPage;
-    
+
     router.get('/kirim-konversi', params, {
         preserveState: true,
         preserveScroll: true,
@@ -129,9 +145,16 @@ const changePerPage = (event: Event) => {
 const changeSort = (event: Event) => {
     const target = event.target as HTMLSelectElement;
     const sortBy = target.value;
-    const params: Record<string, any> = { ...props.filters };
+    const params: Record<string, any> = {};
+
+    if (filters.search) params.search = filters.search;
+    if (filters.status && filters.status !== 'all') params.status = filters.status;
+    if (filters.source && filters.source !== 'all') params.source = filters.source;
+    if (filters.date_from) params.date_from = filters.date_from;
+    if (filters.date_to) params.date_to = filters.date_to;
     params.sort_by = sortBy;
-    
+    params.sort_order = filters.sort_order;
+
     router.get('/kirim-konversi', params, {
         preserveState: true,
         preserveScroll: true,
@@ -141,9 +164,16 @@ const changeSort = (event: Event) => {
 const changeSortOrder = (event: Event) => {
     const target = event.target as HTMLSelectElement;
     const sortOrder = target.value;
-    const params: Record<string, any> = { ...props.filters };
+    const params: Record<string, any> = {};
+
+    if (filters.search) params.search = filters.search;
+    if (filters.status && filters.status !== 'all') params.status = filters.status;
+    if (filters.source && filters.source !== 'all') params.source = filters.source;
+    if (filters.date_from) params.date_from = filters.date_from;
+    if (filters.date_to) params.date_to = filters.date_to;
+    params.sort_by = filters.sort_by;
     params.sort_order = sortOrder;
-    
+
     router.get('/kirim-konversi', params, {
         preserveState: true,
         preserveScroll: true,
@@ -155,10 +185,21 @@ const deleteKirimKonversi = (item: KirimKonversi) => {
         return;
     }
 
+    const params: Record<string, any> = {};
+
+    if (filters.search) params.search = filters.search;
+    if (filters.status && filters.status !== 'all') params.status = filters.status;
+    if (filters.source && filters.source !== 'all') params.source = filters.source;
+    if (filters.date_from) params.date_from = filters.date_from;
+    if (filters.date_to) params.date_to = filters.date_to;
+    params.sort_by = filters.sort_by;
+    params.sort_order = filters.sort_order;
+    params.per_page = props.kirimKonversis.per_page;
+
     router.delete(`/kirim-konversi/${item.id}`, {
         preserveScroll: true,
         onSuccess: () => {
-            router.get('/kirim-konversi', { ...props.filters, per_page: props.kirimKonversis.per_page }, {
+            router.get('/kirim-konversi', params, {
                 preserveScroll: true,
             });
         },
@@ -168,7 +209,18 @@ const deleteKirimKonversi = (item: KirimKonversi) => {
 // Update data response when form is submitted
 const updateDataResponse = (data: any) => {
     //reload data
-    router.get('/kirim-konversi', { ...props.filters, per_page: props.kirimKonversis.per_page }, {
+    const params: Record<string, any> = {};
+
+    if (filters.search) params.search = filters.search;
+    if (filters.status && filters.status !== 'all') params.status = filters.status;
+    if (filters.source && filters.source !== 'all') params.source = filters.source;
+    if (filters.date_from) params.date_from = filters.date_from;
+    if (filters.date_to) params.date_to = filters.date_to;
+    params.sort_by = filters.sort_by;
+    params.sort_order = filters.sort_order;
+    params.per_page = props.kirimKonversis.per_page;
+
+    router.get('/kirim-konversi', params, {
         preserveScroll: true,
     });
 }
