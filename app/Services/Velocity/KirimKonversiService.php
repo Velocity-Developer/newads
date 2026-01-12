@@ -41,6 +41,7 @@ class KirimKonversiService
             'action' => $action,
             'gclid' => $gclid,
             'conversion_time' => $conversion_time,
+            'rekap_form_source' => $datarekapform ? $datarekapform['source'] : null,
         ];
 
         $response = Http::timeout(5)->withHeaders([
@@ -61,6 +62,8 @@ class KirimKonversiService
                 'source'        => $datarekapform ? 'greetingads' : 'manual',
                 'tercatat'      => $dataRes['tercatat'] !== 'tidak' ? 1 : 0,
                 'rekap_form_id' => $datarekapform ? $datarekapform['id'] : null,
+                'rekap_form_source' => $datarekapform ? $datarekapform['source'] : null,
+                'conversion_action_id' => $dataRes['conversion_action_id'] ?? null,
             ]);
 
             //tambahkan ke respon
