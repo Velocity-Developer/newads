@@ -17,7 +17,9 @@ class KirimKonversi extends Model
         'response',
         'source',
         'rekap_form_id',
+        'rekap_form_source',
         'tercatat',
+        'conversion_action_id',
     ];
 
     // cast response to json
