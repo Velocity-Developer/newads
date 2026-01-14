@@ -89,12 +89,15 @@ class KirimKonversiService
             throw new \Exception('GCLID and Conversion time are required');
         }
 
-        //ambil kode gclid dari $gclid
-        //sample : GCL.1767882111.Cj0KCQiAyP3KBhD9ARIsAAJLnnafQlHrtpQ9U8E4--iOfrr5O7VS2ncC7POXg5Itwv6tXSQaAhLcEALw_wc
-        //kode gclid adalah bagian setelah GCL.1767882111.
-        $gclid = explode('.', $gclid)[2];
+        //jika gclid diawali dengan GCL., ambil kode gclid dari $gclid
+        if (str_starts_with($gclid, 'GCL.')) {
+            //ambil kode gclid dari $gclid
+            //sample : GCL.1767882111.Cj0KCQiAyP3KBhD9ARIsAAJLnnafQlHrtpQ9U8E4--iOfrr5O7VS2ncC7POXg5Itwv6tXSQaAhLcEALw_wc
+            //kode gclid adalah bagian setelah GCL.1767882111.
+            $gclid = explode('.', $gclid)[2];
+        }
 
-        //ubah $conversion_time 
+        // ubah $conversion_time 
         // sample : 2026-01-09 04:40:35+07:00
         // ditambahkan 15 menit, menjadi 2026-01-09 04:55:35+07:00
         // pertahankan format Y-m-d H:i
@@ -109,6 +112,8 @@ class KirimKonversiService
             'id' => $rekapform['id'],
             'cek_konversi_ads' => true,
             'jobid' => $dataRes['result']['jobId'],
+            'kirim_konversi_id' => $dataRes['kirim_konversi']['id'] ?? null,
+            'conversion_action_id' => $dataRes['kirim_konversi']['conversion_action_id'] ?? null,
         ]]);
 
         return $dataRes;

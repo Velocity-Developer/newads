@@ -51,6 +51,7 @@ class RekapFormServices
 
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $this->apiToken,
+            'Accept' => 'application/json',
         ])->post($url, $payload);
 
         return $response->json();
