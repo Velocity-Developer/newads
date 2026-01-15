@@ -43,6 +43,34 @@ class RekapFormServices
         }
     }
 
+
+    //get list rekap form konversi nominal
+    public function get_list_kategori_nominal(array $params = [])
+    {
+        $url = $this->rekapApiUrl . '/rekap-form-konversi-nominal-ads';
+
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $this->apiToken,
+            ])->get($url, $params);
+
+            if ($response->failed()) {
+                return [
+                    'success' => false,
+                    'status'  => $response->status(),
+                    'body'    => $response->body(),
+                ];
+            }
+
+            return $response->json();
+        } catch (\Throwable $e) {
+            return [
+                'success' => false,
+                'error'   => $e->getMessage(),
+            ];
+        }
+    }
+
     //update_cek_konversi
     public function update_cek_konversi(array $data)
     {

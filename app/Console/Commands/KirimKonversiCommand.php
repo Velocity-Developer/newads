@@ -75,5 +75,40 @@ class KirimKonversiCommand extends Command
 
             return self::FAILURE;
         }
+
+        try {
+
+            //get rekap form
+            $rekapFormServices = app()->make(RekapFormServices::class);
+            $rekapForms = $rekapFormServices->get_list_kategori_nominal([
+                'per_page' => 1,
+            ]);
+            //jika rekap form ada, kirim konversi
+            if ($rekapForms['data'] && $rekapForms['total'] > 0) {
+
+                //loop kirim konversi
+                foreach ($rekapForms['data'] as $rekapForm) {
+
+                    try {
+                        $kirimKonversiService = new KirimKonversiService();
+                        $kirimKonversiService->kirimKonversiDariRekapFormNominal($rekapForm);
+                    } catch (\Exception $e) {
+                        Log::error('[CRON] kirim-konversi:sync-vdnet nominal FAILED', [
+                            'message' => $e->getMessage(),
+                            'trace'   => $e->getTraceAsString(),
+                        ]);
+                    }
+                }
+            } else {
+                Log::info('[CRON] kirim-konversi:sync-vdnet nominal NO REKAP FORM');
+            }
+        } catch (\Exception $e) {
+            Log::error('[CRON] kirim-konversi:sync-vdnet nominal FAILED', [
+                'message' => $e->getMessage(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
+
+            return self::FAILURE;
+        }
     }
 }
