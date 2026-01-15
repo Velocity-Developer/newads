@@ -45,15 +45,25 @@ class KirimKonversiCommand extends Command
             //get rekap form
             $rekapFormServices = app()->make(RekapFormServices::class);
             $rekapForms = $rekapFormServices->get_list([
-                'per_page' => 1,
+                'per_page' => 3,
             ]);
 
             //jika rekap form ada, kirim konversi
             if ($rekapForms['data'] && $rekapForms['total'] > 0) {
 
-                $kirimKonversiService = new KirimKonversiService();
+                //loop kirim konversi
+                foreach ($rekapForms['data'] as $rekapForm) {
 
-                $kirimKonversiService->kirimKonversiDariRekapForm($rekapForms['data'][0]);
+                    try {
+                        $kirimKonversiService = new KirimKonversiService();
+                        $kirimKonversiService->kirimKonversiDariRekapForm($rekapForm);
+                    } catch (\Exception $e) {
+                        Log::error('[CRON] kirim-konversi:sync-vdnet FAILED', [
+                            'message' => $e->getMessage(),
+                            'trace'   => $e->getTraceAsString(),
+                        ]);
+                    }
+                }
             } else {
                 Log::info('[CRON] kirim-konversi:sync-vdnet NO REKAP FORM');
             }

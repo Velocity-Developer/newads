@@ -37,32 +37,75 @@ class KirimKonversiService
         //ubah $conversion_time ke Y-m-d H:i
         $conversion_time = date('Y-m-d H:i', strtotime($conversion_time));
 
+        //tentukan conversion_action_id
+        $conversion_action_id = '7449463884';
+        if ($datarekapform['source'] == 'vdcom') {
+            $conversion_action_id = '7439007312';
+        } else if ($datarekapform['source'] == 'tidio') {
+            $conversion_action_id = '7438121184'; //sementara gunakan manual komversi
+        }
+
         $data = [
             'action' => $action,
             'gclid' => $gclid,
             'conversion_time' => $conversion_time,
             'rekap_form_source' => $datarekapform ? $datarekapform['source'] : null,
+            'conversion_action_id' => $conversion_action_id,
         ];
 
-        $response = Http::timeout(5)->withHeaders([
-            'Authorization' => 'Bearer ' . $this->secret_key,
-            'X-Time' => $this->time,
-        ])->post($this->api_url, $data);
+        $response = null;
+        $dataRes  = [];
+        $success  = false;
+        $errorMsg = null;
 
-        //jika respon success, tambahkan data ke table kirim_konversi
-        $dataRes = $response ? $response->json() : [];
+        try {
+            $response = Http::timeout(5)->withHeaders([
+                'Authorization' => 'Bearer ' . $this->secret_key,
+                'X-Time' => $this->time,
+            ])->post($this->api_url, $data);
+
+            //jika respon success, tambahkan data ke table kirim_konversi  
+            if ($response->successful()) {
+                $dataRes = $response->json();
+                $success = $dataRes['success'] ?? false;
+            } else {
+                $errorMsg = 'HTTP ' . $response->status();
+                $dataRes  = $response->json() ?? [];
+            }
+        } catch (\Throwable $e) {
+            // TOTAL FAILURE (timeout, DNS, dll)
+            $errorMsg = $e->getMessage();
+        }
 
         if ($action == 'click_conversion') {
+            // $datakirim = KirimKonversi::create([
+            //     'gclid'         => $dataRes['result']['results'][0]['gclid'],
+            //     'jobid'         => $dataRes['result']['jobId'],
+            //     'waktu'         => $dataRes['result']['results'][0]['conversionDateTime'],
+            //     'status'        => $dataRes['success'] ? 'success' : 'failed',
+            //     'response'      => $dataRes['result'],
+            //     'source'        => $datarekapform ? 'greetingads' : 'manual',
+            //     'tercatat'      => $dataRes['tercatat'] !== 'tidak' ? 1 : 0,
+            //     'rekap_form_id' => $datarekapform ? $datarekapform['id'] : null,
+            //     'rekap_form_source' => $datarekapform ? $datarekapform['source'] : null,
+            //     'conversion_action_id' => $dataRes['conversion_action_id'] ?? null,
+            // ]);
+
             $datakirim = KirimKonversi::create([
-                'gclid'         => $dataRes['result']['results'][0]['gclid'],
-                'jobid'         => $dataRes['result']['jobId'],
-                'waktu'         => $dataRes['result']['results'][0]['conversionDateTime'],
-                'status'        => $dataRes['success'] ? 'success' : 'failed',
-                'response'      => $dataRes['result'],
-                'source'        => $datarekapform ? 'greetingads' : 'manual',
-                'tercatat'      => $dataRes['tercatat'] !== 'tidak' ? 1 : 0,
-                'rekap_form_id' => $datarekapform ? $datarekapform['id'] : null,
-                'rekap_form_source' => $datarekapform ? $datarekapform['source'] : null,
+                'gclid' => $dataRes['result']['results'][0]['gclid']
+                    ?? $gclid,
+                'jobid' => $dataRes['result']['jobId']
+                    ?? null,
+                'waktu' => $dataRes['result']['results'][0]['conversionDateTime']
+                    ?? $conversion_time,
+                'status' => $success ? 'success' : 'failed',
+                'response' => $dataRes ?: [
+                    'error' => $errorMsg,
+                ],
+                'source' => $datarekapform ? 'greetingads' : 'manual',
+                'tercatat' => ($dataRes['tercatat'] ?? 'tidak') !== 'tidak' ? 1 : 0,
+                'rekap_form_id' => $datarekapform['id'] ?? null,
+                'rekap_form_source' => $datarekapform['source'] ?? null,
                 'conversion_action_id' => $dataRes['conversion_action_id'] ?? null,
             ]);
 
