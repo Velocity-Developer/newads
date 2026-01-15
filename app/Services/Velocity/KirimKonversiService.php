@@ -197,10 +197,10 @@ class KirimKonversiService
         $kategori_konversi_nominal = $rekapform['kategori_konversi_nominal'] ?? null;
 
         $konversi_actions = [
-            '390rb' => [7452857980],
-            '500rb' => [7452857974, 7452857977],
-            '1juta-1,4juta' => [7447336446, 7447105159, 7447105162],
-            '1,5juta' => [7452857983, 7452857986, 7452857989, 7452857992],
+            'dibawah500rb' => [7452857980],
+            '500rb-900rb' => [7452857974, 7452857977],
+            '1jt-1,4jt' => [7447336446, 7447105159, 7447105162],
+            '1,5jt' => [7452857983, 7452857986, 7452857989, 7452857992],
         ];
 
         if (!isset($konversi_actions[$kategori_konversi_nominal])) {
