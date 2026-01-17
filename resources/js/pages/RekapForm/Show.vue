@@ -201,6 +201,7 @@ const formatDate = (dateStr?: string | null) => {
             <table class="w-full border-collapse">
               <thead class="bg-muted/50">
                 <tr class="border-b">
+                  <th class="text-left p-2 font-medium">No</th>
                   <th class="text-left p-2 font-medium">ID</th>
                   <th class="text-left p-2 font-medium">GCLID</th>
                   <th class="text-left p-2 font-medium">Status</th>
@@ -213,15 +214,19 @@ const formatDate = (dateStr?: string | null) => {
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="item in rekapForm.kirim_konversi" :key="item.id" class="border-b hover:bg-muted/50">
+                <tr v-for="item, index in rekapForm.kirim_konversi" :key="item.id" class="border-b hover:bg-muted/50">
+                  <td class="p-2">
+                    <div class="text-sm">{{ index + 1 }}</div>
+                  </td>
                   <td class="p-2">
                     <div class="font-medium">{{ item.id }}</div>
                   </td>
                   <td class="p-2">
-                    <div class="text-sm break-all">{{ item.gclid || '-' }}</div>
+                    <div class="text-sm break-all max-w-[60px] overflow-hidden text-ellipsis whitespace-nowrap">{{ item.gclid || '-' }}</div>
                   </td>
-                  <td class="p-2">
-                    <div class="text-sm">{{ item.status || '-' }}</div>
+                  <td class="p-2 text-sm">
+                    <Badge v-if="item.status === 'success'" variant="success">{{ item.status || '-' }}</Badge>
+                    <Badge v-else-if="item.status === 'failed'" variant="danger">{{ item.status || '-' }}</Badge>
                   </td>
                   <td class="p-2">
                     <div class="text-sm">{{ item.waktu || '-' }}</div>
