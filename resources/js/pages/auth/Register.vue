@@ -9,6 +9,7 @@ import AuthBase from '@/layouts/AuthLayout.vue';
 import { login } from '@/routes';
 import { Form, Head } from '@inertiajs/vue3';
 import { LoaderCircle } from 'lucide-vue-next';
+import { Link } from '@inertiajs/vue3'
 </script>
 
 <template>
@@ -18,7 +19,13 @@ import { LoaderCircle } from 'lucide-vue-next';
     >
         <Head title="Register" />
 
-        <Form
+        <div class="text-center bg-amber-200 text-amber-800 dark:bg-amber-800 dark:text-amber-200 p-2 rounded-md">
+            Form registrasi disabled !
+        </div>
+
+        <Link href="/login" class="bg-gray-900 hover:bg-gray-800 text-white px-4 py-2 rounded-md text-center">Login</Link>
+
+        <!-- <Form
             v-bind="RegisteredUserController.store.form()"
             :reset-on-success="['password', 'password_confirmation']"
             v-slot="{ errors, processing }"
@@ -106,6 +113,6 @@ import { LoaderCircle } from 'lucide-vue-next';
                     >Log in</TextLink
                 >
             </div>
-        </Form>
+        </Form> -->
     </AuthBase>
 </template>

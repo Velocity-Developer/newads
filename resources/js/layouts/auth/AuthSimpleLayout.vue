@@ -19,9 +19,9 @@ const hasError = ref(false);
 
 <template>
     <div
-        class="flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 md:p-10"
+        class="flex min-h-svh flex-col items-center justify-center gap-6 bg-gray-100 dark:bg-gray-900 p-6 md:p-10"
     >
-        <div class="w-full max-w-sm">
+        <div class="w-full max-w-sm bg-background p-6 md:p-10">
             <div class="flex flex-col gap-8">
                 <div class="flex flex-col items-center gap-4">
                     <Link
