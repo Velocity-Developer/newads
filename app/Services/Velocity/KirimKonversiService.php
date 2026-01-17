@@ -5,6 +5,7 @@ namespace App\Services\Velocity;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use App\Models\KirimKonversi;
+use App\Models\RekapForm;
 use App\Services\NewVDnet\RekapFormServices;
 
 class KirimKonversiService
@@ -136,6 +137,29 @@ class KirimKonversiService
         // pertahankan format Y-m-d H:i
         $conversion_time = date('Y-m-d H:i', strtotime($conversion_time));
 
+        //updateOrCreate rekapform
+        RekapForm::updateOrCreate([
+            'id' => $rekapform['id'],
+        ], [
+            'source' => $rekapform['source'],
+            'source_id' => $rekapform['source_id'],
+            'nama' => $rekapform['nama'],
+            'no_whatsapp' => $rekapform['no_whatsapp'],
+            'jenis_website' => $rekapform['jenis_website'],
+            'ai_result' => $rekapform['ai_result'],
+            'via' => $rekapform['via'],
+            'utm_content' => $rekapform['utm_content'],
+            'utm_medium' => $rekapform['utm_medium'],
+            'greeting' => $rekapform['greeting'],
+            'status' => $rekapform['status'],
+            'gclid' => $rekapform['gclid'],
+            'cek_konversi_ads' => $rekapform['cek_konversi_ads'],
+            'cek_konversi_nominal' => $rekapform['cek_konversi_nominal'],
+            'kategori_konversi_nominal' => $rekapform['kategori_konversi_nominal'],
+            'tanggal' => $rekapform['created_at'],
+            'created_at' => $rekapform['created_at'],
+        ]);
+
         //tentukan conversion_action_id
         $conversion_action_id = '7449463884';
 
@@ -157,6 +181,13 @@ class KirimKonversiService
             'kirim_konversi_id' => $dataRes['kirim_konversi']['id'] ?? null,
             'conversion_action_id' => $dataRes['kirim_konversi']['conversion_action_id'] ?? null,
         ]]);
+
+        //update rekapform
+        RekapForm::update([
+            'id' => $rekapform['id'],
+        ], [
+            'cek_konversi_ads' => true,
+        ]);
 
         return $dataRes;
     }
