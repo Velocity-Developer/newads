@@ -24,6 +24,20 @@ interface RekapForm {
   kategori_konversi_nominal: string | null;
   tanggal: string | null;
   created_at: string | null;
+  kirim_konversi?: Array<{
+    id: number;
+    gclid: string | null;
+    jobid: string | null;
+    waktu: string | null;
+    status: string | null;
+    source: string | null;
+    rekap_form_id: string | null;
+    rekap_form_source: string | null;
+    tercatat: boolean | null;
+    conversion_action_id: string | null;
+    created_at: string | null;
+    updated_at?: string | null;
+  }>;
 }
 
 const props = defineProps<{ rekapForm: RekapForm }>();
@@ -175,7 +189,66 @@ const formatDate = (dateStr?: string | null) => {
           </CardContent>
         </Card>
       </div>
+
+      <!-- Kirim Konversi Terkait -->
+      <Card v-if="rekapForm.kirim_konversi && rekapForm.kirim_konversi.length">
+        <CardHeader>
+          <CardTitle>Kirim Konversi Terkait</CardTitle>
+          <CardDescription>Daftar kirim konversi yang terkait dengan Rekap Form ini</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div class="overflow-x-auto">
+            <table class="w-full border-collapse">
+              <thead class="bg-muted/50">
+                <tr class="border-b">
+                  <th class="text-left p-2 font-medium">ID</th>
+                  <th class="text-left p-2 font-medium">GCLID</th>
+                  <th class="text-left p-2 font-medium">Status</th>
+                  <th class="text-left p-2 font-medium">Waktu</th>
+                  <th class="text-left p-2 font-medium">Source</th>
+                  <th class="text-left p-2 font-medium">Tercatat</th>
+                  <th class="text-left p-2 font-medium">Conversion Action</th>
+                  <th class="text-left p-2 font-medium">Created At</th>
+                  <th class="text-left p-2 font-medium">Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in rekapForm.kirim_konversi" :key="item.id" class="border-b hover:bg-muted/50">
+                  <td class="p-2">
+                    <div class="font-medium">{{ item.id }}</div>
+                  </td>
+                  <td class="p-2">
+                    <div class="text-sm break-all">{{ item.gclid || '-' }}</div>
+                  </td>
+                  <td class="p-2">
+                    <div class="text-sm">{{ item.status || '-' }}</div>
+                  </td>
+                  <td class="p-2">
+                    <div class="text-sm">{{ item.waktu || '-' }}</div>
+                  </td>
+                  <td class="p-2">
+                    <div class="text-sm">{{ item.source || '-' }}</div>
+                  </td>
+                  <td class="p-2">
+                    <div class="text-sm">{{ item.tercatat === true ? 'Ya' : item.tercatat === false ? 'Tidak' : '-' }}</div>
+                  </td>
+                  <td class="p-2">
+                    <div class="text-sm">{{ item.conversion_action_id || '-' }}</div>
+                  </td>
+                  <td class="p-2">
+                    <span class="text-sm text-muted-foreground">{{ item.created_at ? formatDate(item.created_at) : '-' }}</span>
+                  </td>
+                  <td class="p-2">
+                    <Button variant="outline" size="sm" as-child>
+                      <Link :href="`/kirim-konversi/${item.id}`">Detail</Link>
+                    </Button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   </AppLayout>
 </template>
-

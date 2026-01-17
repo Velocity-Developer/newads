@@ -12,7 +12,7 @@ class RekapFormController extends Controller
 {
     public function index(Request $request): Response
     {
-        $query = RekapForm::query();
+        $query = RekapForm::with('kirim_konversi');
 
         $search = $request->get('search');
         $dateFrom = $request->get('date_from');
@@ -58,7 +58,7 @@ class RekapFormController extends Controller
 
     public function show(int $id): Response
     {
-        $rekapForm = RekapForm::findOrFail($id);
+        $rekapForm = RekapForm::with('kirim_konversi')->findOrFail($id);
         return Inertia::render('RekapForm/Show', [
             'rekapForm' => $rekapForm,
         ]);
