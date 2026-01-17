@@ -6,6 +6,7 @@ use App\Http\Controllers\TermsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AdminToolsController;
 use App\Http\Controllers\KirimKonversiController;
+use App\Http\Controllers\RekapFormController;
 
 // Redirect root to dashboard to avoid 404
 Route::redirect('/', '/dashboard');
@@ -22,6 +23,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/kirim-konversi', [KirimKonversiController::class, 'index'])->name('kirim-konversi.index');
     Route::get('/kirim-konversi/{kirimKonversi}', [KirimKonversiController::class, 'show'])->name('kirim-konversi.show');
     Route::delete('/kirim-konversi/{kirimKonversi}', [KirimKonversiController::class, 'destroy'])->name('kirim-konversi.destroy');
+
+    // Rekap Form pages
+    Route::get('/rekap-form', [RekapFormController::class, 'index'])->name('rekap-form.index');
 });
 
 // Restore dashboard route
