@@ -379,12 +379,17 @@ const updateDataResponse = (data: any) => {
                                         <div class="font-medium">{{ kirimKonversis.data.indexOf(item) + kirimKonversis.from }}</div>
                                     </td>
                                     <td class="p-2">
-                                        <template v-if="item?.rekap_form?.nama">
-                                            {{ item.rekap_form.nama }}
-                                        </template>
-                                        <template v-else>
-                                            {{ item.rekap_form_id }}
-                                        </template>
+                                        <Link :href="`/rekap-form/${item.rekap_form_id}`" class="hover:underline">                                            
+                                            <template v-if="item?.rekap_form?.nama">
+                                                {{ item.rekap_form.nama }}
+                                            </template>
+                                            <template v-else-if="item?.rekap_form_id">
+                                                {{ item.rekap_form_id }}
+                                            </template>
+                                            <template v-else>
+                                                -
+                                            </template>
+                                        </Link>
                                     </td>
                                     <td class="p-2">
                                         <div :title="item.gclid" class="font-mono text-sm max-w-40 overflow-hidden text-ellipsis whitespace-nowrap">
