@@ -3,9 +3,29 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
+
+interface RekapForm {
+    id: number;
+    source: string | null;
+    source_id: string | null;
+    nama: string | null;
+    no_whatsapp: string | null;
+    jenis_website: string | null;
+    ai_result: string | null;
+    via: string | null;
+    utm_content: string | null;
+    utm_medium: string | null;
+    greeting: string | null;
+    status: string | null;
+    gclid: string | null;
+    cek_konversi_ads: boolean | null;
+    cek_konversi_nominal: boolean | null;
+    kategori_konversi_nominal: string | null;
+    tanggal: string | null;
+    created_at: string | null;
+}
 
 interface KirimKonversi {
     id: number;
@@ -19,6 +39,7 @@ interface KirimKonversi {
     created_at: string;
     updated_at: string;
     tercatat: boolean | null;
+    rekap_form: RekapForm | null;
 }
 
 interface Props {
@@ -152,6 +173,60 @@ const formatJson = (text: string | null) => {
                                 <label class="text-sm font-medium text-muted-foreground">Tercatat</label>
                                 <p class="text-sm">{{ kirimKonversi.tercatat ? 'Ya' : 'Tidak' }}</p>
                             </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+
+            <div v-if="kirimKonversi.rekap_form">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Rekap Form</CardTitle>
+                        <CardDescription>Detail terkait data rekap form</CardDescription>
+                    </CardHeader>
+                    <CardContent class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div>
+                                <label class="text-sm font-medium text-muted-foreground">ID</label>
+                                <p class="font-mono text-sm">{{ kirimKonversi.rekap_form?.id }}</p>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium text-muted-foreground">Nama</label>
+                                <p class="text-sm">{{ kirimKonversi.rekap_form?.nama || '-' }}</p>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium text-muted-foreground">No WhatsApp</label>
+                                <p class="text-sm">{{ kirimKonversi.rekap_form?.no_whatsapp || '-' }}</p>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium text-muted-foreground">Jenis Website</label>
+                                <p class="text-sm">{{ kirimKonversi.rekap_form?.jenis_website || '-' }}</p>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium text-muted-foreground">Via</label>
+                                <p class="text-sm">{{ kirimKonversi.rekap_form?.via || '-' }}</p>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium text-muted-foreground">Status</label>
+                                <p class="text-sm">{{ kirimKonversi.rekap_form?.status || '-' }}</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="text-sm font-medium text-muted-foreground">GCLID</label>
+                                <p class="font-mono text-sm break-all">{{ kirimKonversi.rekap_form?.gclid || '-' }}</p>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium text-muted-foreground">Tanggal</label>
+                                <p class="text-sm">{{ kirimKonversi.rekap_form?.tanggal ? formatDate(kirimKonversi.rekap_form.tanggal) : '-' }}</p>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium text-muted-foreground">Created At</label>
+                                <p class="text-sm">{{ kirimKonversi.rekap_form?.created_at ? formatDate(kirimKonversi.rekap_form.created_at) : '-' }}</p>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <Button variant="outline" as-child>
+                                <Link :href="`/rekap-form/${kirimKonversi.rekap_form?.id}`">View Rekap Form</Link>
+                            </Button>
                         </div>
                     </CardContent>
                 </Card>

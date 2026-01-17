@@ -62,7 +62,7 @@ class KirimKonversiController extends Controller
 
     public function show(Request $request, int $id)
     {
-        $kirimKonversi = KirimKonversi::findOrFail($id);
+        $kirimKonversi = KirimKonversi::with('rekap_form')->findOrFail($id);
 
         return Inertia::render('KirimKonversi/Show', [
             'kirimKonversi' => $kirimKonversi,
