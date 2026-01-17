@@ -21,6 +21,14 @@ import { Eye, Trash, Filter } from 'lucide-vue-next';
 import KirimKonversiForm from '@/components/KirimKonversiForm.vue';
 import KirimKonversiGetUpdate from '@/components/KirimKonversiGetUpdate.vue';
 
+interface RekapForm {
+    id: number;
+    nama: string;
+    cek_konversi_nominal: boolean;
+    tanggal: string;
+    created_at: string;
+}
+
 interface KirimKonversi {
     id: number;
     gclid: string;
@@ -32,6 +40,8 @@ interface KirimKonversi {
     rekap_form_id: string | null;
     created_at: string;
     updated_at: string;
+    //relasi dengan model RekapForm
+    rekap_form: RekapForm | null;
 }
 
 interface Props {
@@ -353,6 +363,7 @@ const updateDataResponse = (data: any) => {
                             <thead class="bg-muted/50">
                                 <tr class="border-b">
                                     <th class="text-left p-2 font-medium">No</th>
+                                    <th class="text-left p-2 font-medium">Nama</th>
                                     <th class="text-left p-2 font-medium">GCLID</th>
                                     <th class="text-left p-2 font-medium">Job ID</th>
                                     <th class="text-left p-2 font-medium">Waktu</th>
@@ -366,6 +377,14 @@ const updateDataResponse = (data: any) => {
                                 <tr v-for="item in kirimKonversis.data" :key="item.id" class="border-b hover:bg-muted/50">
                                     <td class="p-2">
                                         <div class="font-medium">{{ kirimKonversis.data.indexOf(item) + kirimKonversis.from }}</div>
+                                    </td>
+                                    <td class="p-2">
+                                        <template v-if="item?.rekap_form?.nama">
+                                            {{ item.rekap_form.nama }}
+                                        </template>
+                                        <template v-else>
+                                            {{ item.rekap_form_id }}
+                                        </template>
                                     </td>
                                     <td class="p-2">
                                         <div :title="item.gclid" class="font-mono text-sm max-w-40 overflow-hidden text-ellipsis whitespace-nowrap">
