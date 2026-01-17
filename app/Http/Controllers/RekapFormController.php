@@ -70,7 +70,7 @@ class RekapFormController extends Controller
 
         $payload = [
             'cek_konversi_ads' => $request->input('cek_konversi_ads', 1),
-            'per_page' => $request->input('per_page', 50),
+            'per_page' => $request->input('per_page', 500),
         ];
         $result = $service->get_list($payload);
 
