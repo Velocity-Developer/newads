@@ -70,7 +70,7 @@ class RekapFormController extends Controller
 
         $payload = [
             'cek_konversi_ads' => $request->input('cek_konversi_ads', 1),
-            'per_page' => $request->input('per_page', 500),
+            'per_page' => $request->input('per_page', 200),
         ];
         $result = $service->get_list($payload);
 
@@ -83,6 +83,10 @@ class RekapFormController extends Controller
                     unset($row['created_at_wib']);
                     unset($row['log_konversi']);
                     unset($row['updated_at']);
+
+                    //ubah created_at dari 2026-01-10T07:34:47.000000+07:00 ke 2026-01-10 07:34:47
+                    $row['created_at'] = date('Y-m-d H:i:s', strtotime($row['created_at']));
+
                     return $row;
                 })
                 ->values()
