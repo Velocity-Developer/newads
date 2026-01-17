@@ -54,4 +54,12 @@ class RekapFormController extends Controller
             ],
         ]);
     }
+
+    public function show(int $id): Response
+    {
+        $rekapForm = RekapForm::findOrFail($id);
+        return Inertia::render('RekapForm/Show', [
+            'rekapForm' => $rekapForm,
+        ]);
+    }
 }

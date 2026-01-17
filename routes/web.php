@@ -26,6 +26,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Rekap Form pages
     Route::get('/rekap-form', [RekapFormController::class, 'index'])->name('rekap-form.index');
+    Route::get('/rekap-form/{id}', [RekapFormController::class, 'show'])->name('rekap-form.show');
 });
 
 // Restore dashboard route

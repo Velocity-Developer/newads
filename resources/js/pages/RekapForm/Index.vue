@@ -186,7 +186,9 @@ const formatDate = (dateStr?: string | null) => {
               <tbody>
                 <tr v-for="item in rekapForms.data" :key="item.id" class="border-b hover:bg-muted/50">
                   <td class="p-2">
-                    <div class="font-medium">{{ item.id }}</div>
+                    <div class="font-medium">
+                      <Link :href="`/rekap-form/${item.id}`">{{ item.id }}</Link>
+                    </div>
                   </td>
                   <td class="p-2">
                     <div class="font-medium">{{ item.nama || '-' }}</div>
@@ -268,4 +270,3 @@ const formatDate = (dateStr?: string | null) => {
     </div>
   </AppLayout>
 </template>
-
