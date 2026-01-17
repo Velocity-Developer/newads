@@ -27,4 +27,10 @@ class KirimKonversi extends Model
         'response' => 'json',
         'tercatat' => 'boolean',
     ];
+
+    //relasi dengan model RekapForm
+    public function rekap_form()
+    {
+        return $this->belongsTo(RekapForm::class, 'rekap_form_id', 'id');
+    }
 }

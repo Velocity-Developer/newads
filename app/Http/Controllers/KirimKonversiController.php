@@ -14,7 +14,7 @@ class KirimKonversiController extends Controller
 {
     public function index(Request $request)
     {
-        $query = KirimKonversi::query()
+        $query = KirimKonversi::with('rekap_form')
             ->orderBy($request->get('sort_by', 'id'), $request->get('sort_order', 'desc'));
 
         if ($search = $request->get('search')) {

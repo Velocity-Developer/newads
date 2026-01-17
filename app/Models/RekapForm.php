@@ -37,4 +37,10 @@ class RekapForm extends Model
         'tanggal' => 'datetime',
         'created_at' => 'datetime',
     ];
+
+    //relasi dengan model KirimKonversi
+    public function kirim_konversi()
+    {
+        return $this->hasMany(KirimKonversi::class, 'rekap_form_id', 'id');
+    }
 }
