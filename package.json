@@ -4,6 +4,7 @@
     "scripts": {
         "build": "vite build",
         "build:ssr": "vite build && vite build --ssr",
+        "build:frontend": "npm run build && powershell -NoProfile -Command \"New-Item -ItemType Directory -Force -Path dist; Compress-Archive -Path public/build/* -DestinationPath dist/public_build.zip -Force\"",
         "dev": "vite",
         "format": "prettier --write resources/",
         "format:check": "prettier --check resources/",
