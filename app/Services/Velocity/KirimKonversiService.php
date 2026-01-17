@@ -133,10 +133,8 @@ class KirimKonversiService
         }
 
         // ubah $conversion_time 
-        // sample : 2026-01-09 04:40:35+07:00
-        // ditambahkan 15 menit, menjadi 2026-01-09 04:55:35+07:00
         // pertahankan format Y-m-d H:i
-        $conversion_time = date('Y-m-d H:i', strtotime($conversion_time . ' +5 minutes'));
+        $conversion_time = date('Y-m-d H:i', strtotime($conversion_time));
 
         //tentukan conversion_action_id
         $conversion_action_id = '7449463884';
@@ -188,10 +186,9 @@ class KirimKonversiService
         }
 
         // ubah $conversion_time 
-        // sample : 2026-01-09 04:40:35+07:00
-        // ditambahkan 15 menit, menjadi 2026-01-09 04:55:35+07:00
         // pertahankan format Y-m-d H:i
-        $conversion_time = date('Y-m-d H:i', strtotime($conversion_time . ' +5 minutes'));
+        // $conversion_time = date('Y-m-d H:i', strtotime($conversion_time . ' +5 minutes'));
+        $conversion_time = date('Y-m-d H:i', strtotime($conversion_time));
 
         //kirim konversi berdasarkan kategori_konversi_nominal
         $kategori_konversi_nominal = $rekapform['kategori_konversi_nominal'] ?? null;
