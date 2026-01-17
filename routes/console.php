@@ -27,4 +27,4 @@ Schedule::call(function () {
 //     ->appendOutputTo(storage_path('logs/negative_keywords_pipeline_apply.log'));
 
 Schedule::command('kirim-konversi:sync-vdnet')
-    ->everyFiveMinutes();
+    ->everyMinute();

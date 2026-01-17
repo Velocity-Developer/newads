@@ -45,7 +45,7 @@ class KirimKonversiCommand extends Command
             //get rekap form
             $rekapFormServices = app()->make(RekapFormServices::class);
             $rekapForms = $rekapFormServices->get_list([
-                'per_page' => 3,
+                'per_page' => 2,
             ]);
 
             //jika rekap form ada, kirim konversi
