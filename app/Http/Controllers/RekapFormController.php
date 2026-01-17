@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\RekapForm;
+use App\Services\NewVDnet\RekapFormServices;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -61,5 +62,56 @@ class RekapFormController extends Controller
         return Inertia::render('RekapForm/Show', [
             'rekapForm' => $rekapForm,
         ]);
+    }
+
+    public function syncVDnet(Request $request)
+    {
+        $service = app()->make(RekapFormServices::class);
+
+        $payload = [
+            'cek_konversi_ads' => $request->input('cek_konversi_ads', 1),
+            'per_page' => $request->input('per_page', 50),
+        ];
+        $result = $service->get_list($payload);
+
+        //if success
+        if (isset($result['total']) && $result['total'] > 0) {
+            //upsert rekap forms
+            $data = collect($result['data'])
+                ->filter(fn($row) => !empty($row['id']))
+                ->map(function ($row) {
+                    unset($row['created_at_wib']);
+                    unset($row['log_konversi']);
+                    unset($row['updated_at']);
+                    return $row;
+                })
+                ->values()
+                ->toArray();
+
+            RekapForm::upsert(
+                $data,
+                ['id'], // anchor
+                [
+                    'source',
+                    'source_id',
+                    'nama',
+                    'no_whatsapp',
+                    'jenis_website',
+                    'ai_result',
+                    'via',
+                    'utm_content',
+                    'utm_medium',
+                    'greeting',
+                    'status',
+                    'gclid',
+                    'cek_konversi_ads',
+                    'cek_konversi_nominal',
+                    'kategori_konversi_nominal',
+                    'created_at',
+                ]
+            );
+        }
+
+        return response()->json($result);
     }
 }

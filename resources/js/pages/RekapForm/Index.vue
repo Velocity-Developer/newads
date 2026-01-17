@@ -3,6 +3,14 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { type BreadcrumbItem } from '@/types';
 import { ref } from 'vue';
@@ -91,6 +99,31 @@ const formatDate = (dateStr?: string | null) => {
   if (isNaN(date.getTime())) return dateStr;
   return date.toLocaleString();
 };
+
+const isSyncOpen = ref(false);
+const syncLoading = ref(false);
+const syncError = ref<string | null>(null);
+const syncData = ref<any>(null);
+
+const openSyncModal = async () => {
+  isSyncOpen.value = true;
+  syncLoading.value = true;
+  syncError.value = null;
+  syncData.value = null;
+  try {
+    const res = await fetch('/rekap-form-sync-vdnet', {
+      method: 'GET',
+      headers: { Accept: 'application/json' },
+      credentials: 'same-origin',
+    });
+    const json = await res.json();
+    syncData.value = json;
+  } catch (e: any) {
+    syncError.value = e?.message || 'Terjadi kesalahan';
+  } finally {
+    syncLoading.value = false;
+  }
+};
 </script>
 
 <template>
@@ -156,6 +189,30 @@ const formatDate = (dateStr?: string | null) => {
             <div class="text-sm text-muted-foreground">
               Showing {{ rekapForms.from }} to {{ rekapForms.to }} of {{ rekapForms.total }} results
             </div>
+            <div class="flex items-center">
+              <Dialog v-model:open="isSyncOpen">
+                <DialogTrigger as-child>
+                  <Button variant="outline" @click="openSyncModal">Sync VDnet</Button>
+                </DialogTrigger>
+                <DialogContent class="sm:max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>Sync VDnet</DialogTitle>
+                    <DialogDescription>Menampilkan hasil dari Greeting dari VDnet</DialogDescription>
+                  </DialogHeader>
+                  <div class="min-h-40 max-h-[60vh] overflow-auto rounded border p-3 bg-muted/30">
+                    <template v-if="syncLoading">
+                      <div class="text-sm text-muted-foreground">Memuat data dari VDnet...</div>
+                    </template>
+                    <template v-else-if="syncError">
+                      <div class="text-sm text-red-600">Error: {{ syncError }}</div>
+                    </template>
+                    <template v-else>
+                      <pre class="text-xs whitespace-pre-wrap break-all">{{ JSON.stringify(syncData, null, 2) }}</pre>
+                    </template>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -197,7 +254,7 @@ const formatDate = (dateStr?: string | null) => {
                     <div class="text-sm">{{ item.no_whatsapp || '-' }}</div>
                   </td> -->
                   <td class="p-2">
-                    <div class="text-sm">{{ item.gclid || '-' }}</div>
+                    <div class="text-sm max-w-[50px] overflow-hidden text-ellipsis whitespace-nowrap">{{ item.gclid || '-' }}</div>
                   </td>
                   <!-- <td class="p-2">
                     <div class="text-sm">{{ item.jenis_website || '-' }}</div>
@@ -224,10 +281,10 @@ const formatDate = (dateStr?: string | null) => {
                     <div class="text-sm">{{ item.ai_result || '-' }}</div>
                   </td> -->
                   <td class="p-2">
-                    <div class="text-sm">{{ item.cek_konversi_ads === true ? 'Ya' : item.cek_konversi_ads === false ? 'Tidak' : '-' }}</div>
+                    <div class="text-sm">{{ item.cek_konversi_ads === true ? 'Sudah' : item.cek_konversi_ads === false ? 'Belum' : '-' }}</div>
                   </td>
                   <td class="p-2">
-                    <div class="text-sm">{{ item.cek_konversi_nominal === true ? 'Ya' : item.cek_konversi_nominal === false ? 'Tidak' : '-' }}</div>
+                    <div class="text-sm">{{ item.cek_konversi_nominal === true ? 'Sudah' : item.cek_konversi_nominal === false ? 'Belum' : '-' }}</div>
                   </td>
                   <td class="p-2">
                     <div class="text-sm">{{ item.kategori_konversi_nominal || '-' }}</div>
