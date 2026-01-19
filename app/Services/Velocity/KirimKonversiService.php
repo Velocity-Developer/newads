@@ -8,6 +8,8 @@ use App\Models\KirimKonversi;
 use App\Models\RekapForm;
 use App\Services\NewVDnet\RekapFormServices;
 
+use DateTimeZone, DateTime;
+
 class KirimKonversiService
 {
 
@@ -135,7 +137,17 @@ class KirimKonversiService
 
         // ubah $conversion_time 
         // pertahankan format Y-m-d H:i
-        $conversion_time = date('Y-m-d H:i', strtotime($conversion_time));
+        $tz = new DateTimeZone('Asia/Jakarta');
+        $conversionDt = new DateTime($conversion_time, $tz);
+        $conversionDt->modify('+5 minutes');
+        $now = new DateTime('now', $tz);
+
+        // validasi conversion_time tidak boleh melebihi waktu saat ini + 5 minutes
+        if ($conversionDt > $now) {
+            throw new \Exception('Conversion time tidak boleh melebihi waktu saat ini');
+        }
+
+        $conversion_time = $conversionDt->format('Y-m-d H:i');
 
         //updateOrCreate rekapform
         RekapForm::updateOrCreate([
@@ -183,22 +195,25 @@ class KirimKonversiService
             $dataRes = $this->kirimKonversi('click_conversion', $gclid, $conversion_time, $rekapform, $conversion_action_id);
 
             //jika success, update rekapform
-            //update ke Vdnet melalui RekapFormServices
-            $rekapFormServices = new RekapFormServices();
-            $rekapFormServices->update_cek_konversi([[
-                'id' => $rekapform['id'],
-                'cek_konversi_ads' => true,
-                'jobid' => $dataRes['result']['jobId'],
-                'kirim_konversi_id' => $dataRes['kirim_konversi']['id'] ?? null,
-                'conversion_action_id' => $dataRes['kirim_konversi']['conversion_action_id'] ?? null,
-            ]]);
+            if (isset($dataRes['success']) && $dataRes['success'] == true) {
 
-            //update rekapform
-            RekapForm::update([
-                'id' => $rekapform['id'],
-            ], [
-                'cek_konversi_ads' => true,
-            ]);
+                //update ke Vdnet melalui RekapFormServices
+                $rekapFormServices = new RekapFormServices();
+                $rekapFormServices->update_cek_konversi([[
+                    'id' => $rekapform['id'],
+                    'cek_konversi_ads' => true,
+                    'jobid' => $dataRes['result']['jobId'],
+                    'kirim_konversi_id' => $dataRes['kirim_konversi']['id'] ?? null,
+                    'conversion_action_id' => $dataRes['kirim_konversi']['conversion_action_id'] ?? null,
+                ]]);
+
+                //update rekapform
+                RekapForm::update([
+                    'id' => $rekapform['id'],
+                ], [
+                    'cek_konversi_ads' => true,
+                ]);
+            }
         } else {
             //jika sudah ada, tinggal update status menjadi terkonversi saja
             //update ke Vdnet melalui RekapFormServices
@@ -248,8 +263,17 @@ class KirimKonversiService
 
         // ubah $conversion_time 
         // pertahankan format Y-m-d H:i
-        // $conversion_time = date('Y-m-d H:i', strtotime($conversion_time . ' +5 minutes'));
-        $conversion_time = date('Y-m-d H:i', strtotime($conversion_time));
+        $tz = new DateTimeZone('Asia/Jakarta');
+        $conversionDt = new DateTime($conversion_time, $tz);
+        $conversionDt->modify('+5 minutes');
+        $now = new DateTime('now', $tz);
+
+        // validasi conversion_time tidak boleh melebihi waktu saat ini + 5 minutes
+        if ($conversionDt > $now) {
+            throw new \Exception('Conversion time tidak boleh melebihi waktu saat ini');
+        }
+
+        $conversion_time = $conversionDt->format('Y-m-d H:i');
 
         //kirim konversi berdasarkan kategori_konversi_nominal
         $kategori_konversi_nominal = $rekapform['kategori_konversi_nominal'] ?? null;
