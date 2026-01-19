@@ -27,6 +27,7 @@ interface RekapForm {
     cek_konversi_nominal: boolean;
     tanggal: string;
     created_at: string;
+    source_id: string | null;
 }
 
 interface KirimKonversi {
@@ -38,6 +39,7 @@ interface KirimKonversi {
     response: string | null;
     source: string | null;
     rekap_form_id: string | null;
+    rekap_form_source: string | null;
     created_at: string;
     updated_at: string;
     //relasi dengan model RekapForm
@@ -382,6 +384,9 @@ const updateDataResponse = (data: any) => {
                                         <Link :href="`/rekap-form/${item.rekap_form_id}`" class="hover:underline">                                            
                                             <template v-if="item?.rekap_form?.nama">
                                                 {{ item.rekap_form.nama }}
+                                            </template>
+                                            <template v-else-if="item?.rekap_form?.nama == '' && item.rekap_form_source == 'tidio'">
+                                                {{ item?.rekap_form?.source_id }}
                                             </template>
                                             <template v-else-if="item?.rekap_form_id">
                                                 {{ item.rekap_form_id }}
