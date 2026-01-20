@@ -371,6 +371,7 @@ const updateDataResponse = (data: any) => {
                                     <th class="text-left p-2 font-medium">Waktu</th>
                                     <th class="text-left p-2 font-medium">Status</th>
                                     <th class="text-left p-2 font-medium">Source</th>
+                                    <th class="text-left p-2 font-medium">Form</th>
                                     <th class="text-left p-2 font-medium">Created At</th>
                                     <th class="text-left p-2 font-medium">Actions</th>
                                 </tr>
@@ -416,6 +417,12 @@ const updateDataResponse = (data: any) => {
                                     <td class="p-2">
                                         <Badge v-if="item.source" variant="outline">
                                             {{ item.source }}
+                                        </Badge>
+                                        <span v-else class="text-muted-foreground">-</span>
+                                    </td>
+                                    <td class="p-2">
+                                        <Badge v-if="item.rekap_form_source" :class="{'!bg-blue-600 !text-white': item.rekap_form_source == 'tidio', '!bg-green-600 !text-white': item.rekap_form_source == 'vdcom_id', '!bg-purple-600 !text-white': item.rekap_form_source == 'vdcom'}">
+                                            {{ item.rekap_form_source }}
                                         </Badge>
                                         <span v-else class="text-muted-foreground">-</span>
                                     </td>
