@@ -178,7 +178,9 @@ class KirimKonversiService
         if ($rekapform['source'] == 'vdcom') {
             $conversion_action_id = '7439007312';
         } else if ($rekapform['source'] == 'tidio') {
-            $conversion_action_id = '7449463884'; //tidio manual
+            $conversion_action_id = '7449463884'; //tidio
+        } else if ($rekapform['source'] == 'vdcom_id') {
+            $conversion_action_id = '7449287249'; //vdcom_id
         }
 
         //cek apakah sudah ada kirim_konversi dengan gclid dan rekap_form_id,
