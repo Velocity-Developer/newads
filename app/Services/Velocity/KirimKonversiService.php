@@ -173,7 +173,7 @@ class KirimKonversiService
         ]);
 
         //tentukan conversion_action_id
-        $conversion_action_id = '7449463884';
+        $conversion_action_id = '';
 
         if ($rekapform['source'] == 'vdcom') {
             $conversion_action_id = '7439007312';
