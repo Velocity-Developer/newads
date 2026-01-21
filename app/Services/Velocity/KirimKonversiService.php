@@ -193,6 +193,7 @@ class KirimKonversiService
             ->first();
 
         if (!$kirim_konversi) {
+
             //kirim konversi click_conversion
             $dataRes = $this->kirimKonversi('click_conversion', $gclid, $conversion_time, $rekapform, $conversion_action_id);
 
@@ -210,17 +211,15 @@ class KirimKonversiService
                 ]]);
 
                 //update rekapform
-                RekapForm::update([
-                    'id' => $rekapform['id'],
-                ], [
-                    'cek_konversi_ads' => true,
-                ]);
+                RekapForm::where('id', $rekapform['id'])
+                    ->update([
+                        'cek_konversi_ads' => true,
+                    ]);
             }
         } else {
-            //jika sudah ada, tinggal update status menjadi terkonversi saja
             //update ke Vdnet melalui RekapFormServices
             $rekapFormServices = new RekapFormServices();
-            $rekapFormServices->update_cek_konversi([[
+            $update = $rekapFormServices->update_cek_konversi([[
                 'id' => $kirim_konversi['rekap_form_id'],
                 'cek_konversi_ads' => true,
                 'jobid' => $kirim_konversi['jobid'],
@@ -229,11 +228,10 @@ class KirimKonversiService
             ]]);
 
             //update rekapform
-            RekapForm::update([
-                'id' => $kirim_konversi['rekap_form_id'],
-            ], [
-                'cek_konversi_ads' => true,
-            ]);
+            RekapForm::where('id', $rekapform['id'])
+                ->update([
+                    'cek_konversi_ads' => true,
+                ]);
         }
 
         return $dataRes;
