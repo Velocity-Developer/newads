@@ -70,6 +70,12 @@ class KirimKonversiService
         } catch (\Throwable $e) {
             // TOTAL FAILURE (timeout, DNS, dll)
             $errorMsg = $e->getMessage();
+
+            return [
+                'success' => false,
+                'error' => $errorMsg,
+                'response' => $dataRes,
+            ];
         }
 
         if ($action == 'click_conversion') {
