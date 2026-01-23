@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\SearchTerm;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Services\Velocity\SearchTermService;
 
 class SearchTermsController extends Controller
 {
@@ -30,5 +31,13 @@ class SearchTermsController extends Controller
                 'per_page' => $perPage,
             ],
         ]);
+    }
+
+    //get update search term none
+    public function update_search_terms_none(Request $request)
+    {
+        $searchTermService = new SearchTermService();
+        $dataRes = $searchTermService->getSearchTermsNone();
+        return response()->json($dataRes);
     }
 }
