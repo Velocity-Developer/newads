@@ -8,15 +8,15 @@ class SearchTerm extends Model
 {
     protected $fillable = [
         'term',
-        'ai_result',
-        'google_ads_status',
-        'telegram_send',
+        'check_ai',
+        'iklan_dibuat',
+        'failure_count',
         'waktu',
     ];
 
     protected $casts = [
         'waktu' => 'datetime',
-        'telegram_send' => 'boolean',
-        'google_ads_status' => 'boolean',
+        'iklan_dibuat' => 'boolean',
+        'failure_count' => 'integer',
     ];
 }
