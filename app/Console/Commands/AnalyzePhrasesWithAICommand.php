@@ -2,26 +2,28 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\NewFrasaNegative;
 use App\Services\AI\FrasaAnalyzer;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
 class AnalyzePhrasesWithAICommand extends Command
 {
     protected $signature = 'negative-keywords:analyze-frasa {--batch-size=0 : Jumlah frasa dianalisis per batch (0=semua)} {--dry-run : Jangan simpan ke database} {--show-raw : Tampilkan jawaban AI utuh}';
+
     protected $description = 'Analisis frasa dengan AI untuk menentukan hasil_cek_ai: indonesia/luar';
 
     public function handle(FrasaAnalyzer $analyzer): int
     {
-        if (!$analyzer->isConfigured()) {
+        if (! $analyzer->isConfigured()) {
             Log::error('OpenAI belum dikonfigurasi. Set OPENAI_API_KEY.');
+
             return 1;
         }
 
-        $batchSize = (int)$this->option('batch-size');
-        $dryRun = (bool)$this->option('dry-run');
-        $showRaw = (bool)$this->option('show-raw');
+        $batchSize = (int) $this->option('batch-size');
+        $dryRun = (bool) $this->option('dry-run');
+        $showRaw = (bool) $this->option('show-raw');
 
         $query = NewFrasaNegative::needsAiAnalysis();
         if ($batchSize > 0) {
@@ -31,6 +33,7 @@ class AnalyzePhrasesWithAICommand extends Command
 
         if ($items->isEmpty()) {
             Log::info('Tidak ada frasa yang perlu dianalisis AI.');
+
             return 0;
         }
 
@@ -54,6 +57,7 @@ class AnalyzePhrasesWithAICommand extends Command
             $result = $analyzer->analyzeFrasa($item->frasa);
             if ($result === null) {
                 Log::error('❌ AI analysis failed', ['frasa' => $item->frasa]);
+
                 continue;
             }
 
@@ -64,12 +68,17 @@ class AnalyzePhrasesWithAICommand extends Command
             } else {
                 $item->update(['hasil_cek_ai' => $result]);
                 $updated++;
-                if ($result === NewFrasaNegative::HASIL_CEK_AI_LUAR) $luar++;
-                if ($result === NewFrasaNegative::HASIL_CEK_AI_INDONESIA) $indonesia++;
+                if ($result === NewFrasaNegative::HASIL_CEK_AI_LUAR) {
+                    $luar++;
+                }
+                if ($result === NewFrasaNegative::HASIL_CEK_AI_INDONESIA) {
+                    $indonesia++;
+                }
             }
         }
 
         Log::info("Selesai. Diupdate: {$updated}, luar: {$luar}, indonesia: {$indonesia}");
+
         return 0;
     }
 }

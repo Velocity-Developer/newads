@@ -2,12 +2,12 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
+use App\Models\NewTermsNegative0Click;
 use App\Services\AI\TermAnalyzer;
 use App\Services\Telegram\NotificationService;
-use App\Models\NewTermsNegative0Click;
-use Illuminate\Support\Facades\Log;
 use Exception;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class AnalyzeTermsWithAICommand extends Command
 {
@@ -26,6 +26,7 @@ class AnalyzeTermsWithAICommand extends Command
     protected $description = 'Analyze stored search terms using AI to determine if they should be negative keywords';
 
     protected $termAnalyzer;
+
     protected $notificationService;
 
     public function __construct(TermAnalyzer $termAnalyzer, NotificationService $notificationService)
@@ -41,7 +42,7 @@ class AnalyzeTermsWithAICommand extends Command
     public function handle()
     {
         // Log::info('Starting AI analysis of search terms...');
-        
+
         try {
             $batchSize = (int) $this->option('batch-size');
 
@@ -63,16 +64,17 @@ class AnalyzeTermsWithAICommand extends Command
                 $query->limit($batchSize);
             }
             $terms = $query->get();
-            
+
             $this->info("Records matching needsAiAnalysis scope: {$terms->count()}");
-            
+
             if ($terms->isEmpty()) {
                 $this->info('No terms found that need AI analysis.');
+
                 return 0;
             }
-            
+
             Log::info("Found {$terms->count()} terms to analyze.");
-            
+
             $analyzedCount = 0;
             $positiveCount = 0;
             $relevanTerms = [];
@@ -87,7 +89,7 @@ class AnalyzeTermsWithAICommand extends Command
                     // Log::info("AI Result: {$result}");
                     // Simpan ke database
                     $term->update([
-                        'hasil_cek_ai' => $result
+                        'hasil_cek_ai' => $result,
                     ]);
 
                     // Hitung ringkasan
@@ -103,30 +105,30 @@ class AnalyzeTermsWithAICommand extends Command
                     $analyzedCount++;
 
                 } catch (Exception $e) {
-                    Log::error("Error analyzing term '{$term->terms}': " . $e->getMessage());
+                    Log::error("Error analyzing term '{$term->terms}': ".$e->getMessage());
                 }
             }
 
-            Log::info("Analysis completed. Total: {$analyzedCount}, Relevan: " . count($relevanTerms) . ", Negatif: " . count($negatifTerms));
+            Log::info("Analysis completed. Total: {$analyzedCount}, Relevan: ".count($relevanTerms).', Negatif: '.count($negatifTerms));
             // $displayLimit = 20;
             // if (!empty($relevanTerms)) {
-            //     Log::info("Relevan terms (max {$displayLimit}): " . implode(', ', array_slice($relevanTerms, 0, $displayLimit)));   
+            //     Log::info("Relevan terms (max {$displayLimit}): " . implode(', ', array_slice($relevanTerms, 0, $displayLimit)));
             // }
             // if (!empty($negatifTerms)) {
             //     Log::info("Negatif terms (max {$displayLimit}): " . implode(', ', array_slice($negatifTerms, 0, $displayLimit)));
             // }
 
             return 0;
-            
+
         } catch (Exception $e) {
-            Log::error("Error during AI analysis: " . $e->getMessage());
-            
+            Log::error('Error during AI analysis: '.$e->getMessage());
+
             // Send error notification
             // $this->notificationService->notifySystemError(
             //     'AI Terms Analysis',
             //     $e->getMessage()
             // );
-            
+
             return 1;
         }
     }

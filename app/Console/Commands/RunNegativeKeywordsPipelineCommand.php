@@ -2,18 +2,19 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Services\Velocity\NegativeKeywordsPipelineService;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
 class RunNegativeKeywordsPipelineCommand extends Command
 {
     protected $signature = 'negative-keywords:pipeline {--apply : Apply changes instead of validate} {--json : Output JSON summary}';
+
     protected $description = 'Run Negative Keywords pipeline sequentially (fetch → analyze → velocity terms → process phrases → velocity frasa)';
 
     public function handle(NegativeKeywordsPipelineService $service): int
     {
-        $validate = !$this->option('apply');
+        $validate = ! $this->option('apply');
         $summary = $service->run($validate);
 
         if ($this->option('json')) {
@@ -32,8 +33,8 @@ class RunNegativeKeywordsPipelineCommand extends Command
             //         $step['success'] ? 'OK' : 'FAIL'
             //     ));
             // }
-            Log::info('Total: ' . $summary['total_duration_seconds'] . 's');
-            Log::info('Result: ' . ($summary['success'] ? 'SUCCESS' : 'PARTIAL/FAILED'));
+            Log::info('Total: '.$summary['total_duration_seconds'].'s');
+            Log::info('Result: '.($summary['success'] ? 'SUCCESS' : 'PARTIAL/FAILED'));
         }
 
         return $summary['success'] ? 0 : 1;

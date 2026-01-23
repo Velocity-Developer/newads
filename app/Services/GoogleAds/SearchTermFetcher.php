@@ -3,12 +3,11 @@
 namespace App\Services\GoogleAds;
 
 use App\Models\NewTermsNegative0Click;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class SearchTermFetcher
 {
-
     public function getConfig(): array
     {
         // Baca konfigurasi API eksternal (velocity_ads)
@@ -24,7 +23,6 @@ class SearchTermFetcher
      * Filter out terms containing excluded words.
      * DISABLED: Now returns all terms without filtering.
      */
-
     private function isAssoc(array $arr): bool
     {
         return array_keys($arr) !== range(0, count($arr) - 1);
@@ -45,7 +43,7 @@ class SearchTermFetcher
         try {
             $request = Http::timeout(30);
 
-            if (!empty($apiToken)) {
+            if (! empty($apiToken)) {
                 $request = $request->withHeaders([
                     'Authorization' => "Bearer {$apiToken}",
                     'Accept' => 'application/json',
@@ -60,7 +58,7 @@ class SearchTermFetcher
 
             $response = $request->get($apiUrl);
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 // Log detail status + cuplikan body untuk diagnosa cepat
                 Log::error('❌ External API HTTP error', [
                     'url' => $apiUrl,
@@ -68,13 +66,13 @@ class SearchTermFetcher
                     'body_excerpt' => mb_substr((string) $response->body(), 0, 500),
                     'headers' => $response->headers(),
                 ]);
-                throw new \Exception('External API error: HTTP ' . $response->status());
+                throw new \Exception('External API error: HTTP '.$response->status());
             }
 
             $body = (string) $response->body();
             $data = $response->json();
 
-            if (!is_array($data)) {
+            if (! is_array($data)) {
                 Log::error('❌ Invalid JSON response from external API', [
                     'url' => $apiUrl,
                     'content_type' => $response->header('Content-Type'),
@@ -91,7 +89,7 @@ class SearchTermFetcher
                     $items = $items['search_terms'];
                 }
                 // Fallback tambahan untuk nested umum
-                if (!is_array($items) || ($this->isAssoc($items) && !isset($items[0]))) {
+                if (! is_array($items) || ($this->isAssoc($items) && ! isset($items[0]))) {
                     $paths = [
                         ['data', 'search_terms'],
                         ['payload', 'terms'],
@@ -139,6 +137,7 @@ class SearchTermFetcher
                 $term = is_string($term) ? trim($term) : '';
                 if ($term === '') {
                     $rejectedCount++;
+
                     continue;
                 }
 
@@ -153,7 +152,7 @@ class SearchTermFetcher
 
                 $normalized[] = [
                     'search_term' => $term,
-                    'campaign_id' => is_numeric($campaignId) ? (int)$campaignId : null,
+                    'campaign_id' => is_numeric($campaignId) ? (int) $campaignId : null,
                 ];
             }
 
@@ -186,32 +185,39 @@ class SearchTermFetcher
         $t = trim($term);
         if ($t === '') {
             $reason = '❌empty after trim';
+
             return false;
         }
         if (strlen($t) > 500) {
             $reason = '❌too long (>500 chars)';
+
             return false;
         }
         // Tolak jika hanya angka dan tanda tanggal
         if (preg_match('/^[0-9:\\-\\/\\s]+$/', $t)) {
             $reason = '❌digits/date-like only';
+
             return false;
         }
         // Tolak format ISO / umum lokal
         if (preg_match('/^\\d{4}-\\d{2}-\\d{2}(?:[ T]\\d{2}:\\d{2}(?::\\d{2})?)?$/', $t)) {
             $reason = '❌ISO date/time';
+
             return false;
         }
         if (preg_match('/^\\d{1,2}\\/\\d{1,2}\\/\\d{2,4}(?:\\s+\\d{1,2}:\\d{2}(?:\\s*[AP]M)?)?$/i', $t)) {
             $reason = '❌local date/time';
+
             return false;
         }
         // Wajib ada minimal satu huruf
-        if (!preg_match('/[A-Za-zÀ-ÖØ-öø-ÿ]/', $t)) {
+        if (! preg_match('/[A-Za-zÀ-ÖØ-öø-ÿ]/', $t)) {
             $reason = '❌no letters';
+
             return false;
         }
         $reason = null;
+
         return true;
     }
 
@@ -221,37 +227,40 @@ class SearchTermFetcher
     public function storeZeroClickTerms(array $terms): int
     {
         $stored = 0;
-        
+
         foreach ($terms as $termData) {
             $searchTerm = $termData['search_term'] ?? '';
             $searchTerm = trim($searchTerm);
             if ($searchTerm === '') {
                 Log::debug('❌Skip empty term after trim');
+
                 continue;
             }
 
             // Validasi format term, log alasan jika tidak valid
             $reason = null;
-            if (!$this->isValidSearchTerm($searchTerm, $reason)) {
+            if (! $this->isValidSearchTerm($searchTerm, $reason)) {
                 Log::warning('❌Skip invalid search term', [
                     'term' => $searchTerm,
                     'reason' => $reason,
                 ]);
+
                 continue;
             }
-        
+
             // Skip jika duplikat (exact match), log agar terlihat di monitoring
             if (NewTermsNegative0Click::where('terms', $searchTerm)->exists()) {
                 $campaignIdForLog = $termData['campaign_id'] ?? null;
+
                 // Log::info('❌Skip duplicate search term', [
                 //     'term' => $searchTerm,
                 //     'campaign_id' => is_numeric($campaignIdForLog) ? (int)$campaignIdForLog : null,
                 // ]);
                 continue;
             }
-        
+
             $campaignId = $termData['campaign_id'] ?? null;
-        
+
             try {
                 NewTermsNegative0Click::create([
                     'terms' => $searchTerm,
@@ -259,14 +268,14 @@ class SearchTermFetcher
                     'status_input_google' => null,
                     'retry_count' => 0,
                     'notif_telegram' => null,
-                    'campaign_id' => is_numeric($campaignId) ? (int)$campaignId : null,
+                    'campaign_id' => is_numeric($campaignId) ? (int) $campaignId : null,
                 ]);
-        
+
                 $stored++;
             } catch (\Throwable $e) {
                 Log::error('Failed to store zero-click term', [
                     'term' => $searchTerm,
-                    'campaign_id' => is_numeric($campaignId) ? (int)$campaignId : null,
+                    'campaign_id' => is_numeric($campaignId) ? (int) $campaignId : null,
                     'exception_class' => get_class($e),
                     'exception_code' => $e->getCode(),
                     'error' => $e->getMessage(),
@@ -276,9 +285,9 @@ class SearchTermFetcher
                 ]);
             }
         }
-        
+
         Log::info('Stored zero-click terms', ['count' => $stored]);
-        
+
         return $stored;
     }
 
@@ -291,6 +300,7 @@ class SearchTermFetcher
             'keyword' => $keyword,
             'match_type' => $matchType,
         ]);
+
         return false;
     }
 

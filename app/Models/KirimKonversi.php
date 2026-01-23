@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class KirimKonversi extends Model
 {
@@ -28,7 +28,7 @@ class KirimKonversi extends Model
         'tercatat' => 'boolean',
     ];
 
-    //relasi dengan model RekapForm
+    // relasi dengan model RekapForm
     public function rekap_form()
     {
         return $this->belongsTo(RekapForm::class, 'rekap_form_id', 'id');

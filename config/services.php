@@ -40,7 +40,7 @@ return [
         'model' => env('OPENAI_MODEL', 'gpt-4o-mini'),
     ],
     'newvdnet' => [
-        'api_url'   => 'https://new.velocitydeveloper.net/api/api/public',
+        'api_url' => 'https://new.velocitydeveloper.net/api/api/public',
         'api_token' => env('NEWVDNET_API_PUBLIC_KEY'),
     ],
     'googleads' => [

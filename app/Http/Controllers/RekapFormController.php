@@ -59,6 +59,7 @@ class RekapFormController extends Controller
     public function show(int $id): Response
     {
         $rekapForm = RekapForm::with('kirim_konversi')->findOrFail($id);
+
         return Inertia::render('RekapForm/Show', [
             'rekapForm' => $rekapForm,
         ]);
@@ -74,17 +75,17 @@ class RekapFormController extends Controller
         ];
         $result = $service->get_list($payload);
 
-        //if success
+        // if success
         if (isset($result['total']) && $result['total'] > 0) {
-            //upsert rekap forms
+            // upsert rekap forms
             $data = collect($result['data'])
-                ->filter(fn($row) => !empty($row['id']))
+                ->filter(fn ($row) => ! empty($row['id']))
                 ->map(function ($row) {
                     unset($row['created_at_wib']);
                     unset($row['log_konversi']);
                     unset($row['updated_at']);
 
-                    //ubah created_at dari 2026-01-10T07:34:47.000000+07:00 ke 2026-01-10 07:34:47
+                    // ubah created_at dari 2026-01-10T07:34:47.000000+07:00 ke 2026-01-10 07:34:47
                     $row['created_at'] = date('Y-m-d H:i:s', strtotime($row['created_at']));
 
                     return $row;

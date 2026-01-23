@@ -19,7 +19,7 @@ return new class extends Migration
             $table->enum('status_input_google', ['sukses', 'gagal', 'error'])->nullable();
             $table->integer('retry_count')->default(0);
             $table->enum('notif_telegram', ['sukses', 'gagal'])->nullable()->comment('Status notifikasi Telegram: sukses/gagal');
-            
+
             // Indexes for performance
             $table->index(['hasil_cek_ai', 'status_input_google'], 'idx_ai_status');
             $table->index('created_at', 'idx_created_at');

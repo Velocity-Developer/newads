@@ -2,13 +2,13 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
+use App\Models\NewFrasaNegative;
+use App\Models\NewTermsNegative0Click;
 use App\Services\GoogleAds\SearchTermFetcher;
 use App\Services\Telegram\NotificationService;
-use App\Models\NewTermsNegative0Click;
-use App\Models\NewFrasaNegative;
-use Illuminate\Support\Facades\Log;
 use Exception;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class ProcessIndividualPhrasesCommand extends Command
 {
@@ -27,6 +27,7 @@ class ProcessIndividualPhrasesCommand extends Command
     protected $description = 'Process individual phrases from approved terms (split only, no Google Ads input)';
 
     protected $searchTermFetcher;
+
     protected $notificationService;
 
     public function __construct(SearchTermFetcher $searchTermFetcher, NotificationService $notificationService)
@@ -53,34 +54,35 @@ class ProcessIndividualPhrasesCommand extends Command
             }
 
             $terms = $query->get();
-            
+
             if ($terms->isEmpty()) {
                 Log::info('No terms found that need phrase processing.');
                 Log::info('Skipping Google Ads input; use negative-keywords:input-velocity for submission.');
+
                 return 0;
             }
 
             Log::info("Found {$terms->count()} terms to break down into phrases.");
-            
+
             $totalPhrasesCreated = 0;
-            
+
             foreach ($terms as $term) {
                 try {
                     // Extract allowed phrases from the term
                     $allowedPhrases = NewFrasaNegative::extractAllowedFrasa($term->terms);
-                    
+
                     if (empty($allowedPhrases)) {
                         // Log::info("No valid phrases found in: {$term->terms}");
                         continue;
                     }
-                    
+
                     $phrasesCreated = 0;
-                    
+
                     foreach ($allowedPhrases as $phrase) {
                         // Check if phrase already exists to avoid duplicates
                         $existingPhrase = NewFrasaNegative::where('frasa', $phrase)->first();
-                        
-                        if (!$existingPhrase) {
+
+                        if (! $existingPhrase) {
                             NewFrasaNegative::create([
                                 'frasa' => $phrase,
                                 'parent_term_id' => $term->id,
@@ -89,25 +91,26 @@ class ProcessIndividualPhrasesCommand extends Command
                                 'notif_telegram' => null,
                                 'campaign_id' => $term->campaign_id, // propagate campaign_id
                             ]);
-                            
+
                             $phrasesCreated++;
                         }
                     }
-                    
+
                     $totalPhrasesCreated += $phrasesCreated;
                     // Log::info("Created {$phrasesCreated} new phrases from: {$term->terms}");
-                    
+
                 } catch (Exception $e) {
-                    Log::error("Error processing term '{$term->terms}': " . $e->getMessage());
+                    Log::error("Error processing term '{$term->terms}': ".$e->getMessage());
                 }
             }
-            
+
             // Log::info("Phrase extraction completed. Total new phrases created: {$totalPhrasesCreated}");
             // Log::info('Google Ads input removed. Use negative-keywords:input-velocity to submit phrases.');
             return 0;
-            
+
         } catch (Exception $e) {
-            Log::error("Error during phrase processing: " . $e->getMessage());
+            Log::error('Error during phrase processing: '.$e->getMessage());
+
             return 1;
         }
     }

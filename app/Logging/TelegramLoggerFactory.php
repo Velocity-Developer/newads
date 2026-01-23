@@ -13,7 +13,7 @@ class TelegramLoggerFactory
         $level = \Monolog\Logger::toMonologLevel($config['level'] ?? 'error');
 
         // Gunakan notifier khusus log yang menyimpan token/chat di file sendiri
-        $notifier = new \App\Logging\TelegramLogNotifier();
+        $notifier = new \App\Logging\TelegramLogNotifier;
 
         $handler = new TelegramHandler($notifier, $level);
         $logger->pushHandler($handler);

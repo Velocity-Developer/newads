@@ -2,14 +2,14 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use App\Services\GoogleAds\SearchTermFetcher;
-use App\Services\AI\TermAnalyzer;
-use App\Services\Telegram\NotificationService;
-use App\Models\NewTermsNegative0Click;
 use App\Models\NewFrasaNegative;
-use Illuminate\Support\Facades\Log;
+use App\Models\NewTermsNegative0Click;
+use App\Services\AI\TermAnalyzer;
+use App\Services\GoogleAds\SearchTermFetcher;
+use App\Services\Telegram\NotificationService;
 use Exception;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class TestNegativeKeywordsSystemCommand extends Command
 {
@@ -28,7 +28,9 @@ class TestNegativeKeywordsSystemCommand extends Command
     protected $description = 'Test the negative keywords automation system components';
 
     protected $searchTermFetcher;
+
     protected $termAnalyzer;
+
     protected $notificationService;
 
     public function __construct(
@@ -51,7 +53,7 @@ class TestNegativeKeywordsSystemCommand extends Command
         $this->newLine();
 
         $component = $this->option('component') ?? 'all';
-        
+
         $results = [];
 
         switch ($component) {
@@ -77,18 +79,18 @@ class TestNegativeKeywordsSystemCommand extends Command
         }
 
         $this->displayResults($results);
-        
+
         return 0;
     }
 
     private function testDatabase()
     {
         Log::info('📊 Testing Database Components...');
-        
+
         $results = [
             'migrations' => false,
             'models' => false,
-            'relationships' => false
+            'relationships' => false,
         ];
 
         try {
@@ -101,9 +103,9 @@ class TestNegativeKeywordsSystemCommand extends Command
             }
 
             // Test models
-            $termModel = new NewTermsNegative0Click();
-            $phraseModel = new NewFrasaNegative();
-            
+            $termModel = new NewTermsNegative0Click;
+            $phraseModel = new NewFrasaNegative;
+
             if ($termModel && $phraseModel) {
                 $results['models'] = true;
                 Log::info('✅ Models instantiated successfully');
@@ -116,7 +118,7 @@ class TestNegativeKeywordsSystemCommand extends Command
                     'hasil_cek_ai' => null,
                     'status_input_google' => null,
                     'retry_count' => 0,
-                    'notif_telegram' => null
+                    'notif_telegram' => null,
                 ]
             );
 
@@ -125,7 +127,7 @@ class TestNegativeKeywordsSystemCommand extends Command
                 'parent_term_id' => $testTerm->id,
                 'status_input_google' => null,
                 'retry_count' => 0,
-                'notif_telegram' => null
+                'notif_telegram' => null,
             ]);
 
             if ($testTerm->frasa()->count() > 0 && $testPhrase->parentTerm) {
@@ -138,7 +140,7 @@ class TestNegativeKeywordsSystemCommand extends Command
             $testTerm->delete();
 
         } catch (Exception $e) {
-            Log::error("❌ Database test failed: " . $e->getMessage());
+            Log::error('❌ Database test failed: '.$e->getMessage());
         }
 
         return $results;
@@ -147,16 +149,16 @@ class TestNegativeKeywordsSystemCommand extends Command
     private function testGoogleAds()
     {
         Log::info('🎯 Testing Google Ads Integration...');
-        
+
         $results = [
             'configuration' => false,
-            'connection' => false
+            'connection' => false,
         ];
 
         try {
             // Test configuration
             $config = $this->searchTermFetcher->getConfig();
-            if (!empty($config['client_id']) && !empty($config['developer_token'])) {
+            if (! empty($config['client_id']) && ! empty($config['developer_token'])) {
                 $results['configuration'] = true;
                 Log::info('✅ Google Ads configuration found');
             } else {
@@ -165,9 +167,9 @@ class TestNegativeKeywordsSystemCommand extends Command
 
             // Test connection (placeholder - would need actual API call)
             Log::info('⚠️  Google Ads API connection test requires actual credentials');
-            
+
         } catch (Exception $e) {
-            Log::error("❌ Google Ads test failed: " . $e->getMessage());
+            Log::error('❌ Google Ads test failed: '.$e->getMessage());
         }
 
         return $results;
@@ -176,10 +178,10 @@ class TestNegativeKeywordsSystemCommand extends Command
     private function testAI()
     {
         Log::info('🤖 Testing AI Analysis Service...');
-        
+
         $results = [
             'configuration' => false,
-            'service' => false
+            'service' => false,
         ];
 
         try {
@@ -187,7 +189,7 @@ class TestNegativeKeywordsSystemCommand extends Command
             if ($this->termAnalyzer->isConfigured()) {
                 $results['configuration'] = true;
                 Log::info('✅ AI service configured');
-                Log::info('🧩 Model GPT saat ini: ' . $this->termAnalyzer->getModel());
+                Log::info('🧩 Model GPT saat ini: '.$this->termAnalyzer->getModel());
             } else {
                 Log::error('❌ AI service not configured (missing OpenAI API key)');
             }
@@ -201,7 +203,7 @@ class TestNegativeKeywordsSystemCommand extends Command
             }
 
         } catch (Exception $e) {
-            Log::error("❌ AI test failed: " . $e->getMessage());
+            Log::error('❌ AI test failed: '.$e->getMessage());
         }
 
         return $results;
@@ -210,10 +212,10 @@ class TestNegativeKeywordsSystemCommand extends Command
     private function testTelegram()
     {
         Log::info('📱 Testing Telegram Notifications...');
-        
+
         $results = [
             'configuration' => false,
-            'connection' => false
+            'connection' => false,
         ];
 
         try {
@@ -234,7 +236,7 @@ class TestNegativeKeywordsSystemCommand extends Command
             }
 
         } catch (Exception $e) {
-            Log::error("❌ Telegram test failed: " . $e->getMessage());
+            Log::error('❌ Telegram test failed: '.$e->getMessage());
         }
 
         return $results;
@@ -250,12 +252,14 @@ class TestNegativeKeywordsSystemCommand extends Command
 
         foreach ($results as $component => $componentResults) {
             Log::info("🔧 {$component}:");
-            
+
             if (is_array($componentResults)) {
                 foreach ($componentResults as $test => $passed) {
                     $status = $passed ? '✅' : '❌';
                     Log::info("   {$status} {$test}");
-                    if (!$passed) $allPassed = false;
+                    if (! $passed) {
+                        $allPassed = false;
+                    }
                 }
             }
             $this->newLine();

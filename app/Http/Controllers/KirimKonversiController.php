@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\KirimKonversi;
-use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Log;
 use App\Services\NewVDnet\RekapFormServices;
 use App\Services\Velocity\KirimKonversiService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redirect;
+use Inertia\Inertia;
 
 class KirimKonversiController extends Controller
 {
@@ -80,6 +80,7 @@ class KirimKonversiController extends Controller
                 'id' => $id,
                 'message' => $e->getMessage(),
             ]);
+
             return Redirect::back()->with('error', 'Gagal menghapus data kirim konversi.');
         }
 
@@ -87,19 +88,20 @@ class KirimKonversiController extends Controller
             ->with('success', 'Berhasil menghapus data kirim konversi.');
     }
 
-    //get list rekap form
+    // get list rekap form
     public function get_list_rekap_forms(Request $request)
     {
         $params = $request->query();
         $rekapFormServices = app()->make(RekapFormServices::class);
         $rekapForms = $rekapFormServices->get_list($params);
+
         return response()->json($rekapForms);
     }
 
-    //kirim konversi ke Velocity Ads
+    // kirim konversi ke Velocity Ads
     public function kirim_konversi_velocity(Request $request)
     {
-        $kirimKonversiService = new KirimKonversiService();
+        $kirimKonversiService = new KirimKonversiService;
 
         $response = $kirimKonversiService->kirimKonversi(
             $request->input('action'),
@@ -112,10 +114,10 @@ class KirimKonversiController extends Controller
         return response()->json($response);
     }
 
-    //kirim konversi dari rekap form ke Velocity Ads
+    // kirim konversi dari rekap form ke Velocity Ads
     public function kirim_konversi_dari_rekap_form(Request $request)
     {
-        $kirimKonversiService = new KirimKonversiService();
+        $kirimKonversiService = new KirimKonversiService;
 
         $response = $kirimKonversiService->kirimKonversiDariRekapForm(
             $request->input('rekapform')

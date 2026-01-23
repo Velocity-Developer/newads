@@ -2,11 +2,11 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use App\Services\Velocity\NegativeKeywordInputService;
-use App\Models\NewTermsNegative0Click;
 use App\Models\NewFrasaNegative;
+use App\Models\NewTermsNegative0Click;
 use App\Services\Telegram\NotificationService;
+use App\Services\Velocity\NegativeKeywordInputService;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
 class InputNegativeKeywordsVelocityCommand extends Command
@@ -38,7 +38,7 @@ class InputNegativeKeywordsVelocityCommand extends Command
 
         // Kelompokkan per campaign_id (termasuk null)
         $groups = $rows->groupBy(function ($row) {
-            return $row->campaign_id === null ? 'null' : (string)$row->campaign_id;
+            return $row->campaign_id === null ? 'null' : (string) $row->campaign_id;
         });
 
         $service = app(\App\Services\Velocity\NegativeKeywordInputService::class);
@@ -46,8 +46,8 @@ class InputNegativeKeywordsVelocityCommand extends Command
 
         foreach ($groups as $cidKey => $group) {
             $terms = $group->pluck('terms')
-                ->map(fn($t) => trim((string)$t))
-                ->filter(fn($t) => $t !== '')
+                ->map(fn ($t) => trim((string) $t))
+                ->filter(fn ($t) => $t !== '')
                 ->values()
                 ->all();
 
@@ -56,19 +56,19 @@ class InputNegativeKeywordsVelocityCommand extends Command
             }
 
             // Cast aman: 0 valid, hindari empty()
-            $campaignId = $cidKey === 'null' ? null : (int)$cidKey;
+            $campaignId = $cidKey === 'null' ? null : (int) $cidKey;
 
             $result = $service->send($terms, $matchType, $mode, $campaignId);
 
             if ($result['success']) {
-                $this->info("Sent " . count($terms) . " {$source} to Velocity (campaign_id=" . ($campaignId ?? 'null') . ")");
+                $this->info('Sent '.count($terms)." {$source} to Velocity (campaign_id=".($campaignId ?? 'null').')');
             } else {
-                $this->error("Failed sending {$source} (campaign_id=" . ($campaignId ?? 'null') . "): " . ($result['error'] ?? 'unknown'));
+                $this->error("Failed sending {$source} (campaign_id=".($campaignId ?? 'null').'): '.($result['error'] ?? 'unknown'));
             }
         }
-        $batchSize = (int)$this->option('batch-size');
+        $batchSize = (int) $this->option('batch-size');
 
-        $svc = new NegativeKeywordInputService();
+        $svc = new NegativeKeywordInputService;
         $notifier = app(\App\Services\Telegram\NotificationService::class);
 
         $sources = [];
@@ -93,15 +93,15 @@ class InputNegativeKeywordsVelocityCommand extends Command
 
                 // Kelompokkan per campaign_id (termasuk null)
                 $groups = $rows->groupBy(function ($row) {
-                    return $row->campaign_id === null ? 'null' : (string)$row->campaign_id;
+                    return $row->campaign_id === null ? 'null' : (string) $row->campaign_id;
                 });
 
                 $matchType = $svc->getMatchTypeForSource('terms');
 
                 foreach ($groups as $cidKey => $group) {
                     $terms = $group->pluck('terms')
-                        ->map(fn($t) => trim((string)$t))
-                        ->filter(fn($t) => $t !== '')
+                        ->map(fn ($t) => trim((string) $t))
+                        ->filter(fn ($t) => $t !== '')
                         ->unique()
                         ->values()
                         ->all();
@@ -110,7 +110,7 @@ class InputNegativeKeywordsVelocityCommand extends Command
                         continue;
                     }
 
-                    $campaignId = $cidKey === 'null' ? null : (int)$cidKey;
+                    $campaignId = $cidKey === 'null' ? null : (int) $cidKey;
 
                     $res = $svc->send($terms, $matchType, $mode, $campaignId);
 
@@ -133,15 +133,15 @@ class InputNegativeKeywordsVelocityCommand extends Command
 
                 // Kelompokkan per campaign_id (termasuk null)
                 $groups = $rows->groupBy(function ($row) {
-                    return $row->campaign_id === null ? 'null' : (string)$row->campaign_id;
+                    return $row->campaign_id === null ? 'null' : (string) $row->campaign_id;
                 });
 
                 $matchType = $svc->getMatchTypeForSource('frasa');
 
                 foreach ($groups as $cidKey => $group) {
                     $phrases = $group->pluck('frasa')
-                        ->map(fn($t) => trim((string)$t))
-                        ->filter(fn($t) => $t !== '')
+                        ->map(fn ($t) => trim((string) $t))
+                        ->filter(fn ($t) => $t !== '')
                         ->unique()
                         ->values()
                         ->all();
@@ -150,7 +150,7 @@ class InputNegativeKeywordsVelocityCommand extends Command
                         continue;
                     }
 
-                    $campaignId = $cidKey === 'null' ? null : (int)$cidKey;
+                    $campaignId = $cidKey === 'null' ? null : (int) $cidKey;
 
                     $res = $svc->send($phrases, $matchType, $mode, $campaignId);
 
@@ -192,7 +192,7 @@ class InputNegativeKeywordsVelocityCommand extends Command
     {
         if ($success) {
             $q = NewTermsNegative0Click::whereIn('terms', $terms);
-            if (!is_null($campaignId)) {
+            if (! is_null($campaignId)) {
                 $q->where('campaign_id', $campaignId);
             }
             $q->update([
@@ -201,7 +201,7 @@ class InputNegativeKeywordsVelocityCommand extends Command
             ]);
         } else {
             $q = NewTermsNegative0Click::whereIn('terms', $terms);
-            if (!is_null($campaignId)) {
+            if (! is_null($campaignId)) {
                 $q->where('campaign_id', $campaignId);
             }
             $rows = $q->get();
@@ -220,7 +220,7 @@ class InputNegativeKeywordsVelocityCommand extends Command
     {
         if ($success) {
             $q = NewFrasaNegative::whereIn('frasa', $phrases);
-            if (!is_null($campaignId)) {
+            if (! is_null($campaignId)) {
                 $q->where('campaign_id', $campaignId);
             }
             $q->update([
@@ -229,7 +229,7 @@ class InputNegativeKeywordsVelocityCommand extends Command
             ]);
         } else {
             $q = NewFrasaNegative::whereIn('frasa', $phrases);
-            if (!is_null($campaignId)) {
+            if (! is_null($campaignId)) {
                 $q->where('campaign_id', $campaignId);
             }
             $rows = $q->get();
@@ -259,34 +259,35 @@ class InputNegativeKeywordsVelocityCommand extends Command
         $effectiveMatchType = strtoupper($apiMatchType ?? $matchType);
         $list = implode("\n", array_map(function ($item) use ($effectiveMatchType) {
             if ($effectiveMatchType === 'EXACT') {
-                return '[' . $item . ']';
+                return '['.$item.']';
             } elseif ($effectiveMatchType === 'PHRASE') {
-                return '"' . $item . '"';
+                return '"'.$item.'"';
             }
+
             // Fallback untuk tipe lain: tampilkan apa adanya
-            return $item . ' ' . $effectiveMatchType;
+            return $item.' '.$effectiveMatchType;
         }, array_slice($items, 0, 50)));
 
         if ($res['success']) {
-            $message = "✅ <b>Berhasil Input Keywords Negative</b>\n\n" .
+            $message = "✅ <b>Berhasil Input Keywords Negative</b>\n\n".
                 // "📦 <b>Sumber:</b> {$src}\n" .
-                "🧮 <b>Jumlah:</b> {$count} data\n" .
+                "🧮 <b>Jumlah:</b> {$count} data\n".
                 // "📝 <b>Match Type:</b> {$matchType}" . ($apiMatchType ? " (API={$apiMatchType})" : "") . "\n" .
-                "⚙️ <b>Mode:</b> {$mode}" . (is_bool($validateOnly) ? " (validate_only=" . ($validateOnly ? 'true' : 'false') . ")" : "") . "\n" .
-                ($campaignId ? "📣 <b>Campaign ID:</b> {$campaignId}\n" : "") .
-                "⏰ <b>Waktu:</b> {$timestamp}\n" .
+                "⚙️ <b>Mode:</b> {$mode}".(is_bool($validateOnly) ? ' (validate_only='.($validateOnly ? 'true' : 'false').')' : '')."\n".
+                ($campaignId ? "📣 <b>Campaign ID:</b> {$campaignId}\n" : '').
+                "⏰ <b>Waktu:</b> {$timestamp}\n".
                 "🗒️ <b>Keywords:</b>\n{$list}\n";
         } else {
             $error = $res['error'] ?? 'Unknown error';
             $status = $res['status'] ?? 'N/A';
-            $message = "❌ <b>Gagal Input Keywords Negative</b>\n\n" .
+            $message = "❌ <b>Gagal Input Keywords Negative</b>\n\n".
                 // "📦 <b>Sumber:</b> {$src}\n" .
-                "🧮 <b>Jumlah:</b> {$count} data\n" .
-                "📝 <b>Match Type:</b> {$matchType}\n" .
-                "⚙️ <b>Mode:</b> {$mode}\n" .
-                "📡 <b>Status API:</b> {$status}\n" .
-                "❗ <b>Error:</b> {$error}\n" .
-                "⏰ <b>Waktu:</b> {$timestamp}\n" .
+                "🧮 <b>Jumlah:</b> {$count} data\n".
+                "📝 <b>Match Type:</b> {$matchType}\n".
+                "⚙️ <b>Mode:</b> {$mode}\n".
+                "📡 <b>Status API:</b> {$status}\n".
+                "❗ <b>Error:</b> {$error}\n".
+                "⏰ <b>Waktu:</b> {$timestamp}\n".
                 "🗒️ <b>Keywords:</b>\n\n{$list}\n";
         }
 

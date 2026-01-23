@@ -19,10 +19,10 @@ return new class extends Migration
             $table->enum('status_input_google', ['sukses', 'gagal', 'error'])->nullable();
             $table->integer('retry_count')->default(0);
             $table->enum('notif_telegram', ['sukses', 'gagal'])->nullable()->comment('Status notifikasi Telegram: sukses/gagal');
-            
+
             // Foreign key constraint
             $table->foreign('parent_term_id')->references('id')->on('new_terms_negative_0click')->onDelete('cascade');
-            
+
             // Indexes for performance
             $table->index('status_input_google', 'idx_status');
             $table->index('frasa', 'idx_frasa');

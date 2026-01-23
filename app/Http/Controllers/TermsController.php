@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\NewFrasaNegative;
+use App\Exports\TermsExport;
 use App\Models\NewTermsNegative0Click;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
-use App\Exports\TermsExport;
+use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
 
 class TermsController extends Controller
@@ -74,6 +73,7 @@ class TermsController extends Controller
                 'term_id' => $id,
                 'message' => $e->getMessage(),
             ]);
+
             return Redirect::back()->with('error', 'Gagal menghapus data term.');
         }
 

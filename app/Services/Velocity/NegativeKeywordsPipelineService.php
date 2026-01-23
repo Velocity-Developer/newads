@@ -28,10 +28,10 @@ class NegativeKeywordsPipelineService
             ['cmd' => 'negative-keywords:input-velocity', 'opts' => ['--source' => 'frasa', '--mode' => $validate ? 'validate' : 'execute']],
         ];
 
-        Log::info("🚀 NegativeKeywordsPipeline started (version: {$version}, mode: " . ($validate ? 'validate' : 'execute') . ')');
+        Log::info("🚀 NegativeKeywordsPipeline started (version: {$version}, mode: ".($validate ? 'validate' : 'execute').')');
 
         foreach ($steps as $index => $step) {
-            $label = "{$step['cmd']} " . (empty($step['opts']) ? '' : json_encode($step['opts']));
+            $label = "{$step['cmd']} ".(empty($step['opts']) ? '' : json_encode($step['opts']));
             $t0 = microtime(true);
 
             try {
@@ -39,7 +39,7 @@ class NegativeKeywordsPipelineService
                 $output = Artisan::output();
             } catch (\Throwable $e) {
                 $exitCode = 1;
-                $output = "Exception: " . $e->getMessage();
+                $output = 'Exception: '.$e->getMessage();
             }
 
             $duration = round(microtime(true) - $t0, 3);
@@ -56,7 +56,7 @@ class NegativeKeywordsPipelineService
 
             Log::info("➡️ {$label} finished in {$duration}s (exit={$exitCode})");
 
-            if (!$success) {
+            if (! $success) {
                 $summary['success'] = false;
                 // lanjutkan ke step berikutnya, atau break jika Anda ingin stop di failure:
                 // break;
@@ -64,7 +64,7 @@ class NegativeKeywordsPipelineService
         }
 
         $summary['total_duration_seconds'] = round(microtime(true) - $startAll, 3);
-        Log::info("✅ NegativeKeywordsPipeline completed in {$summary['total_duration_seconds']}s, success=" . ($summary['success'] ? 'true' : 'false'));
+        Log::info("✅ NegativeKeywordsPipeline completed in {$summary['total_duration_seconds']}s, success=".($summary['success'] ? 'true' : 'false'));
 
         return $summary;
     }

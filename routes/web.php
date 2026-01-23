@@ -1,12 +1,12 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\BlacklistWordController;
-use App\Http\Controllers\TermsController;
-use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AdminToolsController;
+use App\Http\Controllers\BlacklistWordController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KirimKonversiController;
 use App\Http\Controllers\RekapFormController;
+use App\Http\Controllers\TermsController;
+use Illuminate\Support\Facades\Route;
 
 // Redirect root to dashboard to avoid 404
 Route::redirect('/', '/dashboard');
@@ -60,12 +60,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/blacklist-words/import-upload', [BlacklistWordController::class, 'importUpload'])->name('blacklist.importUpload');
 });
 
-
 Route::middleware(['auth'])->group(function () {
     Route::get('/kirim_konversi/get_list_rekap_forms', [KirimKonversiController::class, 'get_list_rekap_forms']);
     Route::post('/kirim_konversi/kirim_konversi_velocity', [KirimKonversiController::class, 'kirim_konversi_velocity']);
     Route::post('/kirim_konversi/kirim_konversi_dari_rekap_form', [KirimKonversiController::class, 'kirim_konversi_dari_rekap_form']);
 });
 
-require __DIR__ . '/settings.php';
-require __DIR__ . '/auth.php';
+require __DIR__.'/settings.php';
+require __DIR__.'/auth.php';

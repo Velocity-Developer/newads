@@ -9,7 +9,9 @@ use Illuminate\Support\Facades\Log;
 class TermAnalyzer
 {
     private ?string $apiKey;
+
     private string $model;
+
     private string $baseUrl = 'https://api.openai.com/v1/chat/completions';
 
     public function __construct()
@@ -30,7 +32,7 @@ class TermAnalyzer
 
             Log::info('AI analysis completed', [
                 'term' => $term,
-                'result' => $result
+                'result' => $result,
             ]);
 
             return $result;
@@ -38,7 +40,7 @@ class TermAnalyzer
         } catch (\Exception $e) {
             Log::error('AI analysis failed', [
                 'term' => $term,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             // Hindari bias negatif saat API gagal
@@ -52,14 +54,14 @@ class TermAnalyzer
     public function analyzeTermsBatch(array $terms): array
     {
         $results = [];
-        
+
         foreach ($terms as $term) {
             $results[$term] = $this->analyzeTerm($term);
-            
+
             // Add small delay to respect API rate limits
             usleep(100000); // 0.1 second
         }
-        
+
         return $results;
     }
 
@@ -71,33 +73,33 @@ class TermAnalyzer
         $terms = NewTermsNegative0Click::needsAiAnalysis()
             ->limit($limit)
             ->get();
-        
+
         $processed = 0;
-        
+
         foreach ($terms as $termRecord) {
             try {
                 $result = $this->analyzeTerm($termRecord->terms);
-                
+
                 $termRecord->update([
-                    'hasil_cek_ai' => $result
+                    'hasil_cek_ai' => $result,
                 ]);
-                
+
                 $processed++;
-                
+
             } catch (\Exception $e) {
                 Log::error('Failed to process term for AI analysis', [
                     'term_id' => $termRecord->id,
                     'term' => $termRecord->terms,
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
                 ]);
             }
         }
-        
+
         Log::info('Processed terms for AI analysis', [
             'processed' => $processed,
-            'total_found' => $terms->count()
+            'total_found' => $terms->count(),
         ]);
-        
+
         return $processed;
     }
 
@@ -108,7 +110,7 @@ class TermAnalyzer
     {
         return '<<<PROMPT
 
-        Istilah yang diuji: ' . $term . ' 
+        Istilah yang diuji: '.$term.' 
         Kamu adalah asisten yang bertugas memeriksa apakah sebuah istilah penelusuran Google Ads TIDAK RELEVAN atau RELEVAN untuk bisnis JASA PEMBUATAN WEBSITE.
 
         ---
@@ -169,7 +171,7 @@ class TermAnalyzer
         Instruksi Output:
         - Jawab hanya satu kata persis: Relevan atau Negatif.
         - Jangan menambahkan kata lain, tanda petik, atau mengulang instruksi.';
-        
+
     }
 
     /**
@@ -178,29 +180,30 @@ class TermAnalyzer
     private function callOpenAI(string $prompt): array
     {
         $response = Http::retry(5, 750, function ($exception, $request) {
-                $resp = method_exists($request, 'response') ? $request->response : null;
-                return $exception instanceof \Illuminate\Http\Client\ConnectionException
-                    || ($resp && ($resp->serverError() || $resp->status() === 429));
-            })
+            $resp = method_exists($request, 'response') ? $request->response : null;
+
+            return $exception instanceof \Illuminate\Http\Client\ConnectionException
+                || ($resp && ($resp->serverError() || $resp->status() === 429));
+        })
             ->timeout(120)
             ->connectTimeout(30)
             ->withToken($this->apiKey)
             ->withHeaders([
-                'Accept' => 'application/json',
-            ])
+            'Accept' => 'application/json',
+        ])
             ->asJson()
             ->post($this->baseUrl, [
-                'model' => $this->model,
-                'messages' => [
-                    [
-                        'role' => 'user',
-                        'content' => $prompt
-                    ]
+            'model' => $this->model,
+            'messages' => [
+                [
+                    'role' => 'user',
+                    'content' => $prompt,
                 ],
-            ]);
+            ],
+        ]);
 
-        if (!$response->successful()) {
-            throw new \Exception('OpenAI API request failed: ' . $response->body());
+        if (! $response->successful()) {
+            throw new \Exception('OpenAI API request failed: '.$response->body());
         }
 
         return $response->json();
@@ -232,7 +235,7 @@ class TermAnalyzer
         Log::warning('Unclear AI response, defaulting to relevan', [
             'response_raw' => $raw,
             'normalized' => $normalized,
-            'full_response' => $response
+            'full_response' => $response,
         ]);
 
         return 'relevan';
@@ -243,7 +246,7 @@ class TermAnalyzer
      */
     public function isConfigured(): bool
     {
-        return !empty($this->apiKey) && !empty($this->model);
+        return ! empty($this->apiKey) && ! empty($this->model);
     }
 
     /**
@@ -251,27 +254,27 @@ class TermAnalyzer
      */
     public function testService(): array
     {
-        if (!$this->isConfigured()) {
+        if (! $this->isConfigured()) {
             return [
                 'success' => false,
-                'error' => 'AI service not properly configured'
+                'error' => 'AI service not properly configured',
             ];
         }
-        
+
         try {
             $testTerm = 'jasa pembuatan website';
             $result = $this->analyzeTerm($testTerm);
-            
+
             return [
                 'success' => true,
                 'test_term' => $testTerm,
-                'result' => $result
+                'result' => $result,
             ];
-            
+
         } catch (\Exception $e) {
             return [
                 'success' => false,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ];
         }
     }
@@ -308,6 +311,7 @@ class TermAnalyzer
             ];
         }
     }
+
     public function getModel(): string
     {
         return $this->model;

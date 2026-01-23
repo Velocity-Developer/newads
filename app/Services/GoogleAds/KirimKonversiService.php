@@ -2,22 +2,23 @@
 
 namespace App\Services\GoogleAds;
 
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Http;
-
 use Google\Ads\GoogleAds\Lib\OAuth2TokenBuilder;
 use Google\Ads\GoogleAds\Lib\V19\GoogleAdsClientBuilder;
-use Google\Ads\GoogleAds\V19\Services\SearchGoogleAdsRequest;
+use Illuminate\Support\Facades\Http;
 
 class KirimKonversiService
 {
     public $refresh_token;
+
     public $client_id;
+
     public $client_secret;
+
     public $developer_token;
+
     public $customer_id;
 
-    //constructor
+    // constructor
     public function __construct()
     {
         $this->refresh_token = config('services.googleads.refresh_token');
@@ -27,10 +28,10 @@ class KirimKonversiService
         $this->customer_id = config('services.googleads.customer_id');
     }
 
-    //connect GoogleAds
+    // connect GoogleAds
     public function connectGoogleAds()
     {
-        //jika refresh token kosong
+        // jika refresh token kosong
         if (empty($this->refresh_token)) {
             throw new \Exception('Refresh token is empty');
         }
@@ -41,14 +42,14 @@ class KirimKonversiService
             'refresh_token' => $this->refresh_token,
         ]);
 
-        //auth
-        $oAuth2Credential = (new OAuth2TokenBuilder())
+        // auth
+        $oAuth2Credential = (new OAuth2TokenBuilder)
             ->withClientId($this->client_id)
             ->withClientSecret($this->client_secret)
             ->withRefreshToken($this->refresh_token)
             ->build();
 
-        $client = (new GoogleAdsClientBuilder())
+        $client = (new GoogleAdsClientBuilder)
             ->withDeveloperToken($this->developer_token)
             ->withLoginCustomerId($this->customer_id)
             ->withOAuth2Credential($oAuth2Credential)
@@ -57,13 +58,13 @@ class KirimKonversiService
         return $client;
     }
 
-    //fetchAccountTimeZone
+    // fetchAccountTimeZone
     public function fetchAccountTimeZone()
     {
-        $query = "
+        $query = '
         SELECT
             customer.time_zone
-        FROM customer ";
+        FROM customer ';
 
         $client = $this->connectGoogleAds();
 
@@ -78,21 +79,22 @@ class KirimKonversiService
         return null;
     }
 
-    //send
+    // send
     public function send(array $params = [])
     {
-        $url = config('services.google_ads.api_url') . '/v1/customers/' . config('services.google_ads.customer_id') . '/conversionActions:upload';
+        $url = config('services.google_ads.api_url').'/v1/customers/'.config('services.google_ads.customer_id').'/conversionActions:upload';
         $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . config('services.google_ads.api_token'),
+            'Authorization' => 'Bearer '.config('services.google_ads.api_token'),
         ])->post($url, $params);
+
         return $response->json($params);
     }
 
-    //timezone
+    // timezone
     public function get_time_zone()
     {
         $time_zone = $this->fetchAccountTimeZone();
-        //jika time_zone kosong
+        // jika time_zone kosong
         if (empty($time_zone)) {
             return [
                 'success' => false,

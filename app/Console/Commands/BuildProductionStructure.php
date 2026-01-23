@@ -41,10 +41,15 @@ class BuildProductionStructure extends Command
         $maxCompress = (bool) $this->option('max-compress');
 
         $buildType = 'Production';
-        if ($development) $buildType = 'Development';
-        elseif ($minimal) $buildType = 'Minimal';
-        elseif ($includeVendor && $includeStorage) $buildType = 'Full Production';
-        elseif ($includeVendor) $buildType = 'Production with Vendor';
+        if ($development) {
+            $buildType = 'Development';
+        } elseif ($minimal) {
+            $buildType = 'Minimal';
+        } elseif ($includeVendor && $includeStorage) {
+            $buildType = 'Full Production';
+        } elseif ($includeVendor) {
+            $buildType = 'Production with Vendor';
+        }
 
         $this->info("Building {$buildType} structure...");
 
@@ -111,7 +116,7 @@ class BuildProductionStructure extends Command
             'routes',
             'artisan',
             'composer.json',
-            '.env.example'
+            '.env.example',
         ];
 
         // Include composer.lock only if vendor is included
@@ -120,7 +125,7 @@ class BuildProductionStructure extends Command
         }
 
         // Additional paths for non-minimal builds
-        if (!$minimal) {
+        if (! $minimal) {
             $essentialPaths[] = 'resources';
         }
 
@@ -144,7 +149,7 @@ class BuildProductionStructure extends Command
         if ($includeVendor) {
             $vendorPath = $basePath.'/vendor';
             if (File::exists($vendorPath)) {
-                $this->info('Including vendor folder...');  
+                $this->info('Including vendor folder...');
                 $this->copyDirectory($vendorPath, $destination.'/vendor');
             }
         }
@@ -155,7 +160,7 @@ class BuildProductionStructure extends Command
             if (File::exists($storagePath)) {
                 $this->info('Including storage folder...');
                 $this->copyDirectory($storagePath, $destination.'/storage');
-    
+
                 // Pangkas log dan cache runtime agar artefak produksi tetap kecil
                 $this->info('Pruning storage logs and runtime caches...');
                 $pruneDirs = [
@@ -202,7 +207,7 @@ class BuildProductionStructure extends Command
 
     private function copyDirectory(string $source, string $destination): void
     {
-        if (!File::isDirectory($source)) {
+        if (! File::isDirectory($source)) {
             return;
         }
 
@@ -216,7 +221,7 @@ class BuildProductionStructure extends Command
 
             // Create parent directory if needed
             $destDir = dirname($destPath);
-            if (!File::isDirectory($destDir)) {
+            if (! File::isDirectory($destDir)) {
                 File::makeDirectory($destDir, 0755, true);
             }
 
@@ -271,7 +276,7 @@ class BuildProductionStructure extends Command
         if ($minimal) {
             $unnecessaryFiles = [
                 'admin-tools.php',
-                'simple-admin-tools.php'
+                'simple-admin-tools.php',
             ];
             foreach ($unnecessaryFiles as $file) {
                 $filePath = $destination.'/'.$file;
@@ -286,8 +291,9 @@ class BuildProductionStructure extends Command
     {
         $indexPhpPath = $publicHtmlPath.'/index.php';
 
-        if (!File::exists($indexPhpPath)) {
+        if (! File::exists($indexPhpPath)) {
             $this->error('index.php not found in public_html directory');
+
             return;
         }
 
@@ -355,7 +361,7 @@ class BuildProductionStructure extends Command
                     $destinationFile = $assetsDestination.DIRECTORY_SEPARATOR.$relativePath;
                     $destinationDir = dirname($destinationFile);
 
-                    if (!File::exists($destinationDir)) {
+                    if (! File::exists($destinationDir)) {
                         File::makeDirectory($destinationDir, 0755, true);
                     }
 
@@ -374,25 +380,24 @@ class BuildProductionStructure extends Command
         bool $includeVendor = false,
         bool $includeStorage = false,
         bool $minimal = false
-    ): void
-    {
+    ): void {
         // Buat folder output ZIP di bawah dist
-        $zipOutDir = $distPath . '/' . $zipDir;
-        if (!File::exists($zipOutDir)) {
+        $zipOutDir = $distPath.'/'.$zipDir;
+        if (! File::exists($zipOutDir)) {
             File::makeDirectory($zipOutDir, 0755, true, true);
         }
-    
+
         $zipName = $zipOutput ?: ($buildType === 'Production'
             ? 'production.zip'
             : strtolower(str_replace(' ', '-', $buildType)).'.zip');
-        $zipFile = $zipOutDir . '/' . $zipName;
-    
+        $zipFile = $zipOutDir.'/'.$zipName;
+
         if (File::exists($zipFile)) {
             File::delete($zipFile);
         }
-    
+
         $compressionLevel = $maxCompress ? 9 : 6;
-    
+
         $zip = new ZipArchive;
         if ($zip->open($zipFile, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
             // Pola eksklusi untuk mengecilkan ZIP
@@ -403,7 +408,7 @@ class BuildProductionStructure extends Command
                 '/vendor/examples/', '/vendor/benchmarks/', '/vendor/.git/', '/vendor/.github/',
                 '/phpunit.xml', '/phpunit.dist.xml', '/psalm.xml', '/infection.json', '/phpstan.neon', '/ecs.php',
             ];
-    
+
             // Jika storage disertakan, exclude konten berat runtime agar artefak tetap kecil
             if ($includeStorage) {
                 $exclusions = array_merge($exclusions, [
@@ -413,13 +418,13 @@ class BuildProductionStructure extends Command
                     '/storage/framework/testing/',
                 ]);
             }
-    
+
             // Tambahkan laravel/
             $this->addDirectoryToZip($zip, realpath($distPath.'/laravel'), 'laravel', $exclusions, $compressionLevel);
-    
+
             // Tambahkan public_html/
             $this->addDirectoryToZip($zip, realpath($distPath.'/public_html'), 'public_html', $exclusions, $compressionLevel);
-    
+
             $zip->close();
         }
     }
@@ -430,27 +435,26 @@ class BuildProductionStructure extends Command
         string $zipDir,
         array $exclusions = [],
         int $compressionLevel = 6
-    ): void
-    {
+    ): void {
         if (! $dir || ! is_dir($dir)) {
             return;
         }
-    
+
         $realDir = realpath($dir);
         $iterator = new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator($realDir, \RecursiveDirectoryIterator::SKIP_DOTS),
             \RecursiveIteratorIterator::SELF_FIRST
         );
-    
+
         foreach ($iterator as $file) {
             $filePath = $file->getRealPath();
-    
+
             // Hitung path relatif dan path dalam zip
             $relativePath = str_replace($realDir, '', $filePath);
             $relativePath = ltrim($relativePath, DIRECTORY_SEPARATOR);
             $relativePath = str_replace('\\', '/', $relativePath);
             $zipPath = $relativePath ? $zipDir.'/'.$relativePath : $zipDir;
-    
+
             if ($file->isDir()) {
                 if ($zipPath !== $zipDir) {
                     // Lewati direktori akar
@@ -475,6 +479,7 @@ class BuildProductionStructure extends Command
                 return true;
             }
         }
+
         return false;
     }
 
@@ -487,48 +492,47 @@ class BuildProductionStructure extends Command
         string $distPath,
         ?string $zipOutput = null,
         string $zipDir = 'zip'
-    ): void
-    {
-        $this->info('✅ ' . $buildType . ' build completed successfully!');
-        $this->info('📁 Files created in: ' . $distPath);
-    
+    ): void {
+        $this->info('✅ '.$buildType.' build completed successfully!');
+        $this->info('📁 Files created in: '.$distPath);
+
         // Tentukan zip filename dan lokasi baru
         $zipName = $zipOutput ?: ($buildType === 'Production' ? 'production.zip' : strtolower(str_replace(' ', '-', $buildType)).'.zip');
-        $zipPath = $distPath . '/' . $zipDir . '/' . $zipName;
-    
+        $zipPath = $distPath.'/'.$zipDir.'/'.$zipName;
+
         if (File::exists($zipPath)) {
             $zipSize = $this->formatBytes(File::size($zipPath));
-            $this->info('📦 Production archive: ' . $zipPath . ' (' . $zipSize . ')');
+            $this->info('📦 Production archive: '.$zipPath.' ('.$zipSize.')');
         }
-    
+
         $this->info('');
         $this->info('📋 Build Configuration:');
-        $this->info('   • Build Type: ' . $buildType);
-        $this->info('   • Vendor Folder: ' . ($includeVendor ? '✅ Included' : '❌ Excluded'));
-        $this->info('   • Storage Folder: ' . ($includeStorage ? '✅ Included' : '❌ Excluded'));
-        $this->info('   • Development Mode: ' . ($development ? '✅ Enabled' : '❌ Disabled'));
-        $this->info('   • Minimal Build: ' . ($minimal ? '✅ Enabled' : '❌ Disabled'));
-    
+        $this->info('   • Build Type: '.$buildType);
+        $this->info('   • Vendor Folder: '.($includeVendor ? '✅ Included' : '❌ Excluded'));
+        $this->info('   • Storage Folder: '.($includeStorage ? '✅ Included' : '❌ Excluded'));
+        $this->info('   • Development Mode: '.($development ? '✅ Enabled' : '❌ Disabled'));
+        $this->info('   • Minimal Build: '.($minimal ? '✅ Enabled' : '❌ Disabled'));
+
         $this->info('');
         $this->info('📁 Production structure:');
-    
-        $laravelSize = $this->getDirectorySize($distPath . '/laravel');
-        $publicHtmlSize = $this->getDirectorySize($distPath . '/public_html');
-    
-        $this->info('   📂 laravel/ (' . $this->formatBytes($laravelSize) . ')');
-        $this->info('   📂 public_html/ (' . $this->formatBytes($publicHtmlSize) . ')');        
-    
+
+        $laravelSize = $this->getDirectorySize($distPath.'/laravel');
+        $publicHtmlSize = $this->getDirectorySize($distPath.'/public_html');
+
+        $this->info('   📂 laravel/ ('.$this->formatBytes($laravelSize).')');
+        $this->info('   📂 public_html/ ('.$this->formatBytes($publicHtmlSize).')');
+
         if ($includeVendor) {
             $this->info('       └── vendor/ (Included)');
         }
-    
+
         if ($includeStorage) {
             $this->info('       └── storage/ (Included)');
         }
-    
+
         $this->info('');
         $this->info('🚀 Deployment Instructions:');
-    
+
         if ($includeVendor) {
             $this->info('   1. Extract ZIP to server');
             $this->info('   2. Run: php artisan key:generate');
@@ -539,25 +543,25 @@ class BuildProductionStructure extends Command
             $this->info('   3. Run: php artisan key:generate');
             $this->info('   4. Run: php artisan migrate');
         }
-    
+
         $this->info('   5. Configure .env file');
         $this->info('   6. Set file permissions');
     }
 
     private function formatBytes($bytes, $precision = 2): string
     {
-        $units = array('B', 'KB', 'MB', 'GB', 'TB');
+        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
 
         for ($i = 0; $bytes > 1024 && $i < count($units) - 1; $i++) {
             $bytes /= 1024;
         }
 
-        return round($bytes, $precision) . ' ' . $units[$i];
+        return round($bytes, $precision).' '.$units[$i];
     }
 
     private function getDirectorySize($path): int
     {
-        if (!File::exists($path)) {
+        if (! File::exists($path)) {
             return 0;
         }
 

@@ -2,10 +2,10 @@
 
 /**
  * Emergency Admin Tools
- * 
+ *
  * This file provides basic admin functions when the main application is not accessible.
  * Access: http://yoursite.com/admin-tools.php
- * 
+ *
  * Security: This file should be removed or secured in production.
  * You can add HTTP basic auth or IP restrictions for additional security.
  */
@@ -14,7 +14,7 @@
 session_start();
 $admin_password = 'hutara000'; // Change this password!
 
-if (!isset($_SESSION['admin_authenticated'])) {
+if (! isset($_SESSION['admin_authenticated'])) {
     if (isset($_POST['password']) && $_POST['password'] === $admin_password) {
         $_SESSION['admin_authenticated'] = true;
     } else {
@@ -29,41 +29,41 @@ $currentDir = __DIR__;
 // Try multiple approaches to find Laravel directory
 $possiblePaths = [
     // Production: public_html/ and laravel/ are siblings
-    dirname($currentDir) . '/laravel',
-    // Alternative: private_html/ and laravel/ structure  
-    dirname(dirname($currentDir)) . '/laravel',
+    dirname($currentDir).'/laravel',
+    // Alternative: private_html/ and laravel/ structure
+    dirname(dirname($currentDir)).'/laravel',
     // Another alternative for nested structures
-    dirname(dirname(dirname($currentDir))) . '/laravel',
+    dirname(dirname(dirname($currentDir))).'/laravel',
     // Development: normal Laravel structure
     dirname(__DIR__),
     // If admin-tools.php is in domain root
-    $currentDir . '/laravel',
+    $currentDir.'/laravel',
 ];
 
 $laravelRoot = null;
 foreach ($possiblePaths as $path) {
-    if (is_dir($path) && file_exists($path . '/artisan')) {
+    if (is_dir($path) && file_exists($path.'/artisan')) {
         $laravelRoot = $path;
         break;
     }
 }
 
 // If still not found, use default assumption
-if (!$laravelRoot) {
-    $laravelRoot = dirname($currentDir) . '/laravel';
+if (! $laravelRoot) {
+    $laravelRoot = dirname($currentDir).'/laravel';
 }
 
 // Verify Laravel directory exists
-if (!is_dir($laravelRoot) || !file_exists($laravelRoot . '/artisan')) {
+if (! is_dir($laravelRoot) || ! file_exists($laravelRoot.'/artisan')) {
     $debugInfo = "Laravel directory not found. Debug info:\n";
-    $debugInfo .= "Current directory: " . $currentDir . "\n";
+    $debugInfo .= 'Current directory: '.$currentDir."\n";
     $debugInfo .= "Tried paths:\n";
     foreach ($possiblePaths as $i => $path) {
-        $debugInfo .= "  " . ($i + 1) . ". " . $path . " - " . (is_dir($path) ? "Directory exists" : "Directory missing") . " - " . (file_exists($path . '/artisan') ? "Artisan found" : "Artisan missing") . "\n";
+        $debugInfo .= '  '.($i + 1).'. '.$path.' - '.(is_dir($path) ? 'Directory exists' : 'Directory missing').' - '.(file_exists($path.'/artisan') ? 'Artisan found' : 'Artisan missing')."\n";
     }
-    $debugInfo .= "Final Laravel root: " . $laravelRoot . "\n";
-    $debugInfo .= "Directory listing of parent: " . print_r(scandir(dirname($currentDir)), true);
-    die('<pre>' . $debugInfo . '</pre>');
+    $debugInfo .= 'Final Laravel root: '.$laravelRoot."\n";
+    $debugInfo .= 'Directory listing of parent: '.print_r(scandir(dirname($currentDir)), true);
+    exit('<pre>'.$debugInfo.'</pre>');
 }
 
 chdir($laravelRoot);
@@ -78,18 +78,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         // Add debug info and clean up any wrong storage links
         if ($action === 'storage_link') {
             $output .= "Debug Info:\n";
-            $output .= "Current Dir: " . $currentDir . "\n";
-            $output .= "Laravel Root: " . $laravelRoot . "\n";
-            $output .= "Working Directory: " . getcwd() . "\n";
+            $output .= 'Current Dir: '.$currentDir."\n";
+            $output .= 'Laravel Root: '.$laravelRoot."\n";
+            $output .= 'Working Directory: '.getcwd()."\n";
             $output .= "Server Structure: Production (admin-tools.php in public_html)\n";
-            $output .= "PHP Version: " . PHP_VERSION . "\n";
-            $output .= "PHP Binary: " . (defined('PHP_BINARY') ? PHP_BINARY : 'Not defined') . "\n";
-            $output .= "shell_exec available: " . (function_exists('shell_exec') ? 'Yes' : 'No') . "\n";
+            $output .= 'PHP Version: '.PHP_VERSION."\n";
+            $output .= 'PHP Binary: '.(defined('PHP_BINARY') ? PHP_BINARY : 'Not defined')."\n";
+            $output .= 'shell_exec available: '.(function_exists('shell_exec') ? 'Yes' : 'No')."\n";
 
             // Clean up wrong storage link in laravel/public if it exists
-            $wrongStoragePath = $laravelRoot . '/public/storage';
+            $wrongStoragePath = $laravelRoot.'/public/storage';
             if (file_exists($wrongStoragePath)) {
-                $output .= "\n⚠️ Removing wrong storage link at: " . $wrongStoragePath . "\n";
+                $output .= "\n⚠️ Removing wrong storage link at: ".$wrongStoragePath."\n";
                 if (is_link($wrongStoragePath)) {
                     unlink($wrongStoragePath);
                     $output .= "✅ Wrong symlink removed\n";
@@ -99,21 +99,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             }
 
             $checkPublicPath = $currentDir; // public_html directory
-            $checkStoragePath = $checkPublicPath . '/storage';
+            $checkStoragePath = $checkPublicPath.'/storage';
 
-            $output .= "Public Path: " . $checkPublicPath . "\n";
-            $output .= "Storage Target: " . $laravelRoot . '/storage/app/public' . "\n";
-            $output .= "Storage Link Path: " . $checkStoragePath . "\n";
-            $output .= "Storage app/public exists: " . (is_dir($laravelRoot . '/storage/app/public') ? 'Yes' : 'No') . "\n";
-            $output .= "Public/storage exists: " . (file_exists($checkStoragePath) ? 'Yes' : 'No') . "\n\n";
+            $output .= 'Public Path: '.$checkPublicPath."\n";
+            $output .= 'Storage Target: '.$laravelRoot.'/storage/app/public'."\n";
+            $output .= 'Storage Link Path: '.$checkStoragePath."\n";
+            $output .= 'Storage app/public exists: '.(is_dir($laravelRoot.'/storage/app/public') ? 'Yes' : 'No')."\n";
+            $output .= 'Public/storage exists: '.(file_exists($checkStoragePath) ? 'Yes' : 'No')."\n\n";
         }
 
         switch ($action) {
             case 'clear_cache':
                 $output = executeCommand('php artisan cache:clear');
-                $output .= "\n" . executeCommand('php artisan config:clear');
-                $output .= "\n" . executeCommand('php artisan route:clear');
-                $output .= "\n" . executeCommand('php artisan view:clear');
+                $output .= "\n".executeCommand('php artisan config:clear');
+                $output .= "\n".executeCommand('php artisan route:clear');
+                $output .= "\n".executeCommand('php artisan view:clear');
                 break;
 
             case 'optimize_clear':
@@ -128,21 +128,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 // Determine the correct public path structure
                 // admin-tools.php is in public_html, so storage link should be created here
                 $publicPath = $currentDir; // Same directory as admin-tools.php
-                $storagePath = $publicPath . '/storage';
-                $storageTarget = $laravelRoot . '/storage/app/public';
+                $storagePath = $publicPath.'/storage';
+                $storageTarget = $laravelRoot.'/storage/app/public';
 
                 $output .= "Debug Storage Link Info:\n";
-                $output .= "Public Path: " . $publicPath . "\n";
-                $output .= "Storage Link Path: " . $storagePath . "\n";
-                $output .= "Storage Target: " . $storageTarget . "\n";
-                $output .= "Target exists: " . (is_dir($storageTarget) ? 'Yes' : 'No') . "\n";
-                $output .= "Link exists: " . (file_exists($storagePath) ? 'Yes' : 'No') . "\n";
+                $output .= 'Public Path: '.$publicPath."\n";
+                $output .= 'Storage Link Path: '.$storagePath."\n";
+                $output .= 'Storage Target: '.$storageTarget."\n";
+                $output .= 'Target exists: '.(is_dir($storageTarget) ? 'Yes' : 'No')."\n";
+                $output .= 'Link exists: '.(file_exists($storagePath) ? 'Yes' : 'No')."\n";
 
                 if (file_exists($storagePath)) {
                     if (is_link($storagePath)) {
                         $target = readlink($storagePath);
-                        $output .= "Current link target: " . $target . "\n";
-                        $output .= "Target accessible: " . (is_readable($target) ? 'Yes' : 'No') . "\n";
+                        $output .= 'Current link target: '.$target."\n";
+                        $output .= 'Target accessible: '.(is_readable($target) ? 'Yes' : 'No')."\n";
 
                         // Check if link points to wrong location
                         if ($target !== $storageTarget) {
@@ -158,7 +158,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
                             // Check permissions
                             $perms = fileperms($storageTarget);
-                            $output .= "Target permissions: " . decoct($perms & 0777) . "\n";
+                            $output .= 'Target permissions: '.decoct($perms & 0777)."\n";
                         }
                     } else {
                         $output .= "\n⚠️ Storage exists but is not a symlink (directory/file)\n";
@@ -166,14 +166,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     }
                 } else {
                     // Create new storage link
-                    if (!is_dir($storageTarget)) {
-                        $output .= "\n❌ Target directory does not exist: " . $storageTarget;
+                    if (! is_dir($storageTarget)) {
+                        $output .= "\n❌ Target directory does not exist: ".$storageTarget;
                     } else {
                         $output .= "\n🔨 Creating storage link...\n";
 
                         // Try artisan command first
                         $artisanOutput = executeCommand('php artisan storage:link');
-                        $output .= "Artisan output: " . $artisanOutput . "\n";
+                        $output .= 'Artisan output: '.$artisanOutput."\n";
 
                         // Check if it worked
                         if (file_exists($storagePath)) {
@@ -211,7 +211,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 $output = "MySQL Key Length Fix:\n\n";
 
                 // Check current AppServiceProvider.php
-                $appServiceProvider = $laravelRoot . '/app/Providers/AppServiceProvider.php';
+                $appServiceProvider = $laravelRoot.'/app/Providers/AppServiceProvider.php';
                 if (file_exists($appServiceProvider)) {
                     $content = file_get_contents($appServiceProvider);
 
@@ -228,7 +228,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 // Check MySQL version and configuration
                 try {
                     $mysqlVersion = executeCommand('php artisan tinker --execute="echo DB::select(\'SELECT VERSION() as version\')[0]->version;"');
-                    $output .= "MySQL Version: " . trim($mysqlVersion) . "\n\n";
+                    $output .= 'MySQL Version: '.trim($mysqlVersion)."\n\n";
                 } catch (Exception $e) {
                     $output .= "Could not detect MySQL version\n\n";
                 }
@@ -266,9 +266,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 break;
 
             case 'clear_logs':
-                $logPath = $laravelRoot . '/storage/logs';
+                $logPath = $laravelRoot.'/storage/logs';
                 if (is_dir($logPath)) {
-                    $files = glob($logPath . '/*.log');
+                    $files = glob($logPath.'/*.log');
                     $count = 0;
                     foreach ($files as $file) {
                         if (unlink($file)) {
@@ -277,20 +277,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     }
                     $output = "Deleted {$count} log files";
                 } else {
-                    $output = "Log directory not found";
+                    $output = 'Log directory not found';
                 }
                 break;
 
             case 'cleanup_storage':
-                $wrongStoragePath = $laravelRoot . '/public/storage';
-                $correctStoragePath = $currentDir . '/storage';
-                $storageTarget = $laravelRoot . '/storage/app/public';
+                $wrongStoragePath = $laravelRoot.'/public/storage';
+                $correctStoragePath = $currentDir.'/storage';
+                $storageTarget = $laravelRoot.'/storage/app/public';
 
                 $output = "Storage Cleanup:\n";
 
                 // Remove wrong storage link in laravel/public
                 if (file_exists($wrongStoragePath)) {
-                    $output .= "Removing wrong storage link: " . $wrongStoragePath . "\n";
+                    $output .= 'Removing wrong storage link: '.$wrongStoragePath."\n";
                     if (is_link($wrongStoragePath)) {
                         unlink($wrongStoragePath);
                         $output .= "✅ Wrong symlink removed\n";
@@ -303,7 +303,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 if (file_exists($correctStoragePath)) {
                     if (is_link($correctStoragePath)) {
                         $target = readlink($correctStoragePath);
-                        $output .= "✅ Storage is already a symlink pointing to: " . $target . "\n";
+                        $output .= '✅ Storage is already a symlink pointing to: '.$target."\n";
                         if ($target !== $storageTarget) {
                             $output .= "⚠️ Symlink points to wrong target, fixing...\n";
                             unlink($correctStoragePath);
@@ -332,7 +332,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 } else {
                     // Create new symlink
                     if (symlink($storageTarget, $correctStoragePath)) {
-                        $output .= "✅ Created new storage symlink at: " . $correctStoragePath . "\n";
+                        $output .= '✅ Created new storage symlink at: '.$correctStoragePath."\n";
                     } else {
                         $output .= "❌ Failed to create storage symlink\n";
                     }
@@ -348,8 +348,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
             case 'fix_storage_permissions':
                 $publicPath = $currentDir;
-                $storagePath = $publicPath . '/storage';
-                $storageTarget = $laravelRoot . '/storage/app/public';
+                $storagePath = $publicPath.'/storage';
+                $storageTarget = $laravelRoot.'/storage/app/public';
 
                 $output = "Fixing Storage Permissions:\n";
 
@@ -365,7 +365,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                         if ($file->isFile()) {
                             chmod($file->getPathname(), 0644);
                             $count++;
-                        } elseif ($file->isDir() && !in_array($file->getFilename(), ['.', '..'])) {
+                        } elseif ($file->isDir() && ! in_array($file->getFilename(), ['.', '..'])) {
                             chmod($file->getPathname(), 0755);
                         }
                     }
@@ -376,39 +376,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 break;
 
             case 'backup_env':
-                $envPath = $laravelRoot . '/.env';
-                $backupPath = $laravelRoot . '/.env.backup.' . date('Y-m-d_H-i-s');
+                $envPath = $laravelRoot.'/.env';
+                $backupPath = $laravelRoot.'/.env.backup.'.date('Y-m-d_H-i-s');
 
                 if (file_exists($envPath)) {
                     if (copy($envPath, $backupPath)) {
-                        $output = "✅ Environment file backed up to: " . basename($backupPath);
+                        $output = '✅ Environment file backed up to: '.basename($backupPath);
                     } else {
-                        $output = "❌ Failed to backup environment file";
+                        $output = '❌ Failed to backup environment file';
                     }
                 } else {
-                    $output = "❌ Environment file not found";
+                    $output = '❌ Environment file not found';
                 }
                 break;
 
             case 'check_env':
-                $envPath = $laravelRoot . '/.env';
-                $envExamplePath = $laravelRoot . '/.env.example';
+                $envPath = $laravelRoot.'/.env';
+                $envExamplePath = $laravelRoot.'/.env.example';
 
                 $output = "Environment File Check:\n";
-                $output .= ".env exists: " . (file_exists($envPath) ? 'Yes' : 'No') . "\n";
-                $output .= ".env.example exists: " . (file_exists($envExamplePath) ? 'Yes' : 'No') . "\n";
+                $output .= '.env exists: '.(file_exists($envPath) ? 'Yes' : 'No')."\n";
+                $output .= '.env.example exists: '.(file_exists($envExamplePath) ? 'Yes' : 'No')."\n";
 
                 if (file_exists($envPath)) {
                     $envSize = filesize($envPath);
-                    $output .= ".env size: " . $envSize . " bytes\n";
-                    $output .= ".env modified: " . date('Y-m-d H:i:s', filemtime($envPath)) . "\n";
+                    $output .= '.env size: '.$envSize." bytes\n";
+                    $output .= '.env modified: '.date('Y-m-d H:i:s', filemtime($envPath))."\n";
 
                     // Check key variables
                     $envContent = file_get_contents($envPath);
                     $requiredVars = ['APP_KEY', 'DB_CONNECTION', 'DB_DATABASE'];
                     foreach ($requiredVars as $var) {
-                        $exists = strpos($envContent, $var . '=') !== false;
-                        $output .= "{$var}: " . ($exists ? 'Set' : 'Missing') . "\n";
+                        $exists = strpos($envContent, $var.'=') !== false;
+                        $output .= "{$var}: ".($exists ? 'Set' : 'Missing')."\n";
                     }
                 }
                 break;
@@ -418,37 +418,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
                 // PHP Info
                 $output .= "🔧 PHP Information:\n";
-                $output .= "PHP Version: " . PHP_VERSION . "\n";
-                $output .= "Memory Limit: " . ini_get('memory_limit') . "\n";
-                $output .= "Max Execution Time: " . ini_get('max_execution_time') . "s\n";
-                $output .= "Upload Max Size: " . ini_get('upload_max_filesize') . "\n";
-                $output .= "Post Max Size: " . ini_get('post_max_size') . "\n";
+                $output .= 'PHP Version: '.PHP_VERSION."\n";
+                $output .= 'Memory Limit: '.ini_get('memory_limit')."\n";
+                $output .= 'Max Execution Time: '.ini_get('max_execution_time')."s\n";
+                $output .= 'Upload Max Size: '.ini_get('upload_max_filesize')."\n";
+                $output .= 'Post Max Size: '.ini_get('post_max_size')."\n";
 
                 // Extensions
                 $output .= "\n🔌 Extensions:\n";
                 $requiredExtensions = ['pdo', 'mbstring', 'tokenizer', 'json', 'openssl', 'curl'];
                 foreach ($requiredExtensions as $ext) {
                     $loaded = extension_loaded($ext);
-                    $output .= "{$ext}: " . ($loaded ? '✅ Loaded' : '❌ Missing') . "\n";
+                    $output .= "{$ext}: ".($loaded ? '✅ Loaded' : '❌ Missing')."\n";
                 }
 
                 // Laravel Files
                 $output .= "\n📁 Laravel Files:\n";
                 $files = ['artisan', 'composer.json', '.env', 'bootstrap/app.php'];
                 foreach ($files as $file) {
-                    $exists = file_exists($laravelRoot . '/' . $file);
-                    $output .= "{$file}: " . ($exists ? '✅ Exists' : '❌ Missing') . "\n";
+                    $exists = file_exists($laravelRoot.'/'.$file);
+                    $output .= "{$file}: ".($exists ? '✅ Exists' : '❌ Missing')."\n";
                 }
 
                 // Directories
                 $output .= "\n📂 Directories:\n";
                 $dirs = ['storage', 'storage/app', 'storage/logs', 'storage/framework', 'bootstrap/cache'];
                 foreach ($dirs as $dir) {
-                    $path = $laravelRoot . '/' . $dir;
+                    $path = $laravelRoot.'/'.$dir;
                     $exists = is_dir($path);
                     $writable = $exists ? is_writable($path) : false;
-                    $output .= "{$dir}: " . ($exists ? '✅ Exists' : '❌ Missing') .
-                        ($writable ? ' (Writable)' : ($exists ? ' (Not Writable)' : '')) . "\n";
+                    $output .= "{$dir}: ".($exists ? '✅ Exists' : '❌ Missing').
+                        ($writable ? ' (Writable)' : ($exists ? ' (Not Writable)' : ''))."\n";
                 }
                 break;
 
@@ -467,14 +467,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             case 'schedule_run':
                 $startTs = microtime(true);
                 $output = "Schedule Run (verbose):\n";
-                $output .= "Start: " . date('Y-m-d H:i:s') . "\n\n";
+                $output .= 'Start: '.date('Y-m-d H:i:s')."\n\n";
 
                 // Jalankan scheduler dengan verbosity maksimal
                 $output .= executeCommand('php artisan schedule:run -vvv');
 
                 $endTs = microtime(true);
-                $output .= "\nEnd: " . date('Y-m-d H:i:s') . "\n";
-                $output .= "Duration: " . number_format(($endTs - $startTs), 3) . "s\n";
+                $output .= "\nEnd: ".date('Y-m-d H:i:s')."\n";
+                $output .= 'Duration: '.number_format(($endTs - $startTs), 3)."s\n";
 
                 // Tampilkan daftar schedule yang terdaftar
                 $output .= "\nScheduled Events (schedule:list):\n";
@@ -486,10 +486,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
                 // Storage link
                 $publicPath = $currentDir;
-                $storagePath = $publicPath . '/storage';
-                $storageTarget = $laravelRoot . '/storage/app/public';
+                $storagePath = $publicPath.'/storage';
+                $storageTarget = $laravelRoot.'/storage/app/public';
 
-                if (!file_exists($storagePath) && is_dir($storageTarget)) {
+                if (! file_exists($storagePath) && is_dir($storageTarget)) {
                     if (symlink($storageTarget, $storagePath)) {
                         $output .= "✅ Storage symlink created\n";
                     } else {
@@ -501,27 +501,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
                 // Check for other common symlinks needed
                 $output .= "\nSymlink Status:\n";
-                $output .= "Storage: " . (is_link($storagePath) ? '✅ Symlink' : '❌ Not a symlink') . "\n";
+                $output .= 'Storage: '.(is_link($storagePath) ? '✅ Symlink' : '❌ Not a symlink')."\n";
                 break;
 
             case 'clear_all_cache':
                 $output = "Clearing All Cache and Optimization:\n";
                 $output .= executeCommand('php artisan cache:clear');
-                $output .= "\n" . executeCommand('php artisan config:clear');
-                $output .= "\n" . executeCommand('php artisan route:clear');
-                $output .= "\n" . executeCommand('php artisan view:clear');
-                $output .= "\n" . executeCommand('php artisan optimize:clear');
+                $output .= "\n".executeCommand('php artisan config:clear');
+                $output .= "\n".executeCommand('php artisan route:clear');
+                $output .= "\n".executeCommand('php artisan view:clear');
+                $output .= "\n".executeCommand('php artisan optimize:clear');
                 break;
 
             case 'show_env':
-                $envPath = $laravelRoot . '/.env';
+                $envPath = $laravelRoot.'/.env';
                 if (file_exists($envPath)) {
                     $envContent = file_get_contents($envPath);
                     // Mask sensitive values
                     $maskedContent = preg_replace('/(APP_KEY|DB_PASSWORD|.*_SECRET|.*_TOKEN|.*_KEY)=(.+)/i', '$1=***MASKED***', $envContent);
-                    $output = "Environment File Content (sensitive values masked):\n\n" . $maskedContent;
+                    $output = "Environment File Content (sensitive values masked):\n\n".$maskedContent;
                 } else {
-                    $output = "❌ Environment file not found";
+                    $output = '❌ Environment file not found';
                 }
                 break;
 
@@ -530,15 +530,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
                 // Laravel directory size
                 $laravelSize = getDirSize($laravelRoot);
-                $output .= "Laravel directory: " . formatBytes($laravelSize) . "\n";
+                $output .= 'Laravel directory: '.formatBytes($laravelSize)."\n";
 
                 // Storage directory size
-                $storageSize = getDirSize($laravelRoot . '/storage');
-                $output .= "Storage directory: " . formatBytes($storageSize) . "\n";
+                $storageSize = getDirSize($laravelRoot.'/storage');
+                $output .= 'Storage directory: '.formatBytes($storageSize)."\n";
 
                 // Log files size
-                $logsSize = getDirSize($laravelRoot . '/storage/logs');
-                $output .= "Log files: " . formatBytes($logsSize) . "\n";
+                $logsSize = getDirSize($laravelRoot.'/storage/logs');
+                $output .= 'Log files: '.formatBytes($logsSize)."\n";
 
                 // Available disk space
                 $freeSpace = disk_free_space($laravelRoot);
@@ -546,10 +546,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 $usedSpace = $totalSpace - $freeSpace;
 
                 $output .= "\nDisk Usage:\n";
-                $output .= "Used: " . formatBytes($usedSpace) . "\n";
-                $output .= "Free: " . formatBytes($freeSpace) . "\n";
-                $output .= "Total: " . formatBytes($totalSpace) . "\n";
-                $output .= "Usage: " . round(($usedSpace / $totalSpace) * 100, 2) . "%\n";
+                $output .= 'Used: '.formatBytes($usedSpace)."\n";
+                $output .= 'Free: '.formatBytes($freeSpace)."\n";
+                $output .= 'Total: '.formatBytes($totalSpace)."\n";
+                $output .= 'Usage: '.round(($usedSpace / $totalSpace) * 100, 2)."%\n";
                 break;
 
             case 'debug_500_error':
@@ -557,44 +557,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
                 // 1. Check PHP version and extensions
                 $output .= "1. PHP Environment:\n";
-                $output .= "   Version: " . phpversion() . "\n";
-                $output .= "   SAPI: " . php_sapi_name() . "\n";
+                $output .= '   Version: '.phpversion()."\n";
+                $output .= '   SAPI: '.php_sapi_name()."\n";
 
                 $requiredExtensions = ['openssl', 'pdo', 'mbstring', 'tokenizer', 'xml', 'ctype', 'json', 'curl'];
                 $output .= "   Required Extensions:\n";
                 foreach ($requiredExtensions as $ext) {
                     $loaded = extension_loaded($ext);
-                    $output .= "   - $ext: " . ($loaded ? '✅ Loaded' : '❌ Missing') . "\n";
+                    $output .= "   - $ext: ".($loaded ? '✅ Loaded' : '❌ Missing')."\n";
                 }
 
                 // 2. Check critical files
                 $output .= "\n2. Critical Files Check:\n";
                 $criticalFiles = [
-                    '.env' => $laravelRoot . '/.env',
-                    'artisan' => $laravelRoot . '/artisan',
-                    'index.php' => __DIR__ . '/index.php',
-                    'composer.json' => $laravelRoot . '/composer.json'
+                    '.env' => $laravelRoot.'/.env',
+                    'artisan' => $laravelRoot.'/artisan',
+                    'index.php' => __DIR__.'/index.php',
+                    'composer.json' => $laravelRoot.'/composer.json',
                 ];
 
                 foreach ($criticalFiles as $name => $path) {
                     $exists = file_exists($path);
                     $readable = $exists && is_readable($path);
-                    $output .= "   - $name: " . ($readable ? '✅ OK' : ($exists ? '⚠️ Not readable' : '❌ Missing')) . "\n";
+                    $output .= "   - $name: ".($readable ? '✅ OK' : ($exists ? '⚠️ Not readable' : '❌ Missing'))."\n";
                 }
 
                 // 3. Check permissions
                 $output .= "\n3. Directory Permissions:\n";
                 $directories = [
-                    'storage/' => $laravelRoot . '/storage',
-                    'bootstrap/cache/' => $laravelRoot . '/bootstrap/cache',
-                    'public/' => __DIR__
+                    'storage/' => $laravelRoot.'/storage',
+                    'bootstrap/cache/' => $laravelRoot.'/bootstrap/cache',
+                    'public/' => __DIR__,
                 ];
 
                 foreach ($directories as $name => $path) {
                     if (is_dir($path)) {
                         $writable = is_writable($path);
                         $perms = substr(sprintf('%o', fileperms($path)), -4);
-                        $output .= "   - $name: " . ($writable ? '✅' : '❌') . " Writable (Perms: $perms)\n";
+                        $output .= "   - $name: ".($writable ? '✅' : '❌')." Writable (Perms: $perms)\n";
                     } else {
                         $output .= "   - $name: ❌ Directory not found\n";
                     }
@@ -602,12 +602,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
                 // 4. Check Laravel environment
                 $output .= "\n4. Laravel Environment:\n";
-                $envFile = $laravelRoot . '/.env';
+                $envFile = $laravelRoot.'/.env';
                 if (file_exists($envFile)) {
                     $envContent = file_get_contents($envFile);
                     $hasAppKey = strpos($envContent, 'APP_KEY=') !== false && strpos($envContent, 'APP_KEY=base64:') !== false;
                     $output .= "   - .env exists: ✅ Yes\n";
-                    $output .= "   - APP_KEY set: " . ($hasAppKey ? '✅ Yes' : '❌ No') . "\n";
+                    $output .= '   - APP_KEY set: '.($hasAppKey ? '✅ Yes' : '❌ No')."\n";
 
                     // Check for common .env issues
                     preg_match('/APP_DEBUG=(.*)/', $envContent, $debugMatch);
@@ -619,7 +619,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
                 // 5. Check Laravel logs
                 $output .= "\n5. Laravel Logs:\n";
-                $logPath = $laravelRoot . '/storage/logs/laravel.log';
+                $logPath = $laravelRoot.'/storage/logs/laravel.log';
                 if (file_exists($logPath) && is_readable($logPath)) {
                     $logContent = @file_get_contents($logPath);
                     if ($logContent) {
@@ -628,7 +628,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                         $output .= "   Recent log entries:\n";
                         foreach ($recentLines as $line) {
                             if (trim($line)) {
-                                $output .= "   " . substr($line, 0, 100) . "\n";
+                                $output .= '   '.substr($line, 0, 100)."\n";
                             }
                         }
                     } else {
@@ -640,9 +640,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
                 // 6. Web Server Check
                 $output .= "\n6. Web Server Info:\n";
-                $output .= "   - Server Software: " . ($_SERVER['SERVER_SOFTWARE'] ?? 'Unknown') . "\n";
-                $output .= "   - Document Root: " . ($_SERVER['DOCUMENT_ROOT'] ?? 'Unknown') . "\n";
-                $output .= "   - Script Name: " . ($_SERVER['SCRIPT_NAME'] ?? 'Unknown') . "\n";
+                $output .= '   - Server Software: '.($_SERVER['SERVER_SOFTWARE'] ?? 'Unknown')."\n";
+                $output .= '   - Document Root: '.($_SERVER['DOCUMENT_ROOT'] ?? 'Unknown')."\n";
+                $output .= '   - Script Name: '.($_SERVER['SCRIPT_NAME'] ?? 'Unknown')."\n";
 
                 // 7. Quick Fixes
                 $output .= "\n7. Quick Fix Recommendations:\n";
@@ -657,56 +657,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 $output = "PHP Path Detection Debug:\n\n";
 
                 // Test PHP_BINARY
-                $output .= "1. PHP_BINARY constant: " . (defined('PHP_BINARY') ? PHP_BINARY : 'Not defined') . "\n";
-                $output .= "   Executable: " . (defined('PHP_BINARY') && is_executable(PHP_BINARY) ? '✅ Yes' : '❌ No') . "\n\n";
+                $output .= '1. PHP_BINARY constant: '.(defined('PHP_BINARY') ? PHP_BINARY : 'Not defined')."\n";
+                $output .= '   Executable: '.(defined('PHP_BINARY') && is_executable(PHP_BINARY) ? '✅ Yes' : '❌ No')."\n\n";
 
                 // Test common paths (PHP 8.3 prioritized)
                 $commonPaths = [
-                    '/opt/cpanel/ea-php83/root/usr/bin/php',    # cPanel PHP 8.3
-                    '/opt/cpanel/ea-php84/root/usr/bin/php',    # cPanel PHP 8.4
-                    '/usr/local/php83/bin/php',                # Common PHP 8.3
-                    '/usr/local/lsws/lsphp83/bin/php',         # LiteSpeed PHP 8.3
-                    '/usr/local/bin/php83',                    # Alternative PHP 8.3
-                    '/usr/bin/php83',                          # System PHP 8.3
-                    '/usr/bin/php',                            # Default system PHP
-                    '/usr/local/bin/php',                      # Alternative system PHP
-                    '/opt/cpanel/ea-php82/root/usr/bin/php',   # Fallback to 8.2
-                    '/opt/cpanel/ea-php81/root/usr/bin/php',   # Fallback to 8.1
+                    '/opt/cpanel/ea-php83/root/usr/bin/php',    // cPanel PHP 8.3
+                    '/opt/cpanel/ea-php84/root/usr/bin/php',    // cPanel PHP 8.4
+                    '/usr/local/php83/bin/php',                // Common PHP 8.3
+                    '/usr/local/lsws/lsphp83/bin/php',         // LiteSpeed PHP 8.3
+                    '/usr/local/bin/php83',                    // Alternative PHP 8.3
+                    '/usr/bin/php83',                          // System PHP 8.3
+                    '/usr/bin/php',                            // Default system PHP
+                    '/usr/local/bin/php',                      // Alternative system PHP
+                    '/opt/cpanel/ea-php82/root/usr/bin/php',   // Fallback to 8.2
+                    '/opt/cpanel/ea-php81/root/usr/bin/php',   // Fallback to 8.1
                     '/usr/local/php82/bin/php',
                     '/usr/local/php81/bin/php',
                     '/usr/local/lsws/lsphp82/bin/php',
-                    '/usr/local/lsws/lsphp81/bin/php'
+                    '/usr/local/lsws/lsphp81/bin/php',
                 ];
 
                 $output .= "2. Common PHP paths test:\n";
                 foreach ($commonPaths as $path) {
                     $exists = file_exists($path);
                     $executable = is_executable($path);
-                    $output .= "   $path: " . ($executable ? '✅ Executable' : ($exists ? '⚠️ Exists but not executable' : '❌ Not found')) . "\n";
+                    $output .= "   $path: ".($executable ? '✅ Executable' : ($exists ? '⚠️ Exists but not executable' : '❌ Not found'))."\n";
                 }
 
                 // Test 'which php' command
                 $output .= "\n3. which php command:\n";
                 $which = @shell_exec('which php 2>/dev/null');
-                $output .= "   Result: " . ($which ? trim($which) : 'Command failed or not found') . "\n";
+                $output .= '   Result: '.($which ? trim($which) : 'Command failed or not found')."\n";
 
                 // Test 'php --version' directly
                 $output .= "\n4. Direct 'php --version' test:\n";
                 $phpVersion = @shell_exec('php --version 2>/dev/null');
                 if ($phpVersion) {
                     $output .= "   ✅ 'php' command works directly\n";
-                    $output .= "   Version: " . trim(explode("\n", $phpVersion)[0]) . "\n";
+                    $output .= '   Version: '.trim(explode("\n", $phpVersion)[0])."\n";
                 } else {
                     $output .= "   ❌ 'php' command not available\n";
                 }
 
                 // Server info
                 $output .= "\n5. Server Information:\n";
-                $output .= "   Current user: " . get_current_user() . "\n";
-                $output .= "   Server software: " . ($_SERVER['SERVER_SOFTWARE'] ?? 'Unknown') . "\n";
-                $output .= "   PHP SAPI: " . php_sapi_name() . "\n";
-                $output .= "   Document root: " . ($_SERVER['DOCUMENT_ROOT'] ?? 'Unknown') . "\n";
-                $output .= "   shell_exec available: " . (function_exists('shell_exec') ? '✅ Yes' : '❌ No') . "\n";
+                $output .= '   Current user: '.get_current_user()."\n";
+                $output .= '   Server software: '.($_SERVER['SERVER_SOFTWARE'] ?? 'Unknown')."\n";
+                $output .= '   PHP SAPI: '.php_sapi_name()."\n";
+                $output .= '   Document root: '.($_SERVER['DOCUMENT_ROOT'] ?? 'Unknown')."\n";
+                $output .= '   shell_exec available: '.(function_exists('shell_exec') ? '✅ Yes' : '❌ No')."\n";
 
                 $output .= "\n💡 Recommendation: Contact your hosting provider with this information to get the correct PHP path.";
                 break;
@@ -716,51 +716,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
                 // Current location info
                 $output .= "1. Current Location:\n";
-                $output .= "   Current Dir: " . __DIR__ . "\n";
-                $output .= "   Script: " . ($_SERVER['SCRIPT_NAME'] ?? 'Unknown') . "\n";
-                $output .= "   Document Root: " . ($_SERVER['DOCUMENT_ROOT'] ?? 'Unknown') . "\n";
+                $output .= '   Current Dir: '.__DIR__."\n";
+                $output .= '   Script: '.($_SERVER['SCRIPT_NAME'] ?? 'Unknown')."\n";
+                $output .= '   Document Root: '.($_SERVER['DOCUMENT_ROOT'] ?? 'Unknown')."\n";
 
                 // Path analysis
                 $output .= "\n2. Path Analysis:\n";
                 $currentDir = __DIR__;
-                $output .= "   Parent Dir: " . dirname($currentDir) . "\n";
-                $output .= "   Grandparent Dir: " . dirname(dirname($currentDir)) . "\n";
-                $output .= "   Great-grandparent Dir: " . dirname(dirname(dirname($currentDir))) . "\n";
+                $output .= '   Parent Dir: '.dirname($currentDir)."\n";
+                $output .= '   Grandparent Dir: '.dirname(dirname($currentDir))."\n";
+                $output .= '   Great-grandparent Dir: '.dirname(dirname(dirname($currentDir)))."\n";
 
                 // Test Laravel paths
                 $output .= "\n3. Laravel Root Detection:\n";
                 $testPaths = [
-                    'Sibling (public_html/laravel)' => dirname($currentDir) . '/laravel',
-                    'Uncle (private_html structure)' => dirname(dirname($currentDir)) . '/laravel',
-                    'Great-uncle (nested structure)' => dirname(dirname(dirname($currentDir))) . '/laravel',
+                    'Sibling (public_html/laravel)' => dirname($currentDir).'/laravel',
+                    'Uncle (private_html structure)' => dirname(dirname($currentDir)).'/laravel',
+                    'Great-uncle (nested structure)' => dirname(dirname(dirname($currentDir))).'/laravel',
                     'Parent (development)' => dirname(__DIR__),
-                    'Child (same level)' => $currentDir . '/laravel',
+                    'Child (same level)' => $currentDir.'/laravel',
                 ];
 
                 foreach ($testPaths as $label => $path) {
                     $exists = is_dir($path);
-                    $hasBootstrap = $exists && file_exists($path . '/bootstrap/app.php');
-                    $hasViews = $exists && is_dir($path . '/resources/views');
-                    $hasAppView = $exists && file_exists($path . '/resources/views/app.blade.php');
+                    $hasBootstrap = $exists && file_exists($path.'/bootstrap/app.php');
+                    $hasViews = $exists && is_dir($path.'/resources/views');
+                    $hasAppView = $exists && file_exists($path.'/resources/views/app.blade.php');
 
                     $output .= "   $label:\n";
                     $output .= "     Path: $path\n";
-                    $output .= "     Exists: " . ($exists ? '✅ Yes' : '❌ No') . "\n";
+                    $output .= '     Exists: '.($exists ? '✅ Yes' : '❌ No')."\n";
                     if ($exists) {
-                        $output .= "     Bootstrap: " . ($hasBootstrap ? '✅ Yes' : '❌ No') . "\n";
-                        $output .= "     Views: " . ($hasViews ? '✅ Yes' : '❌ No') . "\n";
-                        $output .= "     app.blade.php: " . ($hasAppView ? '✅ Yes' : '❌ No') . "\n";
+                        $output .= '     Bootstrap: '.($hasBootstrap ? '✅ Yes' : '❌ No')."\n";
+                        $output .= '     Views: '.($hasViews ? '✅ Yes' : '❌ No')."\n";
+                        $output .= '     app.blade.php: '.($hasAppView ? '✅ Yes' : '❌ No')."\n";
                     }
                     $output .= "\n";
                 }
 
                 // Current Laravel root detection
                 $output .= "4. Current Detection Result:\n";
-                $output .= "   Selected Laravel Root: " . ($laravelRoot ?: 'Not found') . "\n";
+                $output .= '   Selected Laravel Root: '.($laravelRoot ?: 'Not found')."\n";
                 if ($laravelRoot) {
-                    $viewsPath = $laravelRoot . '/resources/views/app.blade.php';
+                    $viewsPath = $laravelRoot.'/resources/views/app.blade.php';
                     $output .= "   app.blade.php path: $viewsPath\n";
-                    $output .= "   app.blade.php exists: " . (file_exists($viewsPath) ? '✅ Yes' : '❌ No') . "\n";
+                    $output .= '   app.blade.php exists: '.(file_exists($viewsPath) ? '✅ Yes' : '❌ No')."\n";
                 }
 
                 $output .= "\n💡 Upload files to the correct Laravel directory path shown above.";
@@ -771,15 +771,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
                 // 1. Check views directory
                 $output .= "1. Views Directory Check:\n";
-                $viewsPath = $laravelRoot . '/resources/views';
+                $viewsPath = $laravelRoot.'/resources/views';
                 if (is_dir($viewsPath)) {
                     $output .= "   ✅ Views directory exists: $viewsPath\n";
 
                     // Check for app.blade.php
-                    $appView = $viewsPath . '/app.blade.php';
+                    $appView = $viewsPath.'/app.blade.php';
                     if (file_exists($appView)) {
                         $output .= "   ✅ app.blade.php exists\n";
-                        $output .= "   File size: " . filesize($appView) . " bytes\n";
+                        $output .= '   File size: '.filesize($appView)." bytes\n";
                     } else {
                         $output .= "   ❌ app.blade.php missing\n";
                     }
@@ -790,24 +790,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 // 2. Check view config
                 $output .= "\n2. View Configuration:\n";
                 try {
-                    $configPath = $laravelRoot . '/config/view.php';
+                    $configPath = $laravelRoot.'/config/view.php';
                     if (file_exists($configPath)) {
                         $output .= "   ✅ view.php config exists\n";
                     } else {
                         $output .= "   ❌ view.php config missing\n";
                     }
                 } catch (Exception $e) {
-                    $output .= "   ❌ Error checking view config: " . $e->getMessage() . "\n";
+                    $output .= '   ❌ Error checking view config: '.$e->getMessage()."\n";
                 }
 
                 // 3. Check cache directory
                 $output .= "\n3. View Cache:\n";
-                $viewCachePath = $laravelRoot . '/storage/framework/views';
+                $viewCachePath = $laravelRoot.'/storage/framework/views';
                 if (is_dir($viewCachePath)) {
                     $writable = is_writable($viewCachePath);
                     $perms = substr(sprintf('%o', fileperms($viewCachePath)), -4);
                     $output .= "   ✅ Cache directory exists: $viewCachePath\n";
-                    $output .= "   Writable: " . ($writable ? '✅ Yes' : '❌ No') . " (Perms: $perms)\n";
+                    $output .= '   Writable: '.($writable ? '✅ Yes' : '❌ No')." (Perms: $perms)\n";
                 } else {
                     $output .= "   ❌ View cache directory missing: $viewCachePath\n";
                 }
@@ -820,10 +820,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                         $output .= "   ✅ Database connection working\n";
                     } else {
                         $output .= "   ⚠️ Database connection issue\n";
-                        $output .= "   " . substr($testQuery, 0, 200) . "\n";
+                        $output .= '   '.substr($testQuery, 0, 200)."\n";
                     }
                 } catch (Exception $e) {
-                    $output .= "   ❌ Database test failed: " . $e->getMessage() . "\n";
+                    $output .= '   ❌ Database test failed: '.$e->getMessage()."\n";
                 }
 
                 // 5. Quick fixes
@@ -836,22 +836,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
             case 'logout':
                 session_destroy();
-                header('Location: ' . $_SERVER['PHP_SELF']);
+                header('Location: '.$_SERVER['PHP_SELF']);
                 exit;
                 break;
 
             default:
-                $error = "Unknown action: " . htmlspecialchars($action);
+                $error = 'Unknown action: '.htmlspecialchars($action);
         }
     } catch (Exception $e) {
-        $error = "Error: " . $e->getMessage();
+        $error = 'Error: '.$e->getMessage();
     }
 }
 
 function executeCommand($command)
 {
     // Check if shell_exec is available
-    if (!function_exists('shell_exec')) {
+    if (! function_exists('shell_exec')) {
         return 'Error: shell_exec function is disabled on this server';
     }
 
@@ -888,7 +888,7 @@ function executeCommand($command)
         }
 
         // Method 4: Use which/where command (if available)
-        if (!$phpPath) {
+        if (! $phpPath) {
             $which = trim(@shell_exec('which php 2>/dev/null') ?: '');
             if ($which && is_executable($which)) {
                 $phpPath = $which;
@@ -896,20 +896,20 @@ function executeCommand($command)
         }
 
         // Method 5: Try common hosting-specific paths
-        if (!$phpPath) {
+        if (! $phpPath) {
             $commonPaths = [
-                '/usr/local/php83/bin/php',    # PHP 8.3 prioritized
-                '/usr/local/php84/bin/php',    # PHP 8.4 for future
+                '/usr/local/php83/bin/php',    // PHP 8.3 prioritized
+                '/usr/local/php84/bin/php',    // PHP 8.4 for future
                 '/usr/local/php82/bin/php',
                 '/usr/local/php81/bin/php',
-                '/usr/local/lsws/lsphp83/bin/php',  # LiteSpeed PHP 8.3
-                '/usr/local/lsws/lsphp84/bin/php',  # LiteSpeed PHP 8.4
+                '/usr/local/lsws/lsphp83/bin/php',  // LiteSpeed PHP 8.3
+                '/usr/local/lsws/lsphp84/bin/php',  // LiteSpeed PHP 8.4
                 '/usr/local/lsws/lsphp82/bin/php',
                 '/usr/local/lsws/lsphp81/bin/php',
-                '/home/' . get_current_user() . '/public_html/cgi-bin/php83',
-                '/home/' . get_current_user() . '/public_html/cgi-bin/php',
+                '/home/'.get_current_user().'/public_html/cgi-bin/php83',
+                '/home/'.get_current_user().'/public_html/cgi-bin/php',
                 '/usr/local/bin/php83',
-                '/usr/bin/php83'
+                '/usr/bin/php83',
             ];
 
             foreach ($commonPaths as $path) {
@@ -923,49 +923,51 @@ function executeCommand($command)
         if ($phpPath) {
             // Only escape if it's a full path (contains /)
             if (strpos($phpPath, '/') !== false) {
-                $command = str_replace('php ', escapeshellarg($phpPath) . ' ', $command);
+                $command = str_replace('php ', escapeshellarg($phpPath).' ', $command);
             } else {
-                $command = str_replace('php ', $phpPath . ' ', $command);
+                $command = str_replace('php ', $phpPath.' ', $command);
             }
         } else {
             // Last resort: try without path (some hosting allows this)
             $debugInfo = "PHP Detection Debug:\n";
-            $debugInfo .= "PHP_BINARY: " . (defined('PHP_BINARY') ? PHP_BINARY : 'Not defined') . "\n";
-            $debugInfo .= "PHP_BINARY executable: " . (defined('PHP_BINARY') && is_executable(PHP_BINARY) ? 'Yes' : 'No') . "\n";
-            $debugInfo .= "Current user: " . get_current_user() . "\n";
-            $debugInfo .= "Server software: " . ($_SERVER['SERVER_SOFTWARE'] ?? 'Unknown') . "\n";
-            $debugInfo .= "PHP SAPI: " . php_sapi_name() . "\n";
+            $debugInfo .= 'PHP_BINARY: '.(defined('PHP_BINARY') ? PHP_BINARY : 'Not defined')."\n";
+            $debugInfo .= 'PHP_BINARY executable: '.(defined('PHP_BINARY') && is_executable(PHP_BINARY) ? 'Yes' : 'No')."\n";
+            $debugInfo .= 'Current user: '.get_current_user()."\n";
+            $debugInfo .= 'Server software: '.($_SERVER['SERVER_SOFTWARE'] ?? 'Unknown')."\n";
+            $debugInfo .= 'PHP SAPI: '.php_sapi_name()."\n";
 
-            return 'Error: Could not find PHP executable. ' . $debugInfo .
+            return 'Error: Could not find PHP executable. '.$debugInfo.
                 'Contact your hosting provider for the correct PHP path.';
         }
     }
 
-    $output = shell_exec($command . ' 2>&1');
+    $output = shell_exec($command.' 2>&1');
+
     return $output ?: 'Command executed (no output)';
 }
 
 function removeDirectory($dir)
 {
-    if (!is_dir($dir)) {
+    if (! is_dir($dir)) {
         return false;
     }
 
-    $files = array_diff(scandir($dir), array('.', '..'));
+    $files = array_diff(scandir($dir), ['.', '..']);
     foreach ($files as $file) {
-        $path = $dir . '/' . $file;
+        $path = $dir.'/'.$file;
         if (is_dir($path)) {
             removeDirectory($path);
         } else {
             unlink($path);
         }
     }
+
     return rmdir($dir);
 }
 
 function getDirSize($dir)
 {
-    if (!is_dir($dir)) {
+    if (! is_dir($dir)) {
         return 0;
     }
 
@@ -974,23 +976,24 @@ function getDirSize($dir)
     foreach ($files as $file) {
         $size += $file->getSize();
     }
+
     return $size;
 }
 
 function formatBytes($bytes, $precision = 2)
 {
-    $units = array('B', 'KB', 'MB', 'GB', 'TB');
+    $units = ['B', 'KB', 'MB', 'GB', 'TB'];
 
     for ($i = 0; $bytes > 1024 && $i < count($units) - 1; $i++) {
         $bytes /= 1024;
     }
 
-    return round($bytes, $precision) . ' ' . $units[$i];
+    return round($bytes, $precision).' '.$units[$i];
 }
 
 function showLoginForm()
 {
-?>
+    ?>
     <!DOCTYPE html>
     <html>
 
@@ -1401,22 +1404,22 @@ function showLoginForm()
                 </div>
                 <div class="info-item">
                     <strong>Storage Link:</strong>
-                    <span class="info-value"><?php echo file_exists($laravelRoot . '/public/storage') ? 'Exists' : 'Missing'; ?></span>
+                    <span class="info-value"><?php echo file_exists($laravelRoot.'/public/storage') ? 'Exists' : 'Missing'; ?></span>
                 </div>
                 <div class="info-item">
                     <strong>Environment:</strong>
-                    <span class="info-value"><?php echo file_exists($laravelRoot . '/.env') ? 'File exists' : 'Missing'; ?></span>
+                    <span class="info-value"><?php echo file_exists($laravelRoot.'/.env') ? 'File exists' : 'Missing'; ?></span>
                 </div>
             </div>
 
-            <?php if ($error): ?>
+            <?php if ($error) { ?>
                 <div class="error"><?php echo htmlspecialchars($error); ?></div>
-            <?php endif; ?>
+            <?php } ?>
 
-            <?php if ($output): ?>
+            <?php if ($output) { ?>
                 <div class="success">Command executed successfully!</div>
                 <div class="output"><?php echo htmlspecialchars($output); ?></div>
-            <?php endif; ?>
+            <?php } ?>
 
             <div class="grid">
                 <div class="card">

@@ -5,11 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Cache;
-use App\Models\BlacklistWord;
 
 /**
  * Model untuk menyimpan frasa negative keywords yang diekstrak dari search terms
- * 
+ *
  * @property string $frasa Frasa negative keyword yang diekstrak
  * @property int $parent_term_id ID dari parent term di tabel new_terms_negative_0click
  * @property string|null $status_input_google Status input ke Google Ads: 'sukses', 'gagal', atau 'error'
@@ -19,9 +18,10 @@ use App\Models\BlacklistWord;
 /**
  * @property string|null $hasil_cek_ai Nilai hasil cek AI: 'indonesia' atau 'luar'
  */
-class NewFrasaNegative extends Model {
+class NewFrasaNegative extends Model
+{
     protected $table = 'new_frasa_negative';
-    
+
     protected $fillable = [
         'frasa',
         'parent_term_id',
@@ -31,25 +31,29 @@ class NewFrasaNegative extends Model {
         'notif_telegram',
         'campaign_id',
     ];
-    
+
     protected $casts = [
         'retry_count' => 'integer',
         'parent_term_id' => 'integer',
         'campaign_id' => 'integer',
     ];
-    
+
     // Konstanta untuk enum values
     const STATUS_BERHASIL = 'sukses';
+
     const STATUS_GAGAL = 'gagal';
+
     const STATUS_ERROR = 'error';
 
     const NOTIF_BERHASIL = 'sukses';
+
     const NOTIF_GAGAL = 'gagal';
 
     // Nilai enum untuk hasil cek AI
     const HASIL_CEK_AI_INDONESIA = 'indonesia';
+
     const HASIL_CEK_AI_LUAR = 'luar';
-    
+
     /**
      * Get the parent term that owns this frasa.
      */
@@ -57,16 +61,16 @@ class NewFrasaNegative extends Model {
     {
         return $this->belongsTo(NewTermsNegative0Click::class, 'parent_term_id');
     }
-    
+
     /**
      * Check if this frasa can be retried for Google Ads input.
      */
     public function canRetry(): bool
     {
-        return $this->retry_count < 3 && 
+        return $this->retry_count < 3 &&
                in_array($this->status_input_google, [null, self::STATUS_GAGAL]);
     }
-    
+
     /**
      * Scope: frasa yang perlu dianalisis AI (hasil_cek_ai masih null)
      */
@@ -85,7 +89,7 @@ class NewFrasaNegative extends Model {
         return $query->where('hasil_cek_ai', self::HASIL_CEK_AI_LUAR)
             ->where(function ($q) {
                 $q->whereNull('status_input_google')
-                  ->orWhere('status_input_google', self::STATUS_GAGAL);
+                    ->orWhere('status_input_google', self::STATUS_GAGAL);
             })
             ->where('retry_count', '<', 3);
     }
@@ -96,12 +100,12 @@ class NewFrasaNegative extends Model {
     public function incrementRetry(): void
     {
         $this->increment('retry_count');
-        
+
         if ($this->retry_count >= 3) {
             $this->update(['status_input_google' => self::STATUS_ERROR]);
         }
     }
-    
+
     /**
      * Ambil set blacklist aktif dari cache (case-insensitive)
      */
@@ -116,17 +120,21 @@ class NewFrasaNegative extends Model {
             // Normalize ke lowercase untuk case-insensitive matching
             $set[strtolower($w)] = true;
         }
+
         return $set;
     }
 
     public static function isAllowedFrasa(string $frasa): bool
     {
         $frasa = trim($frasa);
-        if ($frasa === '') return false;
+        if ($frasa === '') {
+            return false;
+        }
 
         $set = self::getBlacklistSet();
+
         // Compare dengan lowercase untuk case-insensitive
-        return !isset($set[strtolower($frasa)]);
+        return ! isset($set[strtolower($frasa)]);
     }
 
     public static function extractAllowedFrasa(string $term): array
@@ -139,10 +147,12 @@ class NewFrasaNegative extends Model {
 
         foreach ($words as $word) {
             $cleanWord = trim($word);
-            if ($cleanWord === '') continue;
+            if ($cleanWord === '') {
+                continue;
+            }
 
             // Buang jika case-insensitive match ada di blacklist
-            if (!isset($set[strtolower($cleanWord)])) {
+            if (! isset($set[strtolower($cleanWord)])) {
                 $allowedFrasa[] = $cleanWord;
             }
         }
@@ -152,15 +162,15 @@ class NewFrasaNegative extends Model {
         $result = [];
         foreach ($allowedFrasa as $frasa) {
             $lower = strtolower($frasa);
-            if (!isset($seen[$lower])) {
+            if (! isset($seen[$lower])) {
                 $seen[$lower] = true;
                 $result[] = $frasa;
             }
         }
-        
+
         return array_values($result);
     }
-    
+
     public function setHasilCekAiAttribute($value): void
     {
         $v = is_string($value) ? strtolower(trim($value)) : null;

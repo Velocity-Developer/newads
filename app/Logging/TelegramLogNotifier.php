@@ -8,6 +8,7 @@ class TelegramLogNotifier
 {
     // Masukkan kredensial khusus log di sini (hanya di file ini)
     private string $botToken = '7347197196:AAHj2Stttl0gA8T20-pfYc3PMQmYApFSUOY';
+
     // Satu chat ID bisa string, multi chat ID array
     private array|string $chatId = ['-1003107021002'];
 
@@ -23,15 +24,16 @@ class TelegramLogNotifier
 
     public function isConfigured(): bool
     {
-        $hasToken = !empty($this->botToken);
+        $hasToken = ! empty($this->botToken);
         $ids = is_array($this->chatId) ? $this->chatId : [$this->chatId];
         $hasChat = count(array_filter($ids)) > 0;
+
         return $hasToken && $hasChat;
     }
 
     public function sendMessage(string $message): void
     {
-        if (!$this->isConfigured()) {
+        if (! $this->isConfigured()) {
             return;
         }
 

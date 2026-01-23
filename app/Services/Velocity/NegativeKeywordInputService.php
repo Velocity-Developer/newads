@@ -2,14 +2,16 @@
 
 namespace App\Services\Velocity;
 
+use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Exception;
 
 class NegativeKeywordInputService
 {
     private string $inputApiUrl;
+
     private ?string $apiToken;
+
     private array $matchTypes;
 
     public function __construct()
@@ -26,19 +28,21 @@ class NegativeKeywordInputService
     public function getMatchTypeForSource(string $source): string
     {
         $source = strtolower($source);
+
         return $this->matchTypes[$source] ?? 'EXACT';
     }
 
     /**
      * Kirim negative keywords ke Velocity API.
-     * @param array $terms Array of strings
-     * @param string $matchType 'EXACT' atau 'PHRASE' (atau 'PHARSE' jika API memang demikian)
-     * @param string $mode 'validate' atau 'execute'
+     *
+     * @param  array  $terms  Array of strings
+     * @param  string  $matchType  'EXACT' atau 'PHRASE' (atau 'PHARSE' jika API memang demikian)
+     * @param  string  $mode  'validate' atau 'execute'
      * @return array {success: bool, status: int|null, json: mixed|null, error: string|null}
      */
     public function send(array $terms, string $matchType, string $mode = 'validate', ?string $campaignId = null): array
     {
-        $terms = array_values(array_filter(array_map('strval', $terms), fn($t) => trim($t) !== ''));
+        $terms = array_values(array_filter(array_map('strval', $terms), fn ($t) => trim($t) !== ''));
         if (empty($terms)) {
             return ['success' => false, 'status' => null, 'json' => null, 'error' => 'No terms provided'];
         }
@@ -68,7 +72,7 @@ class NegativeKeywordInputService
             'Accept' => 'application/json',
             // Jangan set Content-Type manual, biarkan multipart mengatur boundary
         ];
-        if (!empty($this->apiToken)) {
+        if (! empty($this->apiToken)) {
             $headers['Authorization'] = $this->apiToken;
         }
 
@@ -109,7 +113,7 @@ class NegativeKeywordInputService
 
             // Tambahkan header Authorization Bearer jika token tersedia
             $request = Http::timeout(30)->retry(3, 200);
-            if (!empty($this->apiToken)) {
+            if (! empty($this->apiToken)) {
                 $request = $request->withHeaders([
                     'Authorization' => "Bearer {$this->apiToken}",
                     'Accept' => 'application/json',
@@ -130,10 +134,10 @@ class NegativeKeywordInputService
             }
 
             $ok = $resp->ok();
-            $apiSuccess = is_array($json) && array_key_exists('success', $json) ? (bool)$json['success'] : null;
+            $apiSuccess = is_array($json) && array_key_exists('success', $json) ? (bool) $json['success'] : null;
             $success = $apiSuccess ?? $ok;
 
-            if (!$success) {
+            if (! $success) {
                 Log::warning('Velocity input API failed', [
                     'status' => $status,
                     'body' => $resp->body(),
@@ -149,6 +153,7 @@ class NegativeKeywordInputService
             ];
         } catch (Exception $e) {
             Log::error('Velocity input API exception', ['error' => $e->getMessage()]);
+
             return ['success' => false, 'status' => null, 'json' => null, 'error' => $e->getMessage()];
         }
     }

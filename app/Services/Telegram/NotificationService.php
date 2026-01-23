@@ -8,7 +8,9 @@ use Illuminate\Support\Facades\Log;
 class NotificationService
 {
     private ?string $botToken;
+
     private array|string|null $chatId;
+
     private string $baseUrl;
 
     public function __construct()
@@ -23,8 +25,9 @@ class NotificationService
      */
     public function sendMessage(string $message, bool $disablePreview = true): bool
     {
-        if (!$this->isConfigured()) {
+        if (! $this->isConfigured()) {
             Log::warning('Telegram service not configured, skipping notification');
+
             return false;
         }
 
@@ -50,7 +53,7 @@ class NotificationService
                     Log::error('Telegram API error', [
                         'chat_id' => $chatId,
                         'status' => $response->status(),
-                        'response' => $response->body()
+                        'response' => $response->body(),
                     ]);
                     $allSuccessful = false;
                 }
@@ -60,8 +63,9 @@ class NotificationService
 
         } catch (\Exception $e) {
             Log::error('Failed to send Telegram notification', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
+
             return false;
         }
     }
@@ -74,7 +78,7 @@ class NotificationService
         $message = "✅ <b>Kata Kunci Negatif Ditambahkan</b>\n\n";
         $message .= "🔑 <b>Keyword:</b> {$keyword}\n";
         $message .= "📝 <b>Match Type:</b> {$matchType}\n";
-        $message .= "⏰ <b>Waktu:</b> " . now()->format('Y-m-d H:i:s');
+        $message .= '⏰ <b>Waktu:</b> '.now()->format('Y-m-d H:i:s');
 
         return $this->sendMessage($message);
     }
@@ -88,7 +92,7 @@ class NotificationService
         $message .= "🔑 <b>Keyword:</b> {$keyword}\n";
         $message .= "❗ <b>Error:</b> {$error}\n";
         $message .= "🔄 <b>Retry Count:</b> {$retryCount}\n";
-        $message .= "⏰ <b>Waktu:</b> " . now()->format('Y-m-d H:i:s');
+        $message .= '⏰ <b>Waktu:</b> '.now()->format('Y-m-d H:i:s');
 
         return $this->sendMessage($message);
     }
@@ -102,8 +106,8 @@ class NotificationService
         $message .= "✅ <b>Berhasil:</b> {$successful}\n";
         $message .= "❌ <b>Gagal:</b> {$failed}\n";
         $message .= "📈 <b>Total:</b> {$total}\n";
-        $message .= "📊 <b>Success Rate:</b> " . round(($successful / max($total, 1)) * 100, 1) . "%\n";
-        $message .= "⏰ <b>Waktu:</b> " . now()->format('Y-m-d H:i:s');
+        $message .= '📊 <b>Success Rate:</b> '.round(($successful / max($total, 1)) * 100, 1)."%\n";
+        $message .= '⏰ <b>Waktu:</b> '.now()->format('Y-m-d H:i:s');
 
         return $this->sendMessage($message);
     }
@@ -116,7 +120,7 @@ class NotificationService
         $message = "🔍 <b>Search Terms Baru Diambil</b>\n\n";
         $message .= "🆕 <b>New Terms:</b> {$newTerms}\n";
         $message .= "📊 <b>Total Fetched:</b> {$totalFetched}\n";
-        $message .= "⏰ <b>Waktu:</b> " . now()->format('Y-m-d H:i:s');
+        $message .= '⏰ <b>Waktu:</b> '.now()->format('Y-m-d H:i:s');
 
         return $this->sendMessage($message);
     }
@@ -130,8 +134,8 @@ class NotificationService
         $message .= "📊 <b>Analyzed:</b> {$analyzed}\n";
         $message .= "❌ <b>Negative:</b> {$negative}\n";
         $message .= "✅ <b>Relevant:</b> {$relevant}\n";
-        $message .= "📈 <b>Negative Rate:</b> " . round(($negative / max($analyzed, 1)) * 100, 1) . "%\n";
-        $message .= "⏰ <b>Waktu:</b> " . now()->format('Y-m-d H:i:s');
+        $message .= '📈 <b>Negative Rate:</b> '.round(($negative / max($analyzed, 1)) * 100, 1)."%\n";
+        $message .= '⏰ <b>Waktu:</b> '.now()->format('Y-m-d H:i:s');
 
         return $this->sendMessage($message);
     }
@@ -144,7 +148,7 @@ class NotificationService
         $message = "🚨 <b>Error Sistem</b>\n\n";
         $message .= "⚙️ <b>Operation:</b> {$operation}\n";
         $message .= "❗ <b>Error:</b> {$error}\n";
-        $message .= "⏰ <b>Waktu:</b> " . now()->format('Y-m-d H:i:s');
+        $message .= '⏰ <b>Waktu:</b> '.now()->format('Y-m-d H:i:s');
 
         return $this->sendMessage($message);
     }
@@ -154,24 +158,24 @@ class NotificationService
      */
     public function notifyDailySummary(array $stats): bool
     {
-        $message = "📅 <b>Daily Summary - " . now()->format('Y-m-d') . "</b>\n\n";
-        
+        $message = '📅 <b>Daily Summary - '.now()->format('Y-m-d')."</b>\n\n";
+
         if (isset($stats['terms_fetched'])) {
             $message .= "🔍 <b>Terms Fetched:</b> {$stats['terms_fetched']}\n";
         }
-        
+
         if (isset($stats['ai_analyzed'])) {
             $message .= "🤖 <b>AI Analyzed:</b> {$stats['ai_analyzed']}\n";
         }
-        
+
         if (isset($stats['negative_keywords_added'])) {
             $message .= "❌ <b>Negative Keywords Added:</b> {$stats['negative_keywords_added']}\n";
         }
-        
+
         if (isset($stats['phrases_processed'])) {
             $message .= "📝 <b>Phrases Processed:</b> {$stats['phrases_processed']}\n";
         }
-        
+
         if (isset($stats['errors'])) {
             $message .= "🚨 <b>Errors:</b> {$stats['errors']}\n";
         }
@@ -184,7 +188,7 @@ class NotificationService
      */
     public function isConfigured(): bool
     {
-        return !empty($this->botToken) && !empty($this->chatId);
+        return ! empty($this->botToken) && ! empty($this->chatId);
     }
 
     /**
@@ -192,26 +196,26 @@ class NotificationService
      */
     public function testService(): array
     {
-        if (!$this->isConfigured()) {
+        if (! $this->isConfigured()) {
             return [
                 'success' => false,
-                'error' => 'Telegram service not properly configured'
+                'error' => 'Telegram service not properly configured',
             ];
         }
 
         try {
-            $testMessage = "🧪 <b>Test Notification</b>\n\nTelegram service is working correctly!\n⏰ " . now()->format('Y-m-d H:i:s');
+            $testMessage = "🧪 <b>Test Notification</b>\n\nTelegram service is working correctly!\n⏰ ".now()->format('Y-m-d H:i:s');
             $success = $this->sendMessage($testMessage);
 
             return [
                 'success' => $success,
-                'message' => $success ? 'Test notification sent successfully' : 'Failed to send test notification'
+                'message' => $success ? 'Test notification sent successfully' : 'Failed to send test notification',
             ];
 
         } catch (\Exception $e) {
             return [
                 'success' => false,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ];
         }
     }
@@ -221,10 +225,10 @@ class NotificationService
      */
     public function getBotInfo(): array
     {
-        if (!$this->isConfigured()) {
+        if (! $this->isConfigured()) {
             return [
                 'success' => false,
-                'error' => 'Bot token not configured'
+                'error' => 'Bot token not configured',
             ];
         }
 
@@ -234,19 +238,19 @@ class NotificationService
             if ($response->successful()) {
                 return [
                     'success' => true,
-                    'bot_info' => $response->json()['result']
+                    'bot_info' => $response->json()['result'],
                 ];
             } else {
                 return [
                     'success' => false,
-                    'error' => 'Failed to get bot info: ' . $response->body()
+                    'error' => 'Failed to get bot info: '.$response->body(),
                 ];
             }
 
         } catch (\Exception $e) {
             return [
                 'success' => false,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ];
         }
     }

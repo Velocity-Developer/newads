@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schedule;
 
 // Heartbeat: mencatat waktu eksekusi scheduler setiap menit
 Schedule::call(function () {

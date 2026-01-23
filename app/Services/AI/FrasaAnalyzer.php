@@ -8,7 +8,9 @@ use Illuminate\Support\Facades\Log;
 class FrasaAnalyzer
 {
     private ?string $apiKey;
+
     private string $model;
+
     private string $baseUrl = 'https://api.openai.com/v1/chat/completions';
 
     public function __construct()
@@ -19,7 +21,7 @@ class FrasaAnalyzer
 
     public function isConfigured(): bool
     {
-        return !empty($this->apiKey);
+        return ! empty($this->apiKey);
     }
 
     public function analyzeFrasa(string $frasa): ?string
@@ -30,9 +32,11 @@ class FrasaAnalyzer
             $result = $this->parseResponse($response);
 
             Log::info('AI frasa analysis completed', ['frasa' => $frasa, 'result' => $result]);
+
             return $result;
         } catch (\Throwable $e) {
             Log::error('AI frasa analysis failed', ['frasa' => $frasa, 'error' => $e->getMessage()]);
+
             return null;
         }
     }
@@ -69,6 +73,7 @@ class FrasaAnalyzer
             ];
         }
     }
+
     private function buildPrompt(string $frasa): string
     {
         return '
@@ -86,29 +91,30 @@ class FrasaAnalyzer
     private function callOpenAI(string $prompt): array
     {
         $res = Http::retry(5, 750, function ($exception, $request) {
-                $resp = method_exists($request, 'response') ? $request->response : null;
-                return $exception instanceof \Illuminate\Http\Client\ConnectionException
-                    || ($resp && ($resp->serverError() || $resp->status() === 429));
-            })
+            $resp = method_exists($request, 'response') ? $request->response : null;
+
+            return $exception instanceof \Illuminate\Http\Client\ConnectionException
+                || ($resp && ($resp->serverError() || $resp->status() === 429));
+        })
             ->timeout(120)
             ->connectTimeout(30)
             ->withToken($this->apiKey)
             ->withHeaders([
-                'Accept' => 'application/json',
-            ])
+            'Accept' => 'application/json',
+        ])
             ->asJson()
             ->post($this->baseUrl, [
-                'model' => $this->model,
-                'messages' => [
-                    [
-                        'role' => 'user',
-                        'content' => $prompt
-                    ]
+            'model' => $this->model,
+            'messages' => [
+                [
+                    'role' => 'user',
+                    'content' => $prompt,
                 ],
-            ]);
+            ],
+        ]);
 
-        if (!$res->successful()) {
-            throw new \Exception('OpenAI API request failed: ' . $res->body());
+        if (! $res->successful()) {
+            throw new \Exception('OpenAI API request failed: '.$res->body());
         }
 
         return $res->json();
@@ -121,6 +127,7 @@ class FrasaAnalyzer
         if (in_array($normalized, ['indonesia', 'luar'], true)) {
             return $normalized;
         }
+
         // fallback heuristic: anything non-latin indicating foreign terms could be 'luar'
         return null;
     }

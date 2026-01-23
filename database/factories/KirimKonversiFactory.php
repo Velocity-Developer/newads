@@ -19,6 +19,7 @@ class KirimKonversiFactory extends Factory
         $gclid = str_replace('-', '_', $this->faker->uuid());
         $jobid = $this->faker->numberBetween(225000000000, 225999999999);
         $date = $this->faker->dateTimeInInterval('-1 month', 'now')->format('Y-m-d H:i:sP');
+
         return [
             'gclid' => $gclid,
             'jobid' => $jobid,

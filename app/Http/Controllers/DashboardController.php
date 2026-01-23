@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\NewTermsNegative0Click;
 use App\Models\NewFrasaNegative;
+use App\Models\NewTermsNegative0Click;
 use Inertia\Inertia;
 
 class DashboardController extends Controller

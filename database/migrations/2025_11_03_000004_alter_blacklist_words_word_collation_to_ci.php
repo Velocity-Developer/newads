@@ -3,7 +3,8 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up()
     {
         // 1) Bersihkan duplikat case-insensitive sebelum ubah kolasi
@@ -18,7 +19,7 @@ return new class extends Migration {
             $ids = explode(',', $dup->ids);
             // Simpan record pertama (ID terkecil)
             array_shift($ids);
-            if (!empty($ids)) {
+            if (! empty($ids)) {
                 DB::table('blacklist_words')->whereIn('id', $ids)->delete();
             }
         }
@@ -26,15 +27,15 @@ return new class extends Migration {
         // 2) Ubah kolom menjadi case-insensitive collation (MySQL 8)
         // Deteksi dukungan collation 0900 (MySQL 8.0+). Jika tidak tersedia, fallback ke unicode_ci.
         $supports0900 = \DB::select('SHOW COLLATION LIKE "utf8mb4_0900_ai_ci"');
-        $collation = !empty($supports0900) ? 'utf8mb4_0900_ai_ci' : 'utf8mb4_unicode_ci';
+        $collation = ! empty($supports0900) ? 'utf8mb4_0900_ai_ci' : 'utf8mb4_unicode_ci';
 
-        \DB::statement("
+        \DB::statement('
             ALTER TABLE `blacklist_words`
             MODIFY `word` VARCHAR(255)
             CHARACTER SET utf8mb4
             COLLATE utf8mb4_unicode_ci
             NOT NULL
-        ");
+        ');
 
         // Catatan: index unik `blacklist_words_word_unique` akan mengikuti kolasi kolom,
         // tidak perlu di-drop/recreate jika tidak error.
@@ -43,12 +44,12 @@ return new class extends Migration {
     public function down(): void
     {
         // Kembalikan ke case-sensitive jika diperlukan
-        DB::statement("
+        DB::statement('
             ALTER TABLE `blacklist_words`
             MODIFY `word` VARCHAR(255)
             CHARACTER SET utf8mb4
             COLLATE utf8mb4_0900_as_cs
             NOT NULL
-        ");
+        ');
     }
 };

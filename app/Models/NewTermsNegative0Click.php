@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Model untuk menyimpan search terms zero-click dari Google Ads
- * 
+ *
  * @property string $terms Search term yang diambil dari Google Ads
  * @property string|null $hasil_cek_ai Hasil analisis AI: 'relevan' atau 'negatif'
  * @property string|null $status_input_google Status input ke Google Ads: 'sukses', 'gagal', atau 'error'
@@ -20,7 +20,7 @@ class NewTermsNegative0Click extends Model
     use SoftDeletes;
 
     protected $table = 'new_terms_negative_0click';
-    
+
     protected $fillable = [
         'terms',
         'hasil_cek_ai',
@@ -29,21 +29,25 @@ class NewTermsNegative0Click extends Model
         'notif_telegram',
         'campaign_id',
     ];
-    
+
     protected $casts = [
         'retry_count' => 'integer',
         'campaign_id' => 'integer',
     ];
-    
+
     // Konstanta untuk enum values
     const HASIL_AI_RELEVAN = 'relevan';
+
     const HASIL_AI_NEGATIF = 'negatif';
-    
+
     const STATUS_BERHASIL = 'sukses';
+
     const STATUS_GAGAL = 'gagal';
+
     const STATUS_ERROR = 'error';
-    
+
     const NOTIF_BERHASIL = 'sukses';
+
     const NOTIF_GAGAL = 'gagal';
 
     /**
@@ -53,13 +57,13 @@ class NewTermsNegative0Click extends Model
     {
         return $this->hasMany(NewFrasaNegative::class, 'parent_term_id', 'id');
     }
-    
+
     /**
      * Check if this term can be retried for Google Ads input.
      */
     public function canRetry(): bool
     {
-        return $this->retry_count < 3 && 
+        return $this->retry_count < 3 &&
                in_array($this->status_input_google, [null, self::STATUS_GAGAL]);
     }
 
@@ -69,12 +73,12 @@ class NewTermsNegative0Click extends Model
     public function incrementRetry(): void
     {
         $this->increment('retry_count');
-        
+
         if ($this->retry_count >= 3) {
             $this->update(['status_input_google' => self::STATUS_ERROR]);
         }
     }
-    
+
     /**
      * Scope for terms that need AI analysis.
      */
@@ -82,7 +86,7 @@ class NewTermsNegative0Click extends Model
     {
         return $query->whereNull('hasil_cek_ai');
     }
-    
+
     /**
      * Scope for negative terms that need Google Ads input.
      */
@@ -91,7 +95,7 @@ class NewTermsNegative0Click extends Model
         return $query->where('hasil_cek_ai', self::HASIL_AI_NEGATIF)
             ->where(function ($q) {
                 $q->whereNull('status_input_google')
-                  ->orWhere('status_input_google', self::STATUS_GAGAL);
+                    ->orWhere('status_input_google', self::STATUS_GAGAL);
             })
             ->where('retry_count', '<', 3);
     }

@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\FrasaExport;
 use App\Models\NewFrasaNegative;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use App\Exports\FrasaExport;
 use Maatwebsite\Excel\Facades\Excel;
 
 class FrasaController extends Controller
