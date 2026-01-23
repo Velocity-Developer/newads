@@ -60,7 +60,20 @@ const fetchSearchTerms = async () => {
                 <Loader2 class="animate-spin inline-block h-8 w-8 text-primary" />
             </div>
             <div v-else>
-                {{ dataSearchTerms }}
+                <table class="w-full">
+                    <tr>
+                        <th class="p-2 border-b text-left">No</th>
+                        <th class="p-2 border-b text-left">Term</th>
+                    </tr>
+                    <tr v-for="item,index in dataSearchTerms" :key="item">
+                        <td class="p-2 border-b text-left">
+                            {{ Number(index) + 1 }}
+                        </td> 
+                        <td class="p-2 border-b text-left">
+                            {{ item }}
+                        </td>  
+                    </tr>
+                </table>
             </div>
 
         </DialogContent>
