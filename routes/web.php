@@ -70,7 +70,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/kirim_konversi/kirim_konversi_dari_rekap_form', [KirimKonversiController::class, 'kirim_konversi_dari_rekap_form']);
 
     //update search term none
-    Route::get('/search-terms-none/update', [SearchTermsController::class, 'update_search_terms_none']);
+    Route::get('/update-search-terms-none', [SearchTermsController::class, 'update_search_terms_none']);
 });
 
 require __DIR__ . '/settings.php';

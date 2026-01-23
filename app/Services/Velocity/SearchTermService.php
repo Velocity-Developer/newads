@@ -30,11 +30,7 @@ class SearchTermService
                 'Authorization' => 'Bearer ' . $this->secret_key,
                 'X-Time' => $this->time,
                 'Accept' => 'application/json',
-            ])->get($this->api_url . '/search-terms-none');
-
-            Log::info('getSearchTermsNone', [
-                'response' => $response->json(),
-            ]);
+            ])->get($this->api_url . '/fetch-terms-none.php');
 
             // jika respon success, tambahkan data ke table kirim_konversi
             if ($response->successful()) {
@@ -55,7 +51,7 @@ class SearchTermService
             return [
                 'success' => false,
                 'error' => $errorMsg,
-                'response' => $dataRes,
+                'response' => $response->json() ?? [],
             ];
         }
     }

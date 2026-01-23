@@ -3,6 +3,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { type BreadcrumbItem } from '@/types';
+import SearchTermGetUpdate from '@/components/SearchTerm/GetUpdate.vue';
 
 interface SearchTermItem {
   id: number;
@@ -51,6 +52,11 @@ const changePerPage = (e: Event) => {
 
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-6">
+
+      <div class="flex justify-end">
+        <SearchTermGetUpdate />
+      </div>
+
       <Card>
         <CardHeader>
           <div class="flex items-center justify-between">
