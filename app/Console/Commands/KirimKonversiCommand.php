@@ -36,7 +36,7 @@ class KirimKonversiCommand extends Command
             return self::SUCCESS;
         }
 
-        Log::info('[CRON] kirim-konversi:sync-vdnet START');
+        // Log::info('[CRON] kirim-konversi:sync-vdnet START');
 
         //catat last run time
         Setting::set('schedule_last_run_kirim_konversi_sync_vdnet', now());
@@ -65,7 +65,7 @@ class KirimKonversiCommand extends Command
                     }
                 }
             } else {
-                Log::info('[CRON] kirim-konversi:sync-vdnet NO REKAP FORM');
+                // Log::info('[CRON] kirim-konversi:sync-vdnet NO REKAP FORM');
             }
         } catch (\Exception $e) {
             Log::error('[CRON] kirim-konversi:sync-vdnet FAILED', [
@@ -100,7 +100,7 @@ class KirimKonversiCommand extends Command
                     }
                 }
             } else {
-                Log::info('[CRON] kirim-konversi:sync-vdnet nominal NO REKAP FORM');
+                // Log::info('[CRON] kirim-konversi:sync-vdnet nominal NO REKAP FORM');
             }
         } catch (\Exception $e) {
             Log::error('[CRON] kirim-konversi:sync-vdnet nominal FAILED', [

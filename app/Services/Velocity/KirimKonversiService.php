@@ -141,20 +141,6 @@ class KirimKonversiService
             $gclid = explode('.', $gclid)[2];
         }
 
-        // ubah $conversion_time 
-        // pertahankan format Y-m-d H:i
-        $tz = new DateTimeZone('Asia/Jakarta');
-        $conversionDt = new DateTime($conversion_time, $tz);
-        $conversionDt->modify('+5 minutes');
-        $now = new DateTime('now', $tz);
-
-        // validasi conversion_time tidak boleh melebihi waktu saat ini + 5 minutes
-        if ($conversionDt > $now) {
-            throw new \Exception('Conversion time tidak boleh melebihi waktu saat ini');
-        }
-
-        $conversion_time = $conversionDt->format('Y-m-d H:i');
-
         //updateOrCreate rekapform
         RekapForm::updateOrCreate([
             'id' => $rekapform['id'],
@@ -188,6 +174,28 @@ class KirimKonversiService
         } else if ($rekapform['source'] == 'vdcom_id') {
             $conversion_action_id = '7449287249'; //vdcom_id
         }
+
+        //dapatkan kelipatan waktu berdasarkan riwayat kirim konversi
+        $failedCount  = KirimKonversi::where('rekap_form_id', $rekapform['id'])
+            ->where('conversion_action_id', $conversion_action_id)
+            ->where('status', 'failed')->count();
+        $kelipatan_waktu = $failedCount > 0 ? $failedCount * 5 : 5;
+        //tapi tidak boleh melebihi 25 menit
+        $kelipatan_waktu = min($kelipatan_waktu, 25);
+
+        // ubah $conversion_time 
+        // pertahankan format Y-m-d H:i
+        $tz = new DateTimeZone('Asia/Jakarta');
+        $conversionDt = new DateTime($conversion_time, $tz);
+        $conversionDt->modify('+' . $kelipatan_waktu . ' minutes');
+        $now = new DateTime('now', $tz);
+
+        // validasi conversion_time tidak boleh melebihi waktu saat ini + 5 minutes
+        if ($conversionDt > $now) {
+            throw new \Exception('Conversion time tidak boleh melebihi waktu saat ini');
+        }
+
+        $conversion_time = $conversionDt->format('Y-m-d H:i');
 
         //cek apakah sudah ada kirim_konversi dengan gclid dan rekap_form_id,
         //handle duplikasi kirim_konversi
@@ -267,20 +275,6 @@ class KirimKonversiService
             $gclid = explode('.', $gclid)[2];
         }
 
-        // ubah $conversion_time 
-        // pertahankan format Y-m-d H:i
-        $tz = new DateTimeZone('Asia/Jakarta');
-        $conversionDt = new DateTime($conversion_time, $tz);
-        $conversionDt->modify('+5 minutes');
-        $now = new DateTime('now', $tz);
-
-        // validasi conversion_time tidak boleh melebihi waktu saat ini + 5 minutes
-        if ($conversionDt > $now) {
-            throw new \Exception('Conversion time tidak boleh melebihi waktu saat ini');
-        }
-
-        $conversion_time = $conversionDt->format('Y-m-d H:i');
-
         //kirim konversi berdasarkan kategori_konversi_nominal
         $kategori_konversi_nominal = $rekapform['kategori_konversi_nominal'] ?? null;
 
@@ -304,6 +298,29 @@ class KirimKonversiService
             if (isset($konversi_actions[$kategori_konversi_nominal])) {
 
                 foreach ($konversi_actions[$kategori_konversi_nominal] as $conversion_action_id) {
+
+                    //dapatkan kelipatan waktu berdasarkan riwayat kirim konversi
+                    $failedCount  = KirimKonversi::where('rekap_form_id', $rekapform['id'])
+                        ->where('conversion_action_id', $conversion_action_id)
+                        ->where('status', 'failed')->count();
+                    $kelipatan_waktu = $failedCount > 0 ? $failedCount * 5 : 5;
+                    //tapi tidak boleh melebihi 25 menit
+                    $kelipatan_waktu = min($kelipatan_waktu, 25);
+
+                    // ubah $conversion_time 
+                    // pertahankan format Y-m-d H:i
+                    $tz = new DateTimeZone('Asia/Jakarta');
+                    $conversionDt = new DateTime($conversion_time, $tz);
+                    $conversionDt->modify('+' . $kelipatan_waktu . ' minutes');
+                    $now = new DateTime('now', $tz);
+
+                    // validasi conversion_time tidak boleh melebihi waktu saat ini + 5 minutes
+                    if ($conversionDt > $now) {
+                        throw new \Exception('Conversion time tidak boleh melebihi waktu saat ini');
+                    }
+
+                    $conversion_time = $conversionDt->format('Y-m-d H:i');
+
                     // $dataRes = $this->kirimKonversi('click_conversion', $gclid, $conversion_time, $rekapform, $conversion_action_id);
                     Log::info('[KONVERSI] nominal ', [
                         'kategori' => $kategori_konversi_nominal,
