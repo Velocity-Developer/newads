@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KirimKonversiController;
 use App\Http\Controllers\RekapFormController;
 use App\Http\Controllers\TermsController;
+use App\Http\Controllers\SearchTermsController;
 use Illuminate\Support\Facades\Route;
 
 // Redirect root to dashboard to avoid 404
@@ -18,6 +19,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Frasa Negative page
     Route::get('/frasa', [\App\Http\Controllers\FrasaController::class, 'index'])->name('frasa.index');
+
+    // Search Terms NONE page
+    Route::get('/search-terms-none', [SearchTermsController::class, 'none'])->name('search-terms.none');
 
     // Kirim Konversi pages
     Route::get('/kirim-konversi', [KirimKonversiController::class, 'index'])->name('kirim-konversi.index');
@@ -66,5 +70,5 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/kirim_konversi/kirim_konversi_dari_rekap_form', [KirimKonversiController::class, 'kirim_konversi_dari_rekap_form']);
 });
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';
