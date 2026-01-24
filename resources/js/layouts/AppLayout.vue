@@ -15,6 +15,9 @@ withDefaults(defineProps<Props>(), {
 
 const page = usePage();
 const version = page.props.appInfo.version as string;
+
+//tanggal sekarang
+const now = new Date();
 </script>
 
 <template>
@@ -23,7 +26,7 @@ const version = page.props.appInfo.version as string;
         <Toaster />
         
         <footer style="margin-top:2rem; padding:0.5rem 1.5rem; color:#666; font-size:12px; text-align:right;">
-            Versi aplikasi: {{ version }}
+            <span class="mr-2"> Versi aplikasi: {{ version }} </span> | <span class="mx-2">{{ now.toLocaleDateString() }}</span> | <span class="mx-2"> © {{ now.getFullYear() }} Velocity Developer </span>
         </footer>
     </AppLayout>
 </template>
