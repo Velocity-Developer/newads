@@ -17,6 +17,8 @@ import { toast } from 'vue-sonner'
 const isModalOpen = ref(false);
 const dataSearchTerms = ref([]);
 
+const emit = defineEmits(['update']);
+
 const openModal = () => {
     isModalOpen.value = true;
     fetchSearchTerms();
@@ -30,6 +32,7 @@ const fetchSearchTerms = async () => {
         if (response.data.success) {
             dataSearchTerms.value = response.data.data;
             toast.success('Search Terms berhasil diupdate');
+            emit('update', response.data.data);
         } else {
             toast.error('Gagal mengupdate Search Terms');
         }

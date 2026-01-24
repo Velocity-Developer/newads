@@ -45,6 +45,11 @@ const changePerPage = (e: Event) => {
   const perPage = Number(select.value);
   router.get('/search-terms-none', { per_page: perPage }, { preserveScroll: true });
 };
+
+//reload page when update search terms
+const reloadPage = () => {
+  router.get('/search-terms-none', { page: 1 }, { preserveScroll: true });
+}
 </script>
 
 <template>
@@ -54,7 +59,7 @@ const changePerPage = (e: Event) => {
     <div class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-6">
 
       <div class="flex justify-end">
-        <SearchTermGetUpdate />
+        <SearchTermGetUpdate @update="reloadPage" />
       </div>
 
       <Card>
@@ -94,8 +99,8 @@ const changePerPage = (e: Event) => {
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="item in items.data" :key="item.id" class="border-b">
-                  <td class="px-3 py-2">{{ item.id }}</td>
+                <tr v-for="item, index in items.data" :key="item.id" class="border-b">
+                  <td class="px-3 py-2">{{ Number(items.from + index) }}</td>
                   <td class="px-3 py-2">{{ item.term }}</td>
                   <td class="px-3 py-2">{{ item.failure_count }}</td>
                   <td class="px-3 py-2">{{ item.waktu ?? '-' }}</td>
