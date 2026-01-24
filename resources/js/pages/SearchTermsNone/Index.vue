@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { type BreadcrumbItem } from '@/types';
 import SearchTermGetUpdate from '@/components/SearchTerm/GetUpdate.vue';
+import { ref } from 'vue';
 
 interface SearchTermItem {
   id: number;
@@ -40,16 +41,38 @@ const breadcrumbs: BreadcrumbItem[] = [
   { title: 'Search Terms NONE', href: '/search-terms-none' },
 ];
 
+const urlParams = new URLSearchParams(window.location.search);
+const searchQuery = ref(urlParams.get('search') || '');
+
 const changePerPage = (e: Event) => {
   const select = e.target as HTMLSelectElement;
   const perPage = Number(select.value);
-  router.get('/search-terms-none', { per_page: perPage }, { preserveScroll: true });
+  const params: Record<string, any> = { per_page: perPage };
+  if (searchQuery.value) params.search = searchQuery.value;
+  router.get('/search-terms-none', params, { preserveState: true, preserveScroll: true });
 };
 
 //reload page when update search terms
 const reloadPage = () => {
   router.get('/search-terms-none', { page: 1 }, { preserveScroll: true });
 }
+
+const applySearch = () => {
+  const params: Record<string, any> = {};
+  if (searchQuery.value) params.search = searchQuery.value;
+  const perPage = urlParams.get('per_page');
+  if (perPage) params.per_page = Number(perPage);
+  params.page = 1;
+  router.get('/search-terms-none', params, { preserveState: true, preserveScroll: true });
+};
+
+const clearSearch = () => {
+  searchQuery.value = '';
+  const params: Record<string, any> = {};
+  const perPage = urlParams.get('per_page');
+  if (perPage) params.per_page = Number(perPage);
+  router.get('/search-terms-none', params, { preserveState: true, preserveScroll: true });
+};
 </script>
 
 <template>
@@ -78,6 +101,24 @@ const reloadPage = () => {
                 <option value="50">50</option>
                 <option value="100">100</option>
               </select>
+              <input
+                v-model="searchQuery"
+                placeholder="Cari term..."
+                class="flex h-8 w-56 rounded-md border border-input bg-background px-2 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                @keyup.enter="applySearch"
+              />
+              <button
+                class="h-8 rounded-md border px-3 text-sm hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                @click="applySearch"
+              >
+                Cari
+              </button>
+              <button
+                class="h-8 rounded-md border px-3 text-sm hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                @click="clearSearch"
+              >
+                Reset
+              </button>
             </div>
             <div class="text-sm text-muted-foreground">
               Total: {{ items.total }}

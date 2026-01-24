@@ -11,10 +11,15 @@ class SearchTermsController extends Controller
 {
     public function none(Request $request)
     {
+        $search = trim((string) $request->get('search', ''));
+
         $query = SearchTerm::query()
             ->where(function ($q) {
                 $q->whereNull('check_ai')
                     ->orWhere('check_ai', 'NONE');
+            })
+            ->when($search !== '', function ($q) use ($search) {
+                $q->where('term', 'like', '%' . $search . '%');
             })
             ->orderBy($request->get('sort_by', 'id'), $request->get('sort_order', 'desc'));
 
@@ -26,6 +31,7 @@ class SearchTermsController extends Controller
         return Inertia::render('SearchTermsNone/Index', [
             'items' => $items,
             'filters' => [
+                'search' => $search,
                 'sort_by' => $request->get('sort_by', 'id'),
                 'sort_order' => $request->get('sort_order', 'desc'),
                 'per_page' => $perPage,
