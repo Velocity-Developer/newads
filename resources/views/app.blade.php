@@ -1,60 +1,60 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}"  @class(['dark' => ($appearance ?? 'system') == 'dark'])>
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" @class(['dark'=> ($appearance ?? 'system') == 'dark'])>
 
-        {{-- Inline script to detect system dark mode preference and apply it immediately --}}
-        <script>
-            (function() {
-                const appearance = '{{ $appearance ?? "system" }}';
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-                if (appearance === 'system') {
-                    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    {{-- Inline script to detect system dark mode preference and apply it immediately --}}
+    <script>
+        (function() {
+            const appearance = '{{ $appearance ?? "system" }}';
 
-                    if (prefersDark) {
-                        document.documentElement.classList.add('dark');
-                    }
+            if (appearance === 'system') {
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+                if (prefersDark) {
+                    document.documentElement.classList.add('dark');
                 }
-            })();
-        </script>
-
-        {{-- Inline style to set the HTML background color based on our theme in app.css --}}
-        <style>
-            html {
-                background-color: oklch(1 0 0);
             }
+        })();
+    </script>
 
-            html.dark {
-                background-color: oklch(0.145 0 0);
-            }
-        </style>
+    {{-- Inline style to set the HTML background color based on our theme in app.css --}}
+    <style>
+        html {
+            background-color: oklch(1 0 0);
+        }
 
-        <title inertia>{{ $siteTitle ?? config('app.name', 'Laravel') }}</title>
+        html.dark {
+            background-color: oklch(0.145 0 0);
+        }
+    </style>
 
-        @if (!empty($faviconUrl))
-            <link rel="icon" href="{{ $faviconUrl }}" sizes="any">
-        @else
-            <link rel="icon" href="/favicon.ico" sizes="any">
-            <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-        @endif
+    <title inertia>{{ $siteTitle ?? config('app.name', 'Laravel') }}</title>
 
-        @if (!empty($appleTouchIconUrl))
-            <link rel="apple-touch-icon" href="{{ $appleTouchIconUrl }}">
-        @else
-            <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-        @endif
+    @if (!empty($faviconUrl))
+    <link rel="icon" href="{{ $faviconUrl }}" sizes="any">
+    @else
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    @endif
 
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
+    @if (!empty($appleTouchIconUrl))
+    <link rel="apple-touch-icon" href="{{ $appleTouchIconUrl }}">
+    @else
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    @endif
 
-        @vite(['resources/js/app.ts'])
-        @inertiaHead
-    </head>
-    <body class="font-sans antialiased">
-        @inertia
-        <footer style="margin-top:2rem; padding:0.5rem 1.5rem; color:#666; font-size:12px; text-align:right;">
-            Versi aplikasi: {{ config('app.version') }}
-        </footer>
-    </body>
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
+
+    @vite(['resources/js/app.ts'])
+    @inertiaHead
+</head>
+
+<body class="font-sans antialiased">
+    @inertia
+</body>
+
 </html>

@@ -33,6 +33,9 @@ export type AppPageProps<
     auth: Auth;
     sidebarOpen: boolean;
     branding: Branding;
+    appInfo: {
+        version: string;
+    };
 };
 
 export interface User {

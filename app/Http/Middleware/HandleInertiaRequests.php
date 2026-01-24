@@ -57,6 +57,9 @@ class HandleInertiaRequests extends Middleware
                 'faviconUrl' => $settings?->favicon_path ? Storage::url($settings->favicon_path) : null,
                 'appleTouchIconUrl' => $settings?->apple_touch_icon_path ? Storage::url($settings->apple_touch_icon_path) : null,
             ],
+            'appInfo' => [
+                'version' => config('app.version'),
+            ],
         ];
     }
 }
