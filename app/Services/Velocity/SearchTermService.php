@@ -25,6 +25,7 @@ class SearchTermService
 
     public function getSearchTermsNone()
     {
+        $success = false;
         try {
             $response = Http::timeout(5)->withHeaders([
                 'Authorization' => 'Bearer ' . $this->secret_key,
@@ -40,6 +41,14 @@ class SearchTermService
                 $errorMsg = 'HTTP ' . $response->status();
                 $dataRes = $response->json() ?? [];
                 $dataRes['message'] = $errorMsg;
+            }
+
+            // jika success, tambahkan data ke table search_terms
+            if ($success && isset($response['data']) && is_array($response['data']) && count($response['data']) > 0) {
+                $dataInsert = array_map(fn($term) => [
+                    'term' => $term,
+                ], array_values($response['data']));
+                SearchTerm::insertOrIgnore($dataInsert);
             }
 
             return $dataRes;
