@@ -78,7 +78,7 @@ const footerNavItems: NavItem[] = [];
 
         <SidebarContent>
             <NavMain :items="mainNavItems" label="Adsense" />
-            <NavMain :items="mainNavItems2" label="Platform" />
+            <NavMain :items="mainNavItems2" label="Platform" class="mt-4" />
         </SidebarContent>
 
         <SidebarFooter>
