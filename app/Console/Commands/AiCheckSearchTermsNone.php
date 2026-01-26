@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Services\SearchTermsAds\CheckAiServices;
+use App\Models\CronLog;
 
 class AiCheckSearchTermsNone extends Command
 {
@@ -26,11 +27,29 @@ class AiCheckSearchTermsNone extends Command
      */
     public function handle()
     {
-        //CheckAiServices
-        $checkAiServices = new CheckAiServices;
-        $response = $checkAiServices->check_search_terms_none();
+        $log = CronLog::create([
+            'name' => $this->signature,
+            'type' => 'command',
+            'started_at' => now(),
+            'status' => 'running',
+        ]);
 
-        //return response   
-        $this->info(var_dump($response));
+        try {
+            //CheckAiServices
+            $checkAiServices = new CheckAiServices;
+            $response = $checkAiServices->check_search_terms_none();
+
+            $log->update([
+                'finished_at' => now(),
+                'duration_ms' => now()->diffInMilliseconds($log->started_at),
+                'status' => 'success',
+            ]);
+        } catch (\Exception $e) {
+            $log->update([
+                'finished_at' => now(),
+                'status' => 'failed',
+                'error' => $this->error($e->getMessage()),
+            ]);
+        }
     }
 }
