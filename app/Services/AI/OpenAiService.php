@@ -20,7 +20,7 @@ class OpenAiService
     }
 
     //call
-    public function call(string $prompt, string $message = ''): array
+    public function call(string $prompt, string $message = '')
     {
         try {
             $res = Http::retry(5, 750, function ($exception, $request) {
@@ -31,18 +31,17 @@ class OpenAiService
             })
                 ->timeout(120)
                 ->connectTimeout(30)
-                ->withToken($this->apiKey)
+                // ->withToken($this->apiKey)
                 ->withHeaders([
+                    'Authorization' => 'Bearer ' . $this->apiKey,
                     'Accept' => 'application/json',
                 ])
                 ->asJson()
                 ->post($this->baseUrl, [
                     'model' => $this->model,
                     'messages' => [
-                        [
-                            ['role' => 'system', 'content' => $prompt],
-                            ['role' => 'user', 'content' => $message]
-                        ],
+                        ['role' => 'system', 'content' => $prompt],
+                        ['role' => 'user', 'content' => $message]
                     ],
                 ]);
 
