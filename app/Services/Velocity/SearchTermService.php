@@ -45,9 +45,15 @@ class SearchTermService
 
             // jika success, tambahkan data ke table search_terms
             if ($success && isset($response['data']) && is_array($response['data']) && count($response['data']) > 0) {
+                $now = now();
+
                 $dataInsert = array_map(fn($term) => [
                     'term' => $term,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                    'waktu' => $now,
                 ], array_values($response['data']));
+
                 SearchTerm::insertOrIgnore($dataInsert);
             }
 

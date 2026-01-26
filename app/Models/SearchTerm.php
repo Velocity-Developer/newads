@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class SearchTerm extends Model
 {
+    //timestamp
+    public $timestamps = true;
+
     protected $fillable = [
         'term',
         'check_ai',
