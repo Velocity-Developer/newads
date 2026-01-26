@@ -7,6 +7,7 @@ use App\Http\Controllers\KirimKonversiController;
 use App\Http\Controllers\RekapFormController;
 use App\Http\Controllers\TermsController;
 use App\Http\Controllers\SearchTermsController;
+use App\Http\Controllers\UsersController;
 use Illuminate\Support\Facades\Route;
 
 // Redirect root to dashboard to avoid 404
@@ -22,6 +23,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Search Terms NONE page
     Route::get('/search-terms-none', [SearchTermsController::class, 'none'])->name('search-terms.none');
+
+    // Users page
+    Route::get('/users', [UsersController::class, 'index'])->name('users.index');
 
     // Kirim Konversi pages
     Route::get('/kirim-konversi', [KirimKonversiController::class, 'index'])->name('kirim-konversi.index');
