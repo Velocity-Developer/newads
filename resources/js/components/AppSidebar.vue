@@ -49,6 +49,9 @@ const mainNavItems: NavItem[] = [
         href: '/search-terms-none',
         icon: Tag,
     },
+];
+
+const mainNavItems2: NavItem[] = [
     {
         title: 'Users',
         href: '/users',
@@ -74,7 +77,8 @@ const footerNavItems: NavItem[] = [];
         </SidebarHeader>
 
         <SidebarContent>
-            <NavMain :items="mainNavItems" />
+            <NavMain :items="mainNavItems" label="Adsense" />
+            <NavMain :items="mainNavItems2" label="Platform" />
         </SidebarContent>
 
         <SidebarFooter>
