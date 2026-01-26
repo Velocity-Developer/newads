@@ -39,6 +39,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/rekap-form', [RekapFormController::class, 'index'])->name('rekap-form.index');
     Route::get('/rekap-form/{id}', [RekapFormController::class, 'show'])->name('rekap-form.show');
     Route::get('/rekap-form-sync-vdnet', [RekapFormController::class, 'syncVDnet'])->name('rekap-form.sync');
+
+    // Cron Logs
+    Route::get('/cron-logs', [\App\Http\Controllers\CronLogController::class, 'index'])->name('cron-logs.index');
 });
 
 // Restore dashboard route
