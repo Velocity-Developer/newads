@@ -55,7 +55,7 @@ const stripTags = (s: string) => s.replace(/<[^>]*>/g, '');
       <Card>
         <CardHeader>
           <CardTitle>Daftar Users</CardTitle>
-          <div class="flex items-center justify-between gap-4">
+          <div class="flex flex-col md:flex-row md:items-center justify-end md:justify-between mt-3 gap-4">
             <div class="flex items-center gap-2">
               <Input
                 v-model="searchQuery"
@@ -79,9 +79,6 @@ const stripTags = (s: string) => s.replace(/<[^>]*>/g, '');
                 <option value="50">50</option>
                 <option value="100">100</option>
               </select>
-            </div>
-            <div class="text-sm text-muted-foreground">
-              Menampilkan {{ users.from }} sampai {{ users.to }} dari {{ users.total }} hasil
             </div>
           </div>
         </CardHeader>
@@ -138,6 +135,9 @@ const stripTags = (s: string) => s.replace(/<[^>]*>/g, '');
                 {{ stripTags(link.label) }}
               </Link>
             </div>
+          </div>
+          <div class="mt-5 text-sm text-muted-foreground">
+            Menampilkan {{ users.from }} sampai {{ users.to }} dari {{ users.total }} hasil
           </div>
         </CardContent>
       </Card>
