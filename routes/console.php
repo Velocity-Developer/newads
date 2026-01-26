@@ -28,3 +28,7 @@ Schedule::call(function () {
 
 Schedule::command('kirim-konversi:sync-vdnet')
     ->everyTwoMinutes();
+
+// Fetch search terms none
+// Schedule::command('app:fetch-search-terms-none')
+//     ->everyTenMinutes();
