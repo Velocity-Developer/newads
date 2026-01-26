@@ -64,18 +64,22 @@ const fetchSearchTerms = async () => {
             </div>
             <div v-else>
                 <table class="w-full">
-                    <tr>
-                        <th class="p-2 border-b text-left">No</th>
-                        <th class="p-2 border-b text-left">Term</th>
-                    </tr>
-                    <tr v-for="item,index in dataSearchTerms" :key="item">
-                        <td class="p-2 border-b text-left">
-                            {{ Number(index) + 1 }}
-                        </td> 
-                        <td class="p-2 border-b text-left">
-                            {{ item }}
-                        </td>  
-                    </tr>
+                    <thead>
+                        <tr>
+                            <th class="p-2 border-b text-left">No</th>
+                            <th class="p-2 border-b text-left">Term</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="item,index in dataSearchTerms" :key="item">
+                            <td class="p-2 border-b text-left">
+                                {{ Number(index) + 1 }}
+                            </td> 
+                            <td class="p-2 border-b text-left">
+                                {{ item }}
+                            </td>  
+                        </tr>
+                    </tbody>
                 </table>
             </div>
 
