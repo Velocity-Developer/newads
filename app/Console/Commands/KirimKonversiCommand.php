@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Setting;
 use App\Services\NewVDnet\RekapFormServices;
 use App\Services\Velocity\KirimKonversiService;
+use App\Models\CronLog;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
@@ -42,6 +43,13 @@ class KirimKonversiCommand extends Command
         // catat last run time
         Setting::set('schedule_last_run_kirim_konversi_sync_vdnet', now());
 
+        $log = CronLog::create([
+            'name' => $this->signature,
+            'type' => 'command',
+            'started_at' => now(),
+            'status' => 'running',
+        ]);
+
         try {
             // get rekap form
             $rekapFormServices = app()->make(RekapFormServices::class);
@@ -68,10 +76,22 @@ class KirimKonversiCommand extends Command
             } else {
                 // Log::info('[CRON] kirim-konversi:sync-vdnet NO REKAP FORM');
             }
+
+            $log->update([
+                'finished_at' => now(),
+                'duration_ms' => now()->diffInMilliseconds($log->started_at),
+                'status' => 'success',
+            ]);
         } catch (\Exception $e) {
             Log::error('[CRON] kirim-konversi:sync-vdnet FAILED', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
+            ]);
+
+            $log->update([
+                'finished_at' => now(),
+                'status' => 'failed',
+                'error' => $e->getMessage(),
             ]);
 
             return self::FAILURE;
