@@ -4,7 +4,7 @@
     "scripts": {
         "build": "vite build",
         "build:ssr": "vite build && vite build --ssr",
-        "build:frontend": "npm run build && powershell -NoProfile -Command \"New-Item -ItemType Directory -Force -Path dist; Compress-Archive -Path public/build/* -DestinationPath dist/public_build.zip -Force\"",
+        "build:frontend": "npm run build && node scripts/build-frontend-zip.js",
         "dev": "vite",
         "format": "prettier --write resources/",
         "format:check": "prettier --check resources/",
@@ -21,6 +21,7 @@
         "eslint": "^9.17.0",
         "eslint-config-prettier": "^10.0.1",
         "eslint-plugin-vue": "^9.32.0",
+        "jszip": "^3.10.1",
         "prettier": "^3.4.2",
         "prettier-plugin-organize-imports": "^4.1.0",
         "prettier-plugin-tailwindcss": "^0.6.11",
