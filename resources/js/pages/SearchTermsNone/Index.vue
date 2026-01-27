@@ -14,6 +14,7 @@ import { Pencil, Plus } from 'lucide-vue-next';
 interface SearchTermItem {
   id: number;
   term: string;
+  source?: string | null;
   check_ai: string | null;
   iklan_dibuat: boolean;
   failure_count: number;
@@ -209,6 +210,7 @@ const submitForm = () => {
                   <td class="px-3 py-2">{{ item.created_at }}</td>
                   <td class="px-3 py-2">
                     <Button
+                      v-if="item.source === 'manual'"
                       variant="ghost"
                       size="icon"
                       class="h-8 w-8"
