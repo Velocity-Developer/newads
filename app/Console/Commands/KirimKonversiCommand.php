@@ -77,9 +77,11 @@ class KirimKonversiCommand extends Command
                 // Log::info('[CRON] kirim-konversi:sync-vdnet NO REKAP FORM');
             }
 
+            $finishedAt = now();
+
             $log->update([
-                'finished_at' => now(),
-                'duration_ms' => now()->diffInMilliseconds($log->started_at),
+                'finished_at' => $finishedAt,
+                'duration_ms' => $log->started_at->diffInMilliseconds($finishedAt, true),
                 'status' => 'success',
             ]);
         } catch (\Exception $e) {
