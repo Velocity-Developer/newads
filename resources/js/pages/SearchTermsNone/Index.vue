@@ -1,10 +1,15 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { type BreadcrumbItem } from '@/types';
 import SearchTermGetUpdate from '@/components/SearchTerm/GetUpdate.vue';
 import { ref } from 'vue';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Pencil, Plus } from 'lucide-vue-next';
 
 interface SearchTermItem {
   id: number;
@@ -73,6 +78,49 @@ const clearSearch = () => {
   if (perPage) params.per_page = Number(perPage);
   router.get('/search-terms-none', params, { preserveState: true, preserveScroll: true });
 };
+
+// Form handling
+const isDialogOpen = ref(false);
+const isEditing = ref(false);
+const currentId = ref<number | null>(null);
+
+const form = useForm({
+  term: '',
+});
+
+const openAddDialog = () => {
+  isEditing.value = false;
+  currentId.value = null;
+  form.reset();
+  form.clearErrors();
+  isDialogOpen.value = true;
+};
+
+const openEditDialog = (item: SearchTermItem) => {
+  isEditing.value = true;
+  currentId.value = item.id;
+  form.term = item.term;
+  form.clearErrors();
+  isDialogOpen.value = true;
+};
+
+const submitForm = () => {
+  if (isEditing.value && currentId.value) {
+    form.put(`/search-terms-none/${currentId.value}`, {
+      onSuccess: () => {
+        isDialogOpen.value = false;
+        form.reset();
+      },
+    });
+  } else {
+    form.post('/search-terms-none', {
+      onSuccess: () => {
+        isDialogOpen.value = false;
+        form.reset();
+      },
+    });
+  }
+};
 </script>
 
 <template>
@@ -81,7 +129,11 @@ const clearSearch = () => {
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-6">
 
-      <div class="flex justify-end">
+      <div class="flex justify-end gap-2">
+        <Button @click="openAddDialog" class="gap-2">
+          <Plus class="h-4 w-4" />
+          Tambah Manual
+        </Button>
         <SearchTermGetUpdate @update="reloadPage" />
       </div>
 
@@ -137,6 +189,7 @@ const clearSearch = () => {
                   <th class="px-3 py-2 text-left">Check AI</th>
                   <th class="px-3 py-2 text-left">Iklan Dibuat</th>
                   <th class="px-3 py-2 text-left">Created At</th>
+                  <th class="px-3 py-2 text-left">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -154,6 +207,17 @@ const clearSearch = () => {
                     </span>
                   </td>
                   <td class="px-3 py-2">{{ item.created_at }}</td>
+                  <td class="px-3 py-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      class="h-8 w-8"
+                      @click="openEditDialog(item)"
+                    >
+                      <Pencil class="h-4 w-4" />
+                      <span class="sr-only">Edit</span>
+                    </Button>
+                  </td>
                 </tr>
                 <tr v-if="items.data.length === 0">
                   <td class="px-3 py-6 text-center text-muted-foreground" colspan="7">
@@ -181,4 +245,43 @@ const clearSearch = () => {
       </Card>
     </div>
   </AppLayout>
+
+  <Dialog :open="isDialogOpen" @update:open="isDialogOpen = $event">
+    <DialogContent class="sm:max-w-[425px]">
+      <DialogHeader>
+        <DialogTitle>{{ isEditing ? 'Edit Search Term' : 'Tambah Search Term' }}</DialogTitle>
+        <DialogDescription>
+          {{ isEditing ? 'Edit data search term di sini.' : 'Tambahkan search term baru secara manual.' }}
+        </DialogDescription>
+      </DialogHeader>
+      <div class="grid gap-4 py-4">
+        <div class="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="term" class="text-right">
+            Term
+          </Label>
+          <Textarea
+            id="term"
+            v-model="form.term"
+            class="col-span-3"
+            placeholder="Masukkan search term..."
+            :class="{ 'border-red-500': form.errors.term }"
+          />
+        </div>
+        <div v-if="form.errors.term" class="grid grid-cols-4 gap-4">
+          <div class="col-span-1"></div>
+          <div class="col-span-3 text-sm text-red-500">
+            {{ form.errors.term }}
+          </div>
+        </div>
+      </div>
+      <DialogFooter>
+        <Button variant="outline" @click="isDialogOpen = false">
+          Batal
+        </Button>
+        <Button type="submit" @click="submitForm" :disabled="form.processing">
+          {{ isEditing ? 'Simpan Perubahan' : 'Simpan' }}
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
 </template>

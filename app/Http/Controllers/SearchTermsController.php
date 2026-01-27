@@ -7,8 +7,40 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Services\Velocity\SearchTermService;
 
+use Illuminate\Validation\Rule;
+
 class SearchTermsController extends Controller
 {
+    public function store(Request $request)
+    {
+        $request->validate([
+            'term' => ['required', 'string', 'max:255', 'unique:search_terms,term'],
+        ]);
+
+        SearchTerm::create([
+            'term' => $request->term,
+            'waktu' => now(),
+            'source' => 'manual',
+        ]);
+
+        return redirect()->back()->with('success', 'Search term berhasil ditambahkan.');
+    }
+
+    public function update(Request $request, $id)
+    {
+        $term = SearchTerm::findOrFail($id);
+
+        $request->validate([
+            'term' => ['required', 'string', 'max:255', Rule::unique('search_terms', 'term')->ignore($term->id)],
+        ]);
+
+        $term->update([
+            'term' => $request->term,
+        ]);
+
+        return redirect()->back()->with('success', 'Search term berhasil diperbarui.');
+    }
+
     public function none(Request $request)
     {
         $search = trim((string) $request->get('search', ''));

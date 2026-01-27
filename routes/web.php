@@ -23,6 +23,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Search Terms NONE page
     Route::get('/search-terms-none', [SearchTermsController::class, 'none'])->name('search-terms.none');
+    Route::post('/search-terms-none', [SearchTermsController::class, 'store'])->name('search-terms.store');
+    Route::put('/search-terms-none/{id}', [SearchTermsController::class, 'update'])->name('search-terms.update');
 
     // Users page
     Route::get('/users', [UsersController::class, 'index'])->name('users.index');
