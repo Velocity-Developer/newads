@@ -101,7 +101,7 @@ watch(() => props.logs, (val) => {
             <table class="w-full caption-bottom text-sm">
               <thead class="[&_tr]:border-b">
                 <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                  <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">ID</th>
+                  <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">No</th>
                   <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Name</th>
                   <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Type</th>
                   <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Started At</th>
@@ -115,8 +115,8 @@ watch(() => props.logs, (val) => {
                 <tr v-if="logs.length === 0">
                   <td colspan="8" class="p-4 text-center text-muted-foreground">No logs found.</td>
                 </tr>
-                <tr v-for="log in logs" :key="log.id" class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                  <td class="p-4 align-middle">{{ log.id }}</td>
+                <tr v-for="log, index in logs" :key="log.id" class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                  <td class="p-4 align-middle">{{ props.logs.from + index }}</td>
                   <td class="p-4 align-middle font-medium">{{ log.name }}</td>
                   <td class="p-4 align-middle text-muted-foreground">{{ log.type }}</td>
                   <td class="p-4 align-middle">{{ formatDate(log.started_at) }}</td>
