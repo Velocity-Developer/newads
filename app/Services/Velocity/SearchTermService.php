@@ -52,6 +52,7 @@ class SearchTermService
                     'created_at' => $now,
                     'updated_at' => $now,
                     'waktu' => $now,
+                    'source' => 'google_ads',
                 ], array_values($response['data']));
 
                 SearchTerm::insertOrIgnore($dataInsert);

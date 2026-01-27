@@ -15,6 +15,7 @@ class SearchTerm extends Model
         'iklan_dibuat',
         'failure_count',
         'waktu',
+        'source',
     ];
 
     protected $casts = [
