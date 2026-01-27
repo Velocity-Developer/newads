@@ -21,6 +21,7 @@ interface SearchTermItem {
   waktu: string | null;
   created_at: string;
   updated_at: string;
+  waktu_local: string;
 }
 
 interface Props {
@@ -183,13 +184,12 @@ const submitForm = () => {
             <table class="min-w-full text-sm">
               <thead>
                 <tr class="border-b">
-                  <th class="px-3 py-2 text-left">ID</th>
+                  <th class="px-3 py-2 text-left">No</th>
                   <th class="px-3 py-2 text-left">Term</th>
-                  <th class="px-3 py-2 text-left">Failure Count</th>
-                  <th class="px-3 py-2 text-left">Waktu</th>
                   <th class="px-3 py-2 text-left">Check AI</th>
                   <th class="px-3 py-2 text-left">Iklan Dibuat</th>
-                  <th class="px-3 py-2 text-left">Created At</th>
+                  <th class="px-3 py-2 text-left">Failure Count</th>
+                  <th class="px-3 py-2 text-left">Tanggal</th>
                   <th class="px-3 py-2 text-left">Action</th>
                 </tr>
               </thead>
@@ -197,17 +197,16 @@ const submitForm = () => {
                 <tr v-for="item, index in items.data" :key="item.id" class="border-b">
                   <td class="px-3 py-2">{{ Number(items.from + index) }}</td>
                   <td class="px-3 py-2">{{ item.term }}</td>
-                  <td class="px-3 py-2">{{ item.failure_count }}</td>
-                  <td class="px-3 py-2">{{ item.waktu ?? '-' }}</td>
                   <td class="px-3 py-2">{{ item.check_ai ?? 'NONE' }}</td>
                   <td class="px-3 py-2">
                     <span
                       :class="item.iklan_dibuat ? 'text-green-600' : 'text-gray-500'"
                     >
-                      {{ item.iklan_dibuat ? 'Ya' : 'Tidak' }}
+                      {{ item.iklan_dibuat ? 'Sudah' : 'Belum' }}
                     </span>
                   </td>
-                  <td class="px-3 py-2">{{ item.created_at }}</td>
+                  <td class="px-3 py-2">{{ item.failure_count }}</td>
+                  <td class="px-3 py-2">{{ item.waktu_local }}</td>
                   <td class="px-3 py-2">
                     <Button
                       v-if="item.source === 'manual'"
