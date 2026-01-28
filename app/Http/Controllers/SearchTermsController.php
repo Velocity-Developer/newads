@@ -102,12 +102,12 @@ class SearchTermsController extends Controller
             $n = new SearchTermsAdsCheckAiServices;
             $result = $n->check_search_terms_none($request->terms);
 
-            // return redirect()->back()->with('success', 'Data berhasil diperbarui.');
-            return response()->json([
-                'success' => true,
-                'message' => 'Data berhasil diperbarui.',
-                'result' => $result
-            ]);
+            return redirect()->back()->with('success', 'Data berhasil diperbarui.');
+            // return response()->json([
+            //     'success' => true,
+            //     'message' => 'Data berhasil diperbarui.',
+            //     'result' => $result
+            // ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
