@@ -9,7 +9,9 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Pencil, Plus, Trash2 } from 'lucide-vue-next';
+import { computed } from 'vue';
 
 interface SearchTermItem {
   id: number;
@@ -47,7 +49,7 @@ interface Props {
   };
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
 
 const breadcrumbs: BreadcrumbItem[] = [
   { title: 'Search Terms NONE', href: '/search-terms-none' },
@@ -137,6 +139,34 @@ const deleteTerm = (item: SearchTermItem) => {
         // Optional: Show success message toast
       },
     });
+  }
+};
+
+// Selection handling
+const selectedIds = ref<number[]>([]);
+
+const isAllSelected = computed(() => {
+  if (props.items.data.length === 0) return false;
+  return props.items.data.every(item => selectedIds.value.includes(item.id));
+});
+
+const toggleAll = (checked: boolean) => {
+  if (checked) {
+    const newIds = props.items.data.map(item => item.id);
+    selectedIds.value = [...new Set([...selectedIds.value, ...newIds])];
+  } else {
+    const pageIds = props.items.data.map(item => item.id);
+    selectedIds.value = selectedIds.value.filter(id => !pageIds.includes(id));
+  }
+};
+
+const toggleSelection = (id: number, checked: boolean) => {
+  if (checked) {
+    if (!selectedIds.value.includes(id)) {
+      selectedIds.value.push(id);
+    }
+  } else {
+    selectedIds.value = selectedIds.value.filter(selectedId => selectedId !== id);
   }
 };
 </script>
@@ -248,6 +278,12 @@ const deleteTerm = (item: SearchTermItem) => {
             <table class="min-w-full text-sm">
               <thead>
                 <tr class="border-b">
+                  <th class="px-3 py-2 text-left w-[40px]">
+                    <Checkbox
+                      :checked="isAllSelected"
+                      @update:checked="toggleAll"
+                    />
+                  </th>
                   <th class="px-3 py-2 text-left">No</th>
                   <th class="px-3 py-2 text-left">Term</th>
                   <th class="px-3 py-2 text-left">Check AI</th>
@@ -259,6 +295,12 @@ const deleteTerm = (item: SearchTermItem) => {
               </thead>
               <tbody>
                 <tr v-for="item, index in items.data" :key="item.id" class="border-b">
+                  <td class="px-3 py-2">
+                    <Checkbox
+                      :checked="selectedIds.includes(item.id)"
+                      @update:checked="(checked: boolean) => toggleSelection(item.id, checked)"
+                    />
+                  </td>
                   <td class="px-3 py-2">{{ Number(items.from + index) }}</td>
                   <td class="px-3 py-2">{{ item.term }}</td>
                   <td class="px-3 py-2">{{ item.check_ai ?? 'NONE' }}</td>
@@ -295,7 +337,7 @@ const deleteTerm = (item: SearchTermItem) => {
                   </td>
                 </tr>
                 <tr v-if="items.data.length === 0">
-                  <td class="px-3 py-6 text-center text-muted-foreground" colspan="7">
+                  <td class="px-3 py-6 text-center text-muted-foreground" colspan="8">
                     Tidak ada data.
                   </td>
                 </tr>
