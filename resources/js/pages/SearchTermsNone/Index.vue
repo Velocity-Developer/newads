@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Pencil, Plus, Trash2, Wand2 } from 'lucide-vue-next';
+import { Pencil, Plus, Trash2, Wand2, Loader2 } from 'lucide-vue-next';
 import { computed } from 'vue';
 
 interface SearchTermItem {
@@ -190,6 +190,7 @@ const toggleSelection = (term: SearchTermItem, checked: boolean) => {
   selectedTerms.value = newSet;
 };
 
+const isChecking = ref(false);
 const handleCheckAi = () => {
   if (selectedTerms.value.size === 0) return;
 
@@ -202,11 +203,15 @@ const handleCheckAi = () => {
   if (termsToSend.length === 0) return;
 
   if (confirm(`Apakah Anda yakin ingin melakukan Check AI untuk ${termsToSend.length} items terpilih?`)) {
+    isChecking.value = true;
     router.post('/search-terms-none/check-ai', {
       terms: termsToSend
     }, {
       onSuccess: () => {
         selectedTerms.value.clear();
+      },
+      onFinish: () => {
+        isChecking.value = false;
       },
       preserveScroll: true,
     });
@@ -274,8 +279,10 @@ const handleCheckAi = () => {
           @click="handleCheckAi"
           variant="secondary"
           class="gap-2"
+          :disabled="isChecking"
         >
-          <Wand2 class="h-4 w-4" />
+          <Loader2 v-if="isChecking" class="h-4 w-4 animate-spin" />
+          <Wand2 v-else class="h-4 w-4" />
           Check AI ({{ selectedTerms.size }})
         </Button>
         <Button @click="openAddDialog" class="gap-2">
