@@ -22,4 +22,14 @@ class CronLogController extends Controller
             'logs' => $logs,
         ]);
     }
+
+    /**
+     * Remove all resources from storage.
+     */
+    public function clear()
+    {
+        CronLog::truncate();
+
+        return redirect()->back()->with('success', 'All cron logs have been cleared.');
+    }
 }

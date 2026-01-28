@@ -5,6 +5,7 @@ import { ref, watch } from 'vue';
 import { type BreadcrumbItem } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 type CronLog = {
   id: number;
@@ -75,6 +76,17 @@ const changePerPage = (event: Event) => {
   });
 };
 
+const confirmReset = () => {
+  if (confirm('Are you sure you want to delete all cron logs? This action cannot be undone.')) {
+    router.delete('/cron-logs/clear', {
+      preserveScroll: true,
+      onSuccess: () => {
+        // Optional: Show a toast notification here
+      },
+    });
+  }
+};
+
 watch(() => props.logs, (val) => {
   logs.value = val?.data ?? [];
 });
@@ -90,6 +102,9 @@ watch(() => props.logs, (val) => {
           <h1 class="text-2xl font-semibold tracking-tight">Cron Logs</h1>
           <p class="text-sm text-muted-foreground">Monitor system tasks and jobs</p>
         </div>
+        <Button variant="destructive" @click="confirmReset">
+          Reset Logs
+        </Button>
       </div>
 
       <Card>
