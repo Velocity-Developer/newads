@@ -30,6 +30,7 @@ class FetchSearchTermsNone extends Command
         //
         $status = 'success';
         $error = null;
+        $result = null;
 
         $log = CronLog::create([
             'name' => $this->signature,
@@ -41,6 +42,7 @@ class FetchSearchTermsNone extends Command
         try {
             $searchTermService = new SearchTermService;
             $dataRes = $searchTermService->getSearchTermsNone();
+            $result = json_encode($dataRes, JSON_PRETTY_PRINT);
         } catch (\Exception $e) {
             $status = 'failed';
             $error = $e->getMessage();
@@ -50,6 +52,7 @@ class FetchSearchTermsNone extends Command
                 'duration_ms' => $log->started_at->diffInMilliseconds(now(), true),
                 'status' => $status,
                 'error' => $error,
+                'result' => $result,
             ]);
         };
     }

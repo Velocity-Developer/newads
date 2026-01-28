@@ -14,6 +14,7 @@ class CronLog extends Model
         'duration_ms',
         'status',
         'error',
+        'result',
     ];
 
     protected $casts = [

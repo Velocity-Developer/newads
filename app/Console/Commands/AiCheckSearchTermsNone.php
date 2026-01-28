@@ -30,6 +30,7 @@ class AiCheckSearchTermsNone extends Command
     {
         $status = 'success';
         $error = null;
+        $result = null;
 
         $log = CronLog::create([
             'name' => $this->signature,
@@ -42,6 +43,7 @@ class AiCheckSearchTermsNone extends Command
             // CheckAiServices
             $checkAiServices = new CheckAiServices;
             $response = $checkAiServices->check_search_terms_none();
+            $result = json_encode($response, JSON_PRETTY_PRINT);
 
             Log::info('app:ai-check-search-terms-none ', $response);
         } catch (\Exception $e) {
@@ -52,6 +54,7 @@ class AiCheckSearchTermsNone extends Command
                 'finished_at' => now(),
                 'status' => $status,
                 'error' => $error,
+                'result' => $result,
                 'duration_ms' => $log->started_at->diffInMilliseconds(now(), true),
             ]);
         }

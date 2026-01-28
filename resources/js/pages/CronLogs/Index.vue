@@ -6,6 +6,14 @@ import { type BreadcrumbItem } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 
 type CronLog = {
   id: number;
@@ -16,6 +24,7 @@ type CronLog = {
   duration_ms: number | null;
   status: 'running' | 'success' | 'failed';
   error: string | null;
+  result: string | null;
   created_at: string;
 };
 
@@ -76,6 +85,8 @@ const changePerPage = (event: Event) => {
   });
 };
 
+const selectedLog = ref<CronLog | null>(null);
+
 const confirmReset = () => {
   if (confirm('Are you sure you want to delete all cron logs? This action cannot be undone.')) {
     router.delete('/cron-logs/clear', {
@@ -124,11 +135,12 @@ watch(() => props.logs, (val) => {
                   <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Duration</th>
                   <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Status</th>
                   <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Error</th>
+                  <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Result</th>
                 </tr>
               </thead>
               <tbody class="[&_tr:last-child]:border-0">
                 <tr v-if="logs.length === 0">
-                  <td colspan="8" class="p-4 text-center text-muted-foreground">No logs found.</td>
+                  <td colspan="9" class="p-4 text-center text-muted-foreground">No logs found.</td>
                 </tr>
                 <tr v-for="log, index in logs" :key="log.id" class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
                   <td class="p-4 align-middle">{{ props.logs.from + index }}</td>
@@ -143,6 +155,25 @@ watch(() => props.logs, (val) => {
                   <td class="p-4 align-middle max-w-[200px] truncate" :title="log.error ?? ''">
                     <span v-if="log.error" class="text-destructive">{{ log.error }}</span>
                     <span v-else>-</span>
+                  </td>
+                  <td class="p-4 align-middle">
+                    <Dialog v-if="log.result">
+                      <DialogTrigger as-child>
+                        <Button variant="outline" size="sm" @click="selectedLog = log">View</Button>
+                      </DialogTrigger>
+                      <DialogContent class="max-w-3xl max-h-[80vh] flex flex-col">
+                        <DialogHeader>
+                          <DialogTitle>Log Result</DialogTitle>
+                          <DialogDescription>
+                             Result for {{ log.name }} at {{ formatDate(log.started_at) }}
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div class="flex-1 overflow-auto mt-4 p-4 bg-muted rounded-md font-mono text-xs whitespace-pre-wrap">
+                          {{ log.result }}
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                    <span v-else class="text-muted-foreground">-</span>
                   </td>
                 </tr>
               </tbody>
