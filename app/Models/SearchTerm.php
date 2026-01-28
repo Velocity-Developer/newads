@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class SearchTerm extends Model
 {
@@ -33,8 +34,13 @@ class SearchTerm extends Model
     public function getWaktuLocalAttribute()
     {
         $waktu = $this->waktu ?? $this->created_at;
-        $waktu = $waktu->timezone('Asia/Jakarta')->format('Y-m-d H:i:s');
 
-        return $waktu;
+        if (!$waktu) {
+            return null;
+        }
+
+        return Carbon::parse($waktu)
+            ->setTimezone(config('app.timezone', 'Asia/Jakarta'))
+            ->format('Y-m-d H:i:s');
     }
 }

@@ -217,7 +217,7 @@ const deleteTerm = (item: SearchTermItem) => {
                     </span>
                   </td>
                   <td class="px-3 py-2">{{ item.failure_count }}</td>
-                  <td class="px-3 py-2">{{ item.created_at }}</td>
+                  <td class="px-3 py-2">{{ item.waktu_local }}</td>
                   <td class="px-3 py-2">
                     <div class="flex items-center gap-1" v-if="item.source === 'manual'">
                       <Button
