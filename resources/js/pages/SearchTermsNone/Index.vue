@@ -9,7 +9,6 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Pencil, Plus, Trash2, Wand2 } from 'lucide-vue-next';
 import { computed } from 'vue';
 
@@ -143,14 +142,23 @@ const deleteTerm = (item: SearchTermItem) => {
 };
 
 // Selection handling
-const selectedTerms = ref<SearchTermItem[]>([]);
+const selectedTerms = ref<Set<number>>(new Set());
 
 const isAllSelected = computed(() => {
   const data = props.items?.data || [];
   if (data.length === 0) return false;
-  
+
   // Check if every item on current page is in selectedTerms
-  return data.every(item => selectedTerms.value.some(t => t.id === item.id));
+  return data.every(item => selectedTerms.value.has(item.id));
+});
+
+const isSomeSelected = computed(() => {
+  const data = props.items?.data || [];
+  if (data.length === 0) return false;
+
+  // Check if some (but not all) items on current page are in selectedTerms
+  const selectedCount = data.filter(item => selectedTerms.value.has(item.id)).length;
+  return selectedCount > 0 && selectedCount < data.length;
 });
 
 const toggleAll = (checked: boolean) => {
@@ -158,37 +166,34 @@ const toggleAll = (checked: boolean) => {
   if (data.length === 0) return;
 
   if (checked) {
-    // Add items that are not already selected
+    // Add all items on current page to selection
     data.forEach(item => {
-      if (!selectedTerms.value.some(t => t.id === item.id)) {
-        selectedTerms.value.push(item);
-      }
+      selectedTerms.value.add(item.id);
     });
   } else {
     // Remove items that are on the current page
-    const pageIds = data.map(item => item.id);
-    selectedTerms.value = selectedTerms.value.filter(t => !pageIds.includes(t.id));
+    data.forEach(item => {
+      selectedTerms.value.delete(item.id);
+    });
   }
 };
 
 const toggleSelection = (term: SearchTermItem, checked: boolean) => {
   if (checked) {
-    if (!selectedTerms.value.some(t => t.id === term.id)) {
-      selectedTerms.value.push(term);
-    }
+    selectedTerms.value.add(term.id);
   } else {
-    selectedTerms.value = selectedTerms.value.filter(t => t.id !== term.id);
+    selectedTerms.value.delete(term.id);
   }
 };
 
 const handleCheckAi = () => {
-  if (selectedTerms.value.length === 0) return;
-  
-  if (confirm(`Apakah Anda yakin ingin melakukan Check AI untuk ${selectedTerms.value.length} items terpilih?`)) {
+  if (selectedTerms.value.size === 0) return;
+
+  if (confirm(`Apakah Anda yakin ingin melakukan Check AI untuk ${selectedTerms.value.size} items terpilih?`)) {
     // Placeholder logic - implement API call here later
-    console.log('Checking AI for:', selectedTerms.value);
-    
-    // Example: router.post('/search-terms-none/check-ai', { terms: selectedTerms.value.map(t => t.id) });
+    console.log('Checking AI for term IDs:', Array.from(selectedTerms.value));
+
+    // Example: router.post('/search-terms-none/check-ai', { term_ids: Array.from(selectedTerms.value) });
   }
 };
 </script>
@@ -248,14 +253,14 @@ const handleCheckAi = () => {
       </div>
 
       <div class="flex justify-end gap-2">
-        <Button 
-          v-if="selectedTerms.length > 0" 
-          @click="handleCheckAi" 
+        <Button
+          v-if="selectedTerms.size > 0"
+          @click="handleCheckAi"
           variant="secondary"
           class="gap-2"
         >
           <Wand2 class="h-4 w-4" />
-          Check AI ({{ selectedTerms.length }})
+          Check AI ({{ selectedTerms.size }})
         </Button>
         <Button @click="openAddDialog" class="gap-2">
           <Plus class="h-4 w-4" />
@@ -310,9 +315,12 @@ const handleCheckAi = () => {
               <thead>
                 <tr class="border-b">
                   <th class="px-3 py-2 text-left w-[40px]">
-                    <Checkbox
+                    <input
+                      type="checkbox"
+                      class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
                       :checked="isAllSelected"
-                      @update:checked="(checked: boolean) => toggleAll(checked)"
+                      :indeterminate="isSomeSelected"
+                      @change="(e: Event) => toggleAll((e.target as HTMLInputElement).checked)"
                     />
                   </th>
                   <th class="px-3 py-2 text-left">No</th>
@@ -327,9 +335,11 @@ const handleCheckAi = () => {
               <tbody>
                 <tr v-for="item, index in items.data" :key="item.id" class="border-b">
                   <td class="px-3 py-2">
-                    <Checkbox
-                      :checked="selectedTerms.some(t => t.id === item.id)"
-                      @update:checked="(checked: boolean) => toggleSelection(item, checked)"
+                    <input
+                      type="checkbox"
+                      class="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+                      :checked="selectedTerms.has(item.id)"
+                      @change="(e: Event) => toggleSelection(item, (e.target as HTMLInputElement).checked)"
                     />
                   </td>
                   <td class="px-3 py-2">{{ Number(items.from + index) }}</td>
