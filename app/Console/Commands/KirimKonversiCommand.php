@@ -83,6 +83,7 @@ class KirimKonversiCommand extends Command
                 'finished_at' => $finishedAt,
                 'duration_ms' => $log->started_at->diffInMilliseconds($finishedAt, true),
                 'status' => 'success',
+                'result' => json_encode($rekapForms, JSON_PRETTY_PRINT),
             ]);
         } catch (\Exception $e) {
             Log::error('[CRON] kirim-konversi:sync-vdnet FAILED', [
