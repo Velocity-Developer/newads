@@ -26,6 +26,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/search-terms-none', [SearchTermsController::class, 'store'])->name('search-terms.store');
     Route::put('/search-terms-none/{id}', [SearchTermsController::class, 'update'])->name('search-terms.update');
     Route::delete('/search-terms-none/{id}', [SearchTermsController::class, 'destroy'])->name('search-terms.destroy');
+    Route::post('/search-terms-none/check-ai', [SearchTermsController::class, 'checkAi'])->name('search-terms.check-ai');
 
     // Users page
     Route::get('/users', [UsersController::class, 'index'])->name('users.index');
@@ -86,5 +87,5 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/update-search-terms-none', [SearchTermsController::class, 'update_search_terms_none']);
 });
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';

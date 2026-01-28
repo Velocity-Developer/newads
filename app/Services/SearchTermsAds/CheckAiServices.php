@@ -62,7 +62,9 @@ class CheckAiServices
 
                 // ambil semua nilai kolom 'term' dari searchTerms, dan jadikan string dengan pemisah pipe |
                 $terms = $searchTerms->pluck('term')->implode('|');
+                $count_terms = $searchTerms->count();
             } else {
+                $count_terms = count($terms);
                 $terms = implode('|', $terms);
             }
 
@@ -88,7 +90,7 @@ class CheckAiServices
             $jsonResponse = json_decode($responseContent, true);
 
             // jika json response tidak valid
-            if (! is_array($jsonResponse) || count($jsonResponse) !== $searchTerms->count()) {
+            if (! is_array($jsonResponse) || count($jsonResponse) !== $count_terms) {
                 throw new \Exception('JSON response tidak valid');
             }
 
@@ -110,9 +112,15 @@ class CheckAiServices
                 'response_ai' => $jsonResponse
             ];
         } catch (\Exception $e) {
-            $this->error('Error: ' . $e->getMessage());
+            Log::error('check_search_terms_none failed', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
 
-            return;
+            return [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ];
         }
     }
 }

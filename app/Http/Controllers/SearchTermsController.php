@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\SearchTerm;
 use App\Services\SearchTermsAds\AnalyticServices;
+use App\Services\SearchTermsAds\CheckAiServices as SearchTermsAdsCheckAiServices;
 use App\Services\Velocity\SearchTermService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -80,6 +81,31 @@ class SearchTermsController extends Controller
             ],
             'analytics' => $analytics,
         ]);
+    }
+
+    // check ai
+    public function checkAi(Request $request)
+    {
+        $request->validate([
+            'terms' => ['required', 'array'],
+            'terms.*' => ['string'],
+        ]);
+
+        if (!$request->terms || empty($request->terms)) {
+            return response()->json([
+                'error' => 'kosong'
+            ]);
+        }
+
+        try {
+            $n = new SearchTermsAdsCheckAiServices;
+            $result = $n->check_search_terms_none($request->terms);
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 
     // get update search term none

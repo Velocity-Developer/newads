@@ -165,35 +165,51 @@ const toggleAll = (checked: boolean) => {
   const data = props.items?.data || [];
   if (data.length === 0) return;
 
+  const newSet = new Set(selectedTerms.value);
   if (checked) {
     // Add all items on current page to selection
     data.forEach(item => {
-      selectedTerms.value.add(item.id);
+      newSet.add(item.id);
     });
   } else {
     // Remove items that are on the current page
     data.forEach(item => {
-      selectedTerms.value.delete(item.id);
+      newSet.delete(item.id);
     });
   }
+  selectedTerms.value = newSet;
 };
 
 const toggleSelection = (term: SearchTermItem, checked: boolean) => {
+  const newSet = new Set(selectedTerms.value);
   if (checked) {
-    selectedTerms.value.add(term.id);
+    newSet.add(term.id);
   } else {
-    selectedTerms.value.delete(term.id);
+    newSet.delete(term.id);
   }
+  selectedTerms.value = newSet;
 };
 
 const handleCheckAi = () => {
   if (selectedTerms.value.size === 0) return;
 
-  if (confirm(`Apakah Anda yakin ingin melakukan Check AI untuk ${selectedTerms.value.size} items terpilih?`)) {
-    // Placeholder logic - implement API call here later
-    console.log('Checking AI for term IDs:', Array.from(selectedTerms.value));
+  // Get term strings from selected IDs
+  // Note: This only works for items currently loaded in props.items.data
+  const termsToSend = props.items.data
+    .filter(item => selectedTerms.value.has(item.id))
+    .map(item => item.term);
 
-    // Example: router.post('/search-terms-none/check-ai', { term_ids: Array.from(selectedTerms.value) });
+  if (termsToSend.length === 0) return;
+
+  if (confirm(`Apakah Anda yakin ingin melakukan Check AI untuk ${termsToSend.length} items terpilih?`)) {
+    router.post('/search-terms-none/check-ai', {
+      terms: termsToSend
+    }, {
+      onSuccess: () => {
+        selectedTerms.value.clear();
+      },
+      preserveScroll: true,
+    });
   }
 };
 </script>
