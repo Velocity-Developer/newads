@@ -144,30 +144,38 @@ const deleteTerm = (item: SearchTermItem) => {
 
 // Selection handling
 const selectedIds = ref<number[]>([]);
-
+const selectedTerms = ref([]);
 const isAllSelected = computed(() => {
-  if (props.items.data.length === 0) return false;
-  return props.items.data.every(item => selectedIds.value.includes(item.id));
+  const data = props.items?.data || [];
+  if (data.length === 0) return false;
+  return data.every(item => selectedIds.value.includes(item.id));
 });
 
 const toggleAll = (checked: boolean) => {
+  const data = props.items?.data || [];
+  if (data.length === 0) return;
+
   if (checked) {
-    const newIds = props.items.data.map(item => item.id);
+    const newIds = data.map(item => item.id);
     selectedIds.value = [...new Set([...selectedIds.value, ...newIds])];
   } else {
-    const pageIds = props.items.data.map(item => item.id);
+    const pageIds = data.map(item => item.id);
     selectedIds.value = selectedIds.value.filter(id => !pageIds.includes(id));
   }
+  console.log(checked)
 };
 
-const toggleSelection = (id: number, checked: boolean) => {
-  if (checked) {
-    if (!selectedIds.value.includes(id)) {
-      selectedIds.value.push(id);
-    }
-  } else {
-    selectedIds.value = selectedIds.value.filter(selectedId => selectedId !== id);
-  }
+const toggleSelection = (term: SearchTermItem, checked: boolean) => {
+  // if (checked) {
+  //   if (!selectedTerms.value.some(t => t.id === term.id)) {
+  //     selectedTerms.value.push(term)
+  //   }
+  // } else {
+  //   selectedTerms.value = selectedTerms.value.filter(
+  //     t => t.id !== term.id
+  //   )
+  // }
+  console.log(term)
 };
 </script>
 
@@ -281,7 +289,7 @@ const toggleSelection = (id: number, checked: boolean) => {
                   <th class="px-3 py-2 text-left w-[40px]">
                     <Checkbox
                       :checked="isAllSelected"
-                      @update:checked="toggleAll"
+                      @update:checked="(checked: boolean) => toggleAll(checked)"
                     />
                   </th>
                   <th class="px-3 py-2 text-left">No</th>
@@ -298,7 +306,7 @@ const toggleSelection = (id: number, checked: boolean) => {
                   <td class="px-3 py-2">
                     <Checkbox
                       :checked="selectedIds.includes(item.id)"
-                      @update:checked="(checked: boolean) => toggleSelection(item.id, checked)"
+                      @update:checked="(checked: boolean) => toggleSelection(item, checked)"
                     />
                   </td>
                   <td class="px-3 py-2">{{ Number(items.from + index) }}</td>
