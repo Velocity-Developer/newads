@@ -143,12 +143,14 @@ const deleteTerm = (item: SearchTermItem) => {
 };
 
 // Selection handling
-const selectedIds = ref<number[]>([]);
-const selectedTerms = ref([]);
+const selectedTerms = ref<SearchTermItem[]>([]);
+
 const isAllSelected = computed(() => {
   const data = props.items?.data || [];
   if (data.length === 0) return false;
-  return data.every(item => selectedIds.value.includes(item.id));
+  
+  // Check if every item on current page is in selectedTerms
+  return data.every(item => selectedTerms.value.some(t => t.id === item.id));
 });
 
 const toggleAll = (checked: boolean) => {
@@ -156,26 +158,27 @@ const toggleAll = (checked: boolean) => {
   if (data.length === 0) return;
 
   if (checked) {
-    const newIds = data.map(item => item.id);
-    selectedIds.value = [...new Set([...selectedIds.value, ...newIds])];
+    // Add items that are not already selected
+    data.forEach(item => {
+      if (!selectedTerms.value.some(t => t.id === item.id)) {
+        selectedTerms.value.push(item);
+      }
+    });
   } else {
+    // Remove items that are on the current page
     const pageIds = data.map(item => item.id);
-    selectedIds.value = selectedIds.value.filter(id => !pageIds.includes(id));
+    selectedTerms.value = selectedTerms.value.filter(t => !pageIds.includes(t.id));
   }
-  console.log(checked)
 };
 
 const toggleSelection = (term: SearchTermItem, checked: boolean) => {
-  // if (checked) {
-  //   if (!selectedTerms.value.some(t => t.id === term.id)) {
-  //     selectedTerms.value.push(term)
-  //   }
-  // } else {
-  //   selectedTerms.value = selectedTerms.value.filter(
-  //     t => t.id !== term.id
-  //   )
-  // }
-  console.log(term)
+  if (checked) {
+    if (!selectedTerms.value.some(t => t.id === term.id)) {
+      selectedTerms.value.push(term);
+    }
+  } else {
+    selectedTerms.value = selectedTerms.value.filter(t => t.id !== term.id);
+  }
 };
 </script>
 
@@ -305,7 +308,7 @@ const toggleSelection = (term: SearchTermItem, checked: boolean) => {
                 <tr v-for="item, index in items.data" :key="item.id" class="border-b">
                   <td class="px-3 py-2">
                     <Checkbox
-                      :checked="selectedIds.includes(item.id)"
+                      :checked="selectedTerms.some(t => t.id === item.id)"
                       @update:checked="(checked: boolean) => toggleSelection(item, checked)"
                     />
                   </td>
