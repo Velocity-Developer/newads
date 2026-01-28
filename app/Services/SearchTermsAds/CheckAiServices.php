@@ -66,6 +66,11 @@ class CheckAiServices
                 $terms = implode('|', $terms);
             }
 
+            //jika terms kosong
+            if (!$terms || empty($terms)) {
+                throw new \Exception('Terms kosong');
+            }
+
             // kirim ke openai
             $openAiService = new OpenAiService;
             $response = $openAiService->call(

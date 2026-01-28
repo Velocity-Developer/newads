@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\CronLog;
 use App\Services\SearchTermsAds\CheckAiServices;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class AiCheckSearchTermsNone extends Command
 {
@@ -38,6 +39,8 @@ class AiCheckSearchTermsNone extends Command
             // CheckAiServices
             $checkAiServices = new CheckAiServices;
             $response = $checkAiServices->check_search_terms_none();
+
+            Log::info('app:ai-check-search-terms-none ', $response);
 
             $log->update([
                 'finished_at' => now(),
