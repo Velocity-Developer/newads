@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Pencil, Plus, Trash2 } from 'lucide-vue-next';
+import { Pencil, Plus, Trash2, Wand2 } from 'lucide-vue-next';
 import { computed } from 'vue';
 
 interface SearchTermItem {
@@ -180,6 +180,17 @@ const toggleSelection = (term: SearchTermItem, checked: boolean) => {
     selectedTerms.value = selectedTerms.value.filter(t => t.id !== term.id);
   }
 };
+
+const handleCheckAi = () => {
+  if (selectedTerms.value.length === 0) return;
+  
+  if (confirm(`Apakah Anda yakin ingin melakukan Check AI untuk ${selectedTerms.value.length} items terpilih?`)) {
+    // Placeholder logic - implement API call here later
+    console.log('Checking AI for:', selectedTerms.value);
+    
+    // Example: router.post('/search-terms-none/check-ai', { terms: selectedTerms.value.map(t => t.id) });
+  }
+};
 </script>
 
 <template>
@@ -237,6 +248,15 @@ const toggleSelection = (term: SearchTermItem, checked: boolean) => {
       </div>
 
       <div class="flex justify-end gap-2">
+        <Button 
+          v-if="selectedTerms.length > 0" 
+          @click="handleCheckAi" 
+          variant="secondary"
+          class="gap-2"
+        >
+          <Wand2 class="h-4 w-4" />
+          Check AI ({{ selectedTerms.length }})
+        </Button>
         <Button @click="openAddDialog" class="gap-2">
           <Plus class="h-4 w-4" />
           Tambah Manual
