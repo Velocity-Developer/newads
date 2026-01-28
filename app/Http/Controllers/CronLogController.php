@@ -32,4 +32,15 @@ class CronLogController extends Controller
 
         return redirect()->back()->with('success', 'All cron logs have been cleared.');
     }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy($id)
+    {
+        $log = CronLog::findOrFail($id);
+        $log->delete();
+
+        return redirect()->back()->with('success', 'Cron log deleted successfully.');
+    }
 }

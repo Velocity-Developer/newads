@@ -98,6 +98,17 @@ const confirmReset = () => {
   }
 };
 
+const deleteLog = (log: CronLog) => {
+  if (confirm(`Are you sure you want to delete log "${log.name}"?`)) {
+    router.delete(`/cron-logs/${log.id}`, {
+      preserveScroll: true,
+      onSuccess: () => {
+        // Optional: Show a toast notification here
+      },
+    });
+  }
+};
+
 watch(() => props.logs, (val) => {
   logs.value = val?.data ?? [];
 });
@@ -134,13 +145,12 @@ watch(() => props.logs, (val) => {
                   <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Finished At</th>
                   <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Duration</th>
                   <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Status</th>
-                  <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Error</th>
-                  <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Result</th>
+                  <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Actions</th>
                 </tr>
               </thead>
               <tbody class="[&_tr:last-child]:border-0">
                 <tr v-if="logs.length === 0">
-                  <td colspan="9" class="p-4 text-center text-muted-foreground">No logs found.</td>
+                  <td colspan="8" class="p-4 text-center text-muted-foreground">No logs found.</td>
                 </tr>
                 <tr v-for="log, index in logs" :key="log.id" class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
                   <td class="p-4 align-middle">{{ props.logs.from + index }}</td>
@@ -152,28 +162,47 @@ watch(() => props.logs, (val) => {
                   <td class="p-4 align-middle">
                     <Badge :variant="getStatusBadgeVariant(log.status)">{{ log.status }}</Badge>
                   </td>
-                  <td class="p-4 align-middle max-w-[200px] truncate" :title="log.error ?? ''">
-                    <span v-if="log.error" class="text-destructive">{{ log.error }}</span>
-                    <span v-else>-</span>
-                  </td>
                   <td class="p-4 align-middle">
-                    <Dialog v-if="log.result">
-                      <DialogTrigger as-child>
-                        <Button variant="outline" size="sm" @click="selectedLog = log">View</Button>
-                      </DialogTrigger>
-                      <DialogContent class="max-w-3xl max-h-[80vh] flex flex-col">
-                        <DialogHeader>
-                          <DialogTitle>Log Result</DialogTitle>
-                          <DialogDescription>
-                             Result for {{ log.name }} at {{ formatDate(log.started_at) }}
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div class="flex-1 overflow-auto mt-4 p-4 bg-muted rounded-md font-mono text-xs whitespace-pre-wrap">
-                          {{ log.result }}
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                    <span v-else class="text-muted-foreground">-</span>
+                    <div class="flex items-center gap-2">
+                      <Dialog>
+                        <DialogTrigger as-child>
+                          <Button variant="outline" size="sm" @click="selectedLog = log">View</Button>
+                        </DialogTrigger>
+                        <DialogContent class="max-w-3xl max-h-[80vh] flex flex-col">
+                          <DialogHeader>
+                            <DialogTitle>Log Details</DialogTitle>
+                            <DialogDescription>
+                              Details for {{ log.name }}
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div class="flex-1 overflow-auto mt-4 space-y-4">
+                             <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div><span class="font-semibold">Name:</span> {{ log.name }}</div>
+                                <div><span class="font-semibold">Type:</span> {{ log.type }}</div>
+                                <div><span class="font-semibold">Status:</span> <Badge :variant="getStatusBadgeVariant(log.status)">{{ log.status }}</Badge></div>
+                                <div><span class="font-semibold">Duration:</span> {{ formatDuration(log.duration_ms) }}</div>
+                                <div><span class="font-semibold">Started:</span> {{ formatDate(log.started_at) }}</div>
+                                <div><span class="font-semibold">Finished:</span> {{ formatDate(log.finished_at) }}</div>
+                             </div>
+                             
+                             <div v-if="log.error">
+                               <div class="font-semibold mb-1 text-destructive">Error:</div>
+                               <div class="p-3 bg-destructive/10 text-destructive rounded-md text-xs font-mono whitespace-pre-wrap">{{ log.error }}</div>
+                             </div>
+
+                             <div v-if="log.result">
+                               <div class="font-semibold mb-1">Result:</div>
+                               <div class="p-3 bg-muted rounded-md text-xs font-mono whitespace-pre-wrap">{{ log.result }}</div>
+                             </div>
+                             <div v-else-if="!log.error && log.status === 'success'">
+                               <div class="text-muted-foreground italic">No result output available.</div>
+                             </div>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                      
+                      <Button variant="destructive" size="sm" @click="deleteLog(log)">Delete</Button>
+                    </div>
                   </td>
                 </tr>
               </tbody>

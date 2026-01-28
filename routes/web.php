@@ -47,6 +47,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Cron Logs
     Route::get('/cron-logs', [\App\Http\Controllers\CronLogController::class, 'index'])->name('cron-logs.index');
     Route::delete('/cron-logs/clear', [\App\Http\Controllers\CronLogController::class, 'clear'])->name('cron-logs.clear');
+    Route::delete('/cron-logs/{id}', [\App\Http\Controllers\CronLogController::class, 'destroy'])->name('cron-logs.destroy');
 });
 
 // Restore dashboard route
