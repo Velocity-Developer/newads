@@ -4,11 +4,12 @@ namespace App\Services\SearchTermsAds;
 
 use App\Models\SearchTerm;
 use App\Services\AI\OpenAiService;
+use Illuminate\Support\Facades\Log;
 
 class CheckAiServices
 {
     // check_search_terms_none
-    public function check_search_terms_none()
+    public function check_search_terms_none($terms = [])
     {
         try {
             // prompt
@@ -48,16 +49,22 @@ class CheckAiServices
                 - TANPA penjelasan, TANPA teks lain
             PROMPT;
 
-            // dapatkan 40 search term dengan check_ai = null
-            $searchTerms = SearchTerm::whereNull('check_ai')->take(40)->get();
+            //jika terms kosong
+            if (empty($terms)) {
 
-            // jika tidak ada search term
-            if ($searchTerms->isEmpty()) {
-                throw new \Exception('Tidak ada search term dengan check_ai = null');
+                // dapatkan 40 search term dengan check_ai = null
+                $searchTerms = SearchTerm::whereNull('check_ai')->take(20)->get();
+
+                // jika tidak ada search term
+                if ($searchTerms->isEmpty()) {
+                    throw new \Exception('Tidak ada search term dengan check_ai = null');
+                }
+
+                // ambil semua nilai kolom 'term' dari searchTerms, dan jadikan string dengan pemisah pipe |
+                $terms = $searchTerms->pluck('term')->implode('|');
+            } else {
+                $terms = implode('|', $terms);
             }
-
-            // ambil semua nilai kolom 'term' dari searchTerms, dan jadikan string dengan pemisah pipe |
-            $terms = $searchTerms->pluck('term')->implode('| ');
 
             // kirim ke openai
             $openAiService = new OpenAiService;
@@ -93,9 +100,12 @@ class CheckAiServices
             }
 
             // return results
-            return $results;
+            return [
+                'results' => $results,
+                'response_ai' => $jsonResponse
+            ];
         } catch (\Exception $e) {
-            $this->error('Error: '.$e->getMessage());
+            $this->error('Error: ' . $e->getMessage());
 
             return;
         }

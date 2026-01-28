@@ -54,10 +54,6 @@ class SearchTermsController extends Controller
         $search = trim((string) $request->get('search', ''));
 
         $query = SearchTerm::query()
-            ->where(function ($q) {
-                $q->whereNull('check_ai')
-                    ->orWhere('check_ai', 'NONE');
-            })
             ->when($search !== '', function ($q) use ($search) {
                 $q->where('term', 'like', '%' . $search . '%');
             })
