@@ -2,19 +2,17 @@
 
 namespace App\Services\SearchTermsAds;
 
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
-use App\Services\AI\OpenAiService;
 use App\Models\SearchTerm;
+use App\Services\AI\OpenAiService;
 
 class CheckAiServices
 {
-    //check_search_terms_none
+    // check_search_terms_none
     public function check_search_terms_none()
     {
         try {
-            //prompt
-            $prompt = <<<PROMPT
+            // prompt
+            $prompt = <<<'PROMPT'
                 Anda adalah asisten yang membantu mengklasifikasikan istilah penelusuran Google Ads untuk bisnis jasa pembuatan website.
 
                 ### Tugas Anda:
@@ -50,41 +48,41 @@ class CheckAiServices
                 - TANPA penjelasan, TANPA teks lain
             PROMPT;
 
-            //dapatkan 40 search term dengan check_ai = null
+            // dapatkan 40 search term dengan check_ai = null
             $searchTerms = SearchTerm::whereNull('check_ai')->take(40)->get();
 
-            //jika tidak ada search term
+            // jika tidak ada search term
             if ($searchTerms->isEmpty()) {
                 throw new \Exception('Tidak ada search term dengan check_ai = null');
             }
 
-            //ambil semua nilai kolom 'term' dari searchTerms, dan jadikan string dengan pemisah pipe |
+            // ambil semua nilai kolom 'term' dari searchTerms, dan jadikan string dengan pemisah pipe |
             $terms = $searchTerms->pluck('term')->implode('| ');
 
-            //kirim ke openai
+            // kirim ke openai
             $openAiService = new OpenAiService;
             $response = $openAiService->call(
                 $prompt,
                 $terms
             );
 
-            //jika response tidak valid
-            if (!isset($response['choices'][0]['message']['content'])) {
+            // jika response tidak valid
+            if (! isset($response['choices'][0]['message']['content'])) {
                 throw new \Exception('Response tidak valid');
             }
 
-            //parse response
+            // parse response
             $responseContent = $response['choices'][0]['message']['content'];
             $jsonResponse = json_decode($responseContent, true);
 
-            //jika json response tidak valid
-            if (!is_array($jsonResponse) || count($jsonResponse) !== $searchTerms->count()) {
+            // jika json response tidak valid
+            if (! is_array($jsonResponse) || count($jsonResponse) !== $searchTerms->count()) {
                 throw new \Exception('JSON response tidak valid');
             }
 
             $results = [];
 
-            //update search term
+            // update search term
             foreach ($jsonResponse as $item) {
                 $SearchTerm = SearchTerm::where('term', $item['term'])
                     ->update(['check_ai' => $item['status']]);
@@ -94,10 +92,11 @@ class CheckAiServices
                 ];
             }
 
-            //return results
+            // return results
             return $results;
         } catch (\Exception $e) {
-            $this->error('Error: ' . $e->getMessage());
+            $this->error('Error: '.$e->getMessage());
+
             return;
         }
     }

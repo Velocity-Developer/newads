@@ -5,8 +5,8 @@ use App\Http\Controllers\BlacklistWordController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KirimKonversiController;
 use App\Http\Controllers\RekapFormController;
-use App\Http\Controllers\TermsController;
 use App\Http\Controllers\SearchTermsController;
+use App\Http\Controllers\TermsController;
 use App\Http\Controllers\UsersController;
 use Illuminate\Support\Facades\Route;
 
@@ -82,9 +82,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/kirim_konversi/kirim_konversi_velocity', [KirimKonversiController::class, 'kirim_konversi_velocity']);
     Route::post('/kirim_konversi/kirim_konversi_dari_rekap_form', [KirimKonversiController::class, 'kirim_konversi_dari_rekap_form']);
 
-    //update search term none
+    // update search term none
     Route::get('/update-search-terms-none', [SearchTermsController::class, 'update_search_terms_none']);
 });
 
-require __DIR__ . '/settings.php';
-require __DIR__ . '/auth.php';
+require __DIR__.'/settings.php';
+require __DIR__.'/auth.php';

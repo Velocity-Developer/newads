@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use App\Services\Velocity\SearchTermService;
 use App\Models\CronLog;
+use App\Services\Velocity\SearchTermService;
+use Illuminate\Console\Command;
 
 class FetchSearchTermsNone extends Command
 {
@@ -36,7 +36,7 @@ class FetchSearchTermsNone extends Command
         ]);
 
         try {
-            $searchTermService = new SearchTermService();
+            $searchTermService = new SearchTermService;
             $dataRes = $searchTermService->getSearchTermsNone();
 
             $log->update([
@@ -50,6 +50,7 @@ class FetchSearchTermsNone extends Command
                 'ended_at' => now(),
                 'error' => $e->getMessage(),
             ]);
+
             return $this->error($e->getMessage());
         }
     }

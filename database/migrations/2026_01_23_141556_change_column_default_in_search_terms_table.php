@@ -12,11 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('search_terms', function (Blueprint $table) {
-            //hapus kolom google_ads_status dan telegram_send dan ai_result
+            // hapus kolom google_ads_status dan telegram_send dan ai_result
             $table->dropColumn('google_ads_status');
             $table->dropColumn('telegram_send');
             $table->dropColumn('ai_result');
-            //tambah kolom check_ai,iklan_dibuat,failure_count
+            // tambah kolom check_ai,iklan_dibuat,failure_count
             $table->string('check_ai')->nullable();
             $table->boolean('iklan_dibuat')->default(false);
             $table->integer('failure_count')->default(0);
@@ -29,12 +29,12 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('search_terms', function (Blueprint $table) {
-            //tambah kolom google_ads_status dan telegram_send
+            // tambah kolom google_ads_status dan telegram_send
             $table->boolean('google_ads_status')->default(false);
             $table->boolean('telegram_send')->default(false);
-            //tambah kolom ai_result
+            // tambah kolom ai_result
             $table->string('ai_result')->nullable();
-            //hapus kolom check_ai,iklan_dibuat,failure_count
+            // hapus kolom check_ai,iklan_dibuat,failure_count
             $table->dropColumn('check_ai');
             $table->dropColumn('iklan_dibuat');
             $table->dropColumn('failure_count');

@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('search_terms', function (Blueprint $table) {
-            //tambah kolom source
+            // tambah kolom source
             $table->string('source')->after('term')->nullable();
         });
     }
@@ -23,7 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('search_terms', function (Blueprint $table) {
-            //hapus kolom source
+            // hapus kolom source
             $table->dropColumn('source');
         });
     }

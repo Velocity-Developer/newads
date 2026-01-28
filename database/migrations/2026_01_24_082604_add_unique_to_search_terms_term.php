@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('search_terms', function (Blueprint $table) {
-            //tambahkan unique constraint pada kolom term
+            // tambahkan unique constraint pada kolom term
             $table->unique('term');
         });
     }
@@ -23,7 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('search_terms', function (Blueprint $table) {
-            //hapus unique constraint pada kolom term
+            // hapus unique constraint pada kolom term
             $table->dropUnique('term');
         });
     }

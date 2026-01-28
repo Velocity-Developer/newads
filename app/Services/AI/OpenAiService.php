@@ -19,7 +19,7 @@ class OpenAiService
         $this->model = config('services.openai.model', env('OPENAI_MODEL', 'gpt-4o-mini'));
     }
 
-    //call
+    // call
     public function call(string $prompt, string $message = '')
     {
         try {
@@ -33,7 +33,7 @@ class OpenAiService
                 ->connectTimeout(30)
                 // ->withToken($this->apiKey)
                 ->withHeaders([
-                    'Authorization' => 'Bearer ' . $this->apiKey,
+                    'Authorization' => 'Bearer '.$this->apiKey,
                     'Accept' => 'application/json',
                 ])
                 ->asJson()
@@ -41,15 +41,16 @@ class OpenAiService
                     'model' => $this->model,
                     'messages' => [
                         ['role' => 'system', 'content' => $prompt],
-                        ['role' => 'user', 'content' => $message]
+                        ['role' => 'user', 'content' => $message],
                     ],
                 ]);
 
             if (! $res->successful()) {
-                throw new \Exception('OpenAI API request failed: ' . $res->body());
+                throw new \Exception('OpenAI API request failed: '.$res->body());
             }
         } catch (\Exception $e) {
-            Log::error('OpenAI API error: ' . $e->getMessage());
+            Log::error('OpenAI API error: '.$e->getMessage());
+
             return [
                 'success' => false,
                 'message' => $e->getMessage(),

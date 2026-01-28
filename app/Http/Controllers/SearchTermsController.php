@@ -3,11 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\SearchTerm;
-use Illuminate\Http\Request;
-use Inertia\Inertia;
 use App\Services\Velocity\SearchTermService;
-
+use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Inertia\Inertia;
 
 class SearchTermsController extends Controller
 {
@@ -59,7 +58,7 @@ class SearchTermsController extends Controller
                     ->orWhere('check_ai', 'NONE');
             })
             ->when($search !== '', function ($q) use ($search) {
-                $q->where('term', 'like', '%' . $search . '%');
+                $q->where('term', 'like', '%'.$search.'%');
             })
             ->orderBy($request->get('sort_by', 'id'), $request->get('sort_order', 'desc'));
 
@@ -79,11 +78,12 @@ class SearchTermsController extends Controller
         ]);
     }
 
-    //get update search term none
+    // get update search term none
     public function update_search_terms_none(Request $request)
     {
-        $searchTermService = new SearchTermService();
+        $searchTermService = new SearchTermService;
         $dataRes = $searchTermService->getSearchTermsNone();
+
         return response()->json($dataRes);
     }
 }

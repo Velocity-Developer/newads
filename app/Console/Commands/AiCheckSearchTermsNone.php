@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use App\Services\SearchTermsAds\CheckAiServices;
 use App\Models\CronLog;
+use App\Services\SearchTermsAds\CheckAiServices;
+use Illuminate\Console\Command;
 
 class AiCheckSearchTermsNone extends Command
 {
@@ -35,7 +35,7 @@ class AiCheckSearchTermsNone extends Command
         ]);
 
         try {
-            //CheckAiServices
+            // CheckAiServices
             $checkAiServices = new CheckAiServices;
             $response = $checkAiServices->check_search_terms_none();
 

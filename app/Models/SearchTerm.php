@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class SearchTerm extends Model
 {
-    //timestamp
+    // timestamp
     public $timestamps = true;
 
     protected $fillable = [
@@ -24,12 +24,12 @@ class SearchTerm extends Model
         'failure_count' => 'integer',
     ];
 
-    //append
+    // append
     protected $appends = [
         'waktu_local',
     ];
 
-    //tampilkan waktu dalam format local
+    // tampilkan waktu dalam format local
     public function getWaktuLocalAttribute()
     {
         $waktu = $this->waktu ?? $this->created_at;

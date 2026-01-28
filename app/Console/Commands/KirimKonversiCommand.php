@@ -2,10 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\Models\CronLog;
 use App\Models\Setting;
 use App\Services\NewVDnet\RekapFormServices;
 use App\Services\Velocity\KirimKonversiService;
-use App\Models\CronLog;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
