@@ -93,7 +93,8 @@ class SearchTermsController extends Controller
 
         if (!$request->terms || empty($request->terms)) {
             return response()->json([
-                'error' => 'kosong'
+                'message' => 'Terms kosong',
+                'success' => false,
             ]);
         }
 
@@ -101,9 +102,18 @@ class SearchTermsController extends Controller
             $n = new SearchTermsAdsCheckAiServices;
             $result = $n->check_search_terms_none($request->terms);
 
-            return redirect()->back()->with('success', 'Data berhasil diperbarui.');
+            // return redirect()->back()->with('success', 'Data berhasil diperbarui.');
+            return response()->json([
+                'success' => true,
+                'message' => 'Data berhasil diperbarui.',
+                'result' => $result
+            ]);
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'terms' => $request->terms
+            ]);
         }
     }
 

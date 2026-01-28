@@ -23,20 +23,18 @@ class OpenAiService
     public function call(string $prompt, string $message = '')
     {
         try {
-            $res = Http::retry(5, 750, function ($exception, $request) {
-                $resp = method_exists($request, 'response') ? $request->response : null;
+            if (!is_string($prompt) || !is_string($message)) {
+                throw new \InvalidArgumentException('Prompt and message must be strings');
+            }
 
-                return $exception instanceof \Illuminate\Http\Client\ConnectionException
-                    || ($resp && ($resp->serverError() || $resp->status() === 429));
-            })
+            $res = Http::retry(5, 750)
                 ->timeout(120)
                 ->connectTimeout(30)
-                // ->withToken($this->apiKey)
                 ->withHeaders([
-                    'Authorization' => 'Bearer '.$this->apiKey,
-                    'Accept' => 'application/json',
+                    'Authorization' => 'Bearer ' . $this->apiKey,
+                    'Content-Type'  => 'application/json',
+                    'Accept'        => 'application/json',
                 ])
-                ->asJson()
                 ->post($this->baseUrl, [
                     'model' => $this->model,
                     'messages' => [
@@ -46,17 +44,19 @@ class OpenAiService
                 ]);
 
             if (! $res->successful()) {
-                throw new \Exception('OpenAI API request failed: '.$res->body());
+                throw new \Exception($res->body());
             }
-        } catch (\Exception $e) {
-            Log::error('OpenAI API error: '.$e->getMessage());
+
+            return $res->json();
+        } catch (\Throwable $e) {
+            Log::error('OpenAI API error', [
+                'message' => $e->getMessage(),
+            ]);
 
             return [
                 'success' => false,
                 'message' => $e->getMessage(),
             ];
         }
-
-        return $res->json();
     }
 }

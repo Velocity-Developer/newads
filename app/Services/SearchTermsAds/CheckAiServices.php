@@ -82,6 +82,9 @@ class CheckAiServices
 
             // jika response tidak valid
             if (! isset($response['choices'][0]['message']['content'])) {
+
+                Log::info('openAiService respon', $response);
+
                 throw new \Exception('Response tidak valid');
             }
 
@@ -98,28 +101,34 @@ class CheckAiServices
 
             // update search term
             foreach ($jsonResponse as $item) {
-                $SearchTerm = SearchTerm::where('term', $item['term'])
+                $updated = SearchTerm::where('term', $item['term'])
                     ->update(['check_ai' => $item['status']]);
+
                 $results[] = [
-                    'search_term' => $SearchTerm,
-                    'response_ai' => $item,
+                    'term'        => $item['term'],
+                    'status_ai'  => $item['status'],
+                    'updated'    => $updated > 0, // true / false
                 ];
             }
 
             // return results
             return [
-                'results' => $results,
-                'response_ai' => $jsonResponse
+                'success'       => true,
+                'total'         => count($results),
+                'results'       => $results,
+                'response_ai'   => $jsonResponse
             ];
         } catch (\Exception $e) {
+
             Log::error('check_search_terms_none failed', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
 
             return [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
+                'success'   => false,
+                'message'   => $e->getMessage(),
+                'trace'     => $e->getTraceAsString(),
             ];
         }
     }
