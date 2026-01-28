@@ -41,6 +41,14 @@ class SearchTermsController extends Controller
         return redirect()->back()->with('success', 'Search term berhasil diperbarui.');
     }
 
+    public function destroy($id)
+    {
+        $term = SearchTerm::findOrFail($id);
+        $term->delete();
+
+        return redirect()->back()->with('success', 'Search term berhasil dihapus.');
+    }
+
     public function none(Request $request)
     {
         $search = trim((string) $request->get('search', ''));

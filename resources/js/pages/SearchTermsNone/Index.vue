@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Pencil, Plus } from 'lucide-vue-next';
+import { Pencil, Plus, Trash2 } from 'lucide-vue-next';
 
 interface SearchTermItem {
   id: number;
@@ -123,6 +123,17 @@ const submitForm = () => {
     });
   }
 };
+
+const deleteTerm = (item: SearchTermItem) => {
+  if (confirm('Apakah Anda yakin ingin menghapus search term ini?')) {
+    router.delete(`/search-terms-none/${item.id}`, {
+      preserveScroll: true,
+      onSuccess: () => {
+        // Optional: Show success message toast
+      },
+    });
+  }
+};
 </script>
 
 <template>
@@ -206,18 +217,28 @@ const submitForm = () => {
                     </span>
                   </td>
                   <td class="px-3 py-2">{{ item.failure_count }}</td>
-                  <td class="px-3 py-2">{{ item.waktu_local }}</td>
+                  <td class="px-3 py-2">{{ item.created_at }}</td>
                   <td class="px-3 py-2">
-                    <Button
-                      v-if="item.source === 'manual'"
-                      variant="ghost"
-                      size="icon"
-                      class="h-8 w-8"
-                      @click="openEditDialog(item)"
-                    >
-                      <Pencil class="h-4 w-4" />
-                      <span class="sr-only">Edit</span>
-                    </Button>
+                    <div class="flex items-center gap-1" v-if="item.source === 'manual'">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        class="h-8 w-8"
+                        @click="openEditDialog(item)"
+                      >
+                        <Pencil class="h-4 w-4" />
+                        <span class="sr-only">Edit</span>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        class="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
+                        @click="deleteTerm(item)"
+                      >
+                        <Trash2 class="h-4 w-4" />
+                        <span class="sr-only">Delete</span>
+                      </Button>
+                    </div>
                   </td>
                 </tr>
                 <tr v-if="items.data.length === 0">
