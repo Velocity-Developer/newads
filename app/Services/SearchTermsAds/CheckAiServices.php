@@ -61,11 +61,11 @@ class CheckAiServices
                 }
 
                 // ambil semua nilai kolom 'term' dari searchTerms, dan jadikan string dengan pemisah pipe |
-                $terms = $searchTerms->pluck('term')->implode('|');
-                $count_terms = $searchTerms->count();
+                $terms = $searchTerms ? $searchTerms->pluck('term')->implode('|') : [];
+                $count_terms = $searchTerms ? $searchTerms->count() : 0;
             } else {
                 $count_terms = count($terms);
-                $terms = implode('|', $terms);
+                $terms = $terms ? implode('|', $terms) : null;
             }
 
             //jika terms kosong

@@ -36,7 +36,7 @@ Schedule::command('app:fetch-search-terms-none')
     ->runInBackground();
 
 //check AI Search Term
-// Schedule::command('app:ai-check-search-terms-none')
-//     ->cron('7-59/5 * * * *')
-//     ->withoutOverlapping()
-//     ->runInBackground();
+Schedule::command('app:ai-check-search-terms-none')
+    ->cron('7-59/5 * * * *')
+    ->withoutOverlapping()
+    ->runInBackground();
