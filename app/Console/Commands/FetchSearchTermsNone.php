@@ -28,6 +28,9 @@ class FetchSearchTermsNone extends Command
     public function handle()
     {
         //
+        $status = 'success';
+        $error = null;
+
         $log = CronLog::create([
             'name' => $this->signature,
             'type' => 'command',
@@ -38,20 +41,16 @@ class FetchSearchTermsNone extends Command
         try {
             $searchTermService = new SearchTermService;
             $dataRes = $searchTermService->getSearchTermsNone();
-
+        } catch (\Exception $e) {
+            $status = 'failed';
+            $error = $e->getMessage();
+        } finally {
             $log->update([
                 'finished_at' => now(),
-                'duration_ms' => now()->diffInMilliseconds($log->started_at),
-                'status' => 'success',
+                'duration_ms' => $log->started_at->diffInMilliseconds(now(), true),
+                'status' => $status,
+                'error' => $error,
             ]);
-        } catch (\Exception $e) {
-            $log->update([
-                'status' => 'failed',
-                'ended_at' => now(),
-                'error' => $e->getMessage(),
-            ]);
-
-            return $this->error($e->getMessage());
-        }
+        };
     }
 }

@@ -28,6 +28,9 @@ class AiCheckSearchTermsNone extends Command
      */
     public function handle()
     {
+        $status = 'success';
+        $error = null;
+
         $log = CronLog::create([
             'name' => $this->signature,
             'type' => 'command',
@@ -41,17 +44,15 @@ class AiCheckSearchTermsNone extends Command
             $response = $checkAiServices->check_search_terms_none();
 
             Log::info('app:ai-check-search-terms-none ', $response);
-
-            $log->update([
-                'finished_at' => now(),
-                'duration_ms' => now()->diffInMilliseconds($log->started_at),
-                'status' => 'success',
-            ]);
         } catch (\Exception $e) {
+            $status = 'failed';
+            $error = $e->getMessage();
+        } finally {
             $log->update([
                 'finished_at' => now(),
-                'status' => 'failed',
-                'error' => $this->error($e->getMessage()),
+                'status' => $status,
+                'error' => $error,
+                'duration_ms' => $log->started_at->diffInMilliseconds(now(), true),
             ]);
         }
     }
