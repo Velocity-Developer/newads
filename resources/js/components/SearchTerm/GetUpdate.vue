@@ -18,9 +18,12 @@ const isModalOpen = ref(false);
 const dataSearchTerms = ref([]);
 
 const emit = defineEmits(['update']);
+const hasUpdated = ref(false);
 
 const openModal = () => {
     isModalOpen.value = true;
+    hasUpdated.value = false;
+    dataSearchTerms.value = [];
     fetchSearchTerms();
 }
 
@@ -31,8 +34,8 @@ const fetchSearchTerms = async () => {
         const response = await axios.get('/update-search-terms-none');
         if (response.data.success) {
             dataSearchTerms.value = response.data.data;
+            hasUpdated.value = true;
             toast.success('Search Terms berhasil diupdate');
-            emit('update', response.data.data);
         } else {
             toast.error('Gagal mengupdate Search Terms');
         }
@@ -42,6 +45,12 @@ const fetchSearchTerms = async () => {
         loading.value = false;
     }
 }
+
+watch(isModalOpen, (newVal) => {
+    if (!newVal && hasUpdated.value) {
+        emit('update', dataSearchTerms.value);
+    }
+});
 </script>
 
 <template>
