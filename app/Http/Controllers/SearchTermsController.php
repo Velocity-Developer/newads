@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\SearchTerm;
+use App\Services\SearchTermsAds\AnalyticServices;
 use App\Services\Velocity\SearchTermService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -48,7 +49,7 @@ class SearchTermsController extends Controller
         return redirect()->back()->with('success', 'Search term berhasil dihapus.');
     }
 
-    public function none(Request $request)
+    public function none(Request $request, AnalyticServices $analyticServices)
     {
         $search = trim((string) $request->get('search', ''));
 
@@ -58,7 +59,7 @@ class SearchTermsController extends Controller
                     ->orWhere('check_ai', 'NONE');
             })
             ->when($search !== '', function ($q) use ($search) {
-                $q->where('term', 'like', '%'.$search.'%');
+                $q->where('term', 'like', '%' . $search . '%');
             })
             ->orderBy($request->get('sort_by', 'id'), $request->get('sort_order', 'desc'));
 
@@ -66,6 +67,12 @@ class SearchTermsController extends Controller
         $perPage = in_array($perPage, [10, 15, 25, 50, 100]) ? $perPage : 15;
 
         $items = $query->paginate($perPage)->withQueryString();
+
+        $analytics = [
+            'total_by_check_ai' => $analyticServices->getTotalByCheckAi(),
+            'total_by_iklan_dibuat' => $analyticServices->getTotalByIklanDibuat(),
+            'total_new_data_by_date' => $analyticServices->getTotalNewDataByDate(now()->subDays(30)->format('Y-m-d'), now()->format('Y-m-d')),
+        ];
 
         return Inertia::render('SearchTermsNone/Index', [
             'items' => $items,
@@ -75,6 +82,7 @@ class SearchTermsController extends Controller
                 'sort_order' => $request->get('sort_order', 'desc'),
                 'per_page' => $perPage,
             ],
+            'analytics' => $analytics,
         ]);
     }
 

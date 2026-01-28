@@ -40,6 +40,11 @@ interface Props {
     sort_order?: string;
     per_page?: number;
   };
+  analytics: {
+    total_by_check_ai: Array<{ check_ai: string | null; total: number }>;
+    total_by_iklan_dibuat: Array<{ iklan_dibuat: boolean; total: number }>;
+    total_new_data_by_date: Array<{ date: string; total: number }>;
+  };
 }
 
 defineProps<Props>();
@@ -141,6 +146,54 @@ const deleteTerm = (item: SearchTermItem) => {
 
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-6">
+
+      <!-- Analytics Cards -->
+      <div class="grid gap-4 md:grid-cols-3">
+        <Card>
+          <CardHeader class="pb-2">
+            <h3 class="font-semibold leading-none tracking-tight">Status Check AI</h3>
+          </CardHeader>
+          <CardContent>
+            <div v-for="item in analytics.total_by_check_ai" :key="item.check_ai || 'null'" class="flex justify-between py-1 text-sm">
+              <span class="text-muted-foreground">{{ item.check_ai || 'Belum Dicek' }}</span>
+              <span class="font-medium">{{ item.total }}</span>
+            </div>
+            <div v-if="analytics.total_by_check_ai.length === 0" class="text-sm text-muted-foreground py-1">
+              Tidak ada data
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader class="pb-2">
+            <h3 class="font-semibold leading-none tracking-tight">Status Iklan Dibuat</h3>
+          </CardHeader>
+          <CardContent>
+            <div v-for="item in analytics.total_by_iklan_dibuat" :key="String(item.iklan_dibuat)" class="flex justify-between py-1 text-sm">
+              <span class="text-muted-foreground">{{ item.iklan_dibuat ? 'Sudah' : 'Belum' }}</span>
+              <span class="font-medium">{{ item.total }}</span>
+            </div>
+            <div v-if="analytics.total_by_iklan_dibuat.length === 0" class="text-sm text-muted-foreground py-1">
+              Tidak ada data
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader class="pb-2">
+            <h3 class="font-semibold leading-none tracking-tight">Data Baru (30 Hari)</h3>
+          </CardHeader>
+          <CardContent class="max-h-40 overflow-y-auto">
+            <div v-for="item in analytics.total_new_data_by_date" :key="item.date" class="flex justify-between py-1 text-sm">
+              <span class="text-muted-foreground">{{ item.date }}</span>
+              <span class="font-medium">{{ item.total }}</span>
+            </div>
+            <div v-if="analytics.total_new_data_by_date.length === 0" class="text-sm text-muted-foreground py-1">
+              Tidak ada data baru dalam 30 hari terakhir
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       <div class="flex justify-end gap-2">
         <Button @click="openAddDialog" class="gap-2">
