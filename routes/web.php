@@ -89,5 +89,5 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/update-search-terms-none', [SearchTermsController::class, 'update_search_terms_none']);
 });
 
-require __DIR__ . '/settings.php';
-require __DIR__ . '/auth.php';
+require __DIR__.'/settings.php';
+require __DIR__.'/auth.php';

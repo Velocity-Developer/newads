@@ -49,7 +49,7 @@ class CheckAiServices
                 - TANPA penjelasan, TANPA teks lain
             PROMPT;
 
-            //jika terms kosong
+            // jika terms kosong
             if (empty($terms)) {
 
                 // dapatkan 40 search term dengan check_ai = null
@@ -68,8 +68,8 @@ class CheckAiServices
                 $terms = $terms ? implode('|', $terms) : null;
             }
 
-            //jika terms kosong
-            if (!$terms || empty($terms)) {
+            // jika terms kosong
+            if (! $terms || empty($terms)) {
                 throw new \Exception('Terms kosong');
             }
 
@@ -105,18 +105,18 @@ class CheckAiServices
                     ->update(['check_ai' => $item['status']]);
 
                 $results[] = [
-                    'term'        => $item['term'],
-                    'status_ai'  => $item['status'],
-                    'updated'    => $updated > 0, // true / false
+                    'term' => $item['term'],
+                    'status_ai' => $item['status'],
+                    'updated' => $updated > 0, // true / false
                 ];
             }
 
             // return results
             return [
-                'success'       => true,
-                'total'         => count($results),
-                'results'       => $results,
-                'response_ai'   => $jsonResponse
+                'success' => true,
+                'total' => count($results),
+                'results' => $results,
+                'response_ai' => $jsonResponse,
             ];
         } catch (\Exception $e) {
 
@@ -126,9 +126,9 @@ class CheckAiServices
             ]);
 
             return [
-                'success'   => false,
-                'message'   => $e->getMessage(),
-                'trace'     => $e->getTraceAsString(),
+                'success' => false,
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ];
         }
     }

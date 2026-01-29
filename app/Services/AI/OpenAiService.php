@@ -23,7 +23,7 @@ class OpenAiService
     public function call(string $prompt, string $message = '')
     {
         try {
-            if (!is_string($prompt) || !is_string($message)) {
+            if (! is_string($prompt) || ! is_string($message)) {
                 throw new \InvalidArgumentException('Prompt and message must be strings');
             }
 
@@ -31,9 +31,9 @@ class OpenAiService
                 ->timeout(120)
                 ->connectTimeout(30)
                 ->withHeaders([
-                    'Authorization' => 'Bearer ' . $this->apiKey,
-                    'Content-Type'  => 'application/json',
-                    'Accept'        => 'application/json',
+                    'Authorization' => 'Bearer '.$this->apiKey,
+                    'Content-Type' => 'application/json',
+                    'Accept' => 'application/json',
                 ])
                 ->post($this->baseUrl, [
                     'model' => $this->model,

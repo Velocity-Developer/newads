@@ -56,7 +56,7 @@ class SearchTermsController extends Controller
 
         $query = SearchTerm::query()
             ->when($search !== '', function ($q) use ($search) {
-                $q->where('term', 'like', '%' . $search . '%');
+                $q->where('term', 'like', '%'.$search.'%');
             })
             ->orderBy($request->get('sort_by', 'id'), $request->get('sort_order', 'desc'));
 
@@ -91,7 +91,7 @@ class SearchTermsController extends Controller
             'terms.*' => ['string'],
         ]);
 
-        if (!$request->terms || empty($request->terms)) {
+        if (! $request->terms || empty($request->terms)) {
             return response()->json([
                 'message' => 'Terms kosong',
                 'success' => false,
@@ -112,7 +112,7 @@ class SearchTermsController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
-                'terms' => $request->terms
+                'terms' => $request->terms,
             ]);
         }
     }

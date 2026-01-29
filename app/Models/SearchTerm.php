@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
 
 class SearchTerm extends Model
 {
@@ -35,7 +35,7 @@ class SearchTerm extends Model
     {
         $waktu = $this->waktu ?? $this->created_at;
 
-        if (!$waktu) {
+        if (! $waktu) {
             return null;
         }
 

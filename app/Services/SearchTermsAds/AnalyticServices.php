@@ -34,8 +34,8 @@ class AnalyticServices
     /**
      * Hitung total data baru berdasarkan tanggal (created_at)
      *
-     * @param string|null $startDate Format: Y-m-d
-     * @param string|null $endDate Format: Y-m-d
+     * @param  string|null  $startDate  Format: Y-m-d
+     * @param  string|null  $endDate  Format: Y-m-d
      * @return \Illuminate\Support\Collection
      */
     public function getTotalNewDataByDate($startDate = null, $endDate = null)

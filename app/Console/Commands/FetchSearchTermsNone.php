@@ -54,6 +54,6 @@ class FetchSearchTermsNone extends Command
                 'error' => $error,
                 'result' => $result,
             ]);
-        };
+        }
     }
 }
