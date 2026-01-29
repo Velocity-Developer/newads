@@ -57,7 +57,11 @@ class CheckAiServices
 
                 // jika tidak ada search term
                 if ($searchTerms->isEmpty()) {
-                    throw new \Exception('Tidak ada search term dengan check_ai = null');
+                    return [
+                        'success' => true,
+                        'total' => 0,
+                        'message' => 'Tidak ada search term dengan check_ai = null',
+                    ];
                 }
 
                 // ambil semua nilai kolom 'term' dari searchTerms, dan jadikan string dengan pemisah pipe |
@@ -70,7 +74,11 @@ class CheckAiServices
 
             // jika terms kosong
             if (! $terms || empty($terms)) {
-                throw new \Exception('Terms kosong');
+                return [
+                    'success' => true,
+                    'total' => 0,
+                    'message' => 'Terms kosong',
+                ];
             }
 
             // kirim ke openai
