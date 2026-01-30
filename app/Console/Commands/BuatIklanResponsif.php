@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\SearchTerm;
 use App\Models\CronLog;
+use App\Services\Velocity\BuatIklanResponsifService;
 
 class BuatIklanResponsif extends Command
 {
@@ -49,7 +50,11 @@ class BuatIklanResponsif extends Command
                 throw new \Exception('Tidak ada search term yang relevan dan belum dibuat iklan');
             }
 
-            $result = json_encode($searchTerms, JSON_PRETTY_PRINT);
+            $service = new BuatIklanResponsifService;
+            $result = $service->send($searchTerms->term, 'ai1 - ' . $searchTerms);
+
+            // $result = json_encode($searchTerms, JSON_PRETTY_PRINT);
+
         } catch (\Exception $e) {
             $status = 'failed';
             $error = $e->getMessage();
