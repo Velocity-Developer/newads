@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\SearchTerm;
 use App\Models\CronLog;
+use App\Models\IklanResponsif;
 use App\Services\Velocity\BuatIklanResponsifService;
 
 class BuatIklanResponsif extends Command
@@ -51,10 +52,26 @@ class BuatIklanResponsif extends Command
             }
 
             $service = new BuatIklanResponsifService;
-            $result = $service->send($searchTerms->term, 'ai1 - ' . $searchTerms);
+            $groupName = 'ai1 - ' . $searchTerms->term;
+            $result = $service->send($searchTerms->term, $groupName);
 
-            // $result = json_encode($searchTerms, JSON_PRETTY_PRINT);
+            if (!empty($result['succes'])) {
+                $dataRes = $result['results'] ?? [];
 
+                IklanResponsif::create([
+                    'group_iklan'       => $dataRes['group_iklan'] ?? $groupName,
+                    'kata_kunci'        => $dataRes['kata_kunci'] ?? $searchTerms->term,
+                    'search_term_id'    => $searchTerms->id,
+                    'nomor_group_iklan' => $dataRes['data']['ad_group_id'] ?? $dataRes['data']['ad_group_id'] ?? null,
+                    'nomor_kata_kunci'  => $dataRes['data']['criterion_id'] ?? $dataRes['data']['criterion_id'] ?? null,
+                    'status'            => 'sudah',
+                ]);
+
+                $searchTerms->update(['iklan_dibuat' => true]);
+            } else {
+                $searchTerms->increment('failure_count');
+                throw new \Exception($result['error'] ?? 'Gagal membuat iklan responsif');
+            }
         } catch (\Exception $e) {
             $status = 'failed';
             $error = $e->getMessage();
