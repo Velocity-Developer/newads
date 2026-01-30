@@ -18,6 +18,6 @@ class IklanResponsif extends Model
     // relasi dengan model SearchTerm
     public function search_term()
     {
-        return $this->hasOne(SearchTerm::class, 'search_term_id', 'id');
+        return $this->belongsTo(SearchTerm::class, 'search_term_id', 'id');
     }
 }

@@ -15,7 +15,7 @@ import {
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { LayoutGrid, List, MegaphoneOff, Send, Tag, Users, FolderClock } from 'lucide-vue-next';
+import { LayoutGrid, List, MegaphoneOff, Send, Tag, Users, FolderClock, Megaphone } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
 const mainNavItems: NavItem[] = [
@@ -48,6 +48,11 @@ const mainNavItems: NavItem[] = [
         title: 'Search Terms None',
         href: '/search-terms-none',
         icon: Tag,
+    },
+    {
+        title: 'Iklan Responsif',
+        href: '/iklan-responsif',
+        icon: Megaphone,
     },
 ];
 

@@ -28,6 +28,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/search-terms-none/{id}', [SearchTermsController::class, 'destroy'])->name('search-terms.destroy');
     Route::post('/search-terms-none/check-ai', [SearchTermsController::class, 'checkAi'])->name('search-terms.check-ai');
 
+    // Iklan Responsif page
+    Route::get('/iklan-responsif', [\App\Http\Controllers\IklanResponsifController::class, 'index'])->name('iklan-responsif.index');
+
     // Users page
     Route::get('/users', [UsersController::class, 'index'])->name('users.index');
     Route::post('/users', [UsersController::class, 'store'])->name('users.store');
