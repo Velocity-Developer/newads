@@ -40,3 +40,7 @@ Schedule::command('kirim-konversi:sync-vdnet')
 //     ->cron('7-59/5 * * * *')
 //     ->withoutOverlapping()
 //     ->runInBackground();
+
+//buat iklan responsif
+// Schedule::command('app:buat-iklan-responsif')
+//     ->everyTwoMinutes();
