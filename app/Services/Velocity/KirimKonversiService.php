@@ -56,7 +56,7 @@ class KirimKonversiService
 
         try {
             $response = Http::timeout(5)->withHeaders([
-                'Authorization' => 'Bearer '.$this->secret_key,
+                'Authorization' => 'Bearer ' . $this->secret_key,
                 'X-Time' => $this->time,
             ])->post($this->api_url, $data);
 
@@ -65,7 +65,7 @@ class KirimKonversiService
                 $dataRes = $response->json();
                 $success = $dataRes['success'] ?? false;
             } else {
-                $errorMsg = 'HTTP '.$response->status();
+                $errorMsg = 'HTTP ' . $response->status();
                 $dataRes = $response->json() ?? [];
             }
         } catch (\Throwable $e) {
@@ -188,7 +188,7 @@ class KirimKonversiService
         // pertahankan format Y-m-d H:i
         $tz = new DateTimeZone('Asia/Jakarta');
         $conversionDt = new DateTime($conversion_time, $tz);
-        $conversionDt->modify('+'.$kelipatan_waktu.' minutes');
+        $conversionDt->modify('+' . $kelipatan_waktu . ' minutes');
         $now = new DateTime('now', $tz);
 
         // validasi conversion_time tidak boleh melebihi waktu saat ini + 5 minutes
@@ -299,7 +299,25 @@ class KirimKonversiService
         try {
             if (isset($konversi_actions[$kategori_konversi_nominal])) {
 
+                $COUNT_KONV = count($konversi_actions[$kategori_konversi_nominal]);
+                $COUNT_SUCCESS = 0;
+
                 foreach ($konversi_actions[$kategori_konversi_nominal] as $conversion_action_id) {
+
+                    // cek apakah sudah ada kirim_konversi dengan gclid dan rekap_form_id,
+                    // handle duplikasi kirim_konversi
+                    $sudah_kirim_konversi = KirimKonversi::where('gclid', $gclid)
+                        ->where('rekap_form_id', $rekapform['id'])
+                        ->where('status', 'success')
+                        ->where('rekap_form_source', $rekapform['source'])
+                        ->where('conversion_action_id', $conversion_action_id)
+                        ->first();
+
+                    if ($sudah_kirim_konversi) {
+                        //jika sudah ada kirim_konversi dengan status success, skip
+                        $COUNT_SUCCESS++;
+                        continue;
+                    }
 
                     // dapatkan kelipatan waktu berdasarkan riwayat kirim konversi
                     $failedCount = KirimKonversi::where('rekap_form_id', $rekapform['id'])
@@ -313,7 +331,7 @@ class KirimKonversiService
                     // pertahankan format Y-m-d H:i
                     $tz = new DateTimeZone('Asia/Jakarta');
                     $conversionDt = new DateTime($conversion_time, $tz);
-                    $conversionDt->modify('+'.$kelipatan_waktu.' minutes');
+                    $conversionDt->modify('+' . $kelipatan_waktu . ' minutes');
                     $now = new DateTime('now', $tz);
 
                     // validasi conversion_time tidak boleh melebihi waktu saat ini + 5 minutes
@@ -323,12 +341,41 @@ class KirimKonversiService
 
                     $conversion_time = $conversionDt->format('Y-m-d H:i');
 
-                    // $dataRes = $this->kirimKonversi('click_conversion', $gclid, $conversion_time, $rekapform, $conversion_action_id);
+                    $dataRes = $this->kirimKonversi('click_conversion', $gclid, $conversion_time, $rekapform, $conversion_action_id);
+
                     Log::info('[KONVERSI] nominal ', [
                         'kategori' => $kategori_konversi_nominal,
                         'rekap_form_id' => $rekapform['id'] ?? null,
                         'conversion_action_id' => $conversion_action_id,
                     ]);
+                    $COUNT_SUCCESS++;
+                    $cek_konversi_nominal = false;
+
+                    // cek apakah semua conversion_action_id sudah di kirim
+                    if ($COUNT_SUCCESS == $COUNT_KONV) {
+
+                        // update rekapform
+                        RekapForm::where('id', $rekapform['id'])
+                            ->update([
+                                'cek_konversi_nominal' => true,
+                            ]);
+                        $cek_konversi_nominal = true;
+
+                        Log::info('[KONVERSI] semua nominal sudah di kirim', [
+                            'kategori' => $kategori_konversi_nominal,
+                            'rekap_form_id' => $rekapform['id'] ?? null,
+                        ]);
+                    }
+
+                    // update ke Vdnet melalui RekapFormServices
+                    $rekapFormServices = new RekapFormServices;
+                    $rekapFormServices->update_cek_konversi([[
+                        'id' => $rekapform['id'],
+                        'jobid' => $dataRes['result']['jobId'],
+                        'kirim_konversi_id' => $dataRes['kirim_konversi']['id'] ?? null,
+                        'conversion_action_id' => $dataRes['kirim_konversi']['conversion_action_id'] ?? null,
+                        'cek_konversi_nominal' => $cek_konversi_nominal,
+                    ]]);
                 }
             }
         } catch (\Exception $e) {

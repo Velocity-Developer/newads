@@ -91,9 +91,11 @@ class KirimKonversiCommand extends Command
                 'trace' => $e->getTraceAsString(),
             ]);
 
+            $finishedAt = now();
             $log->update([
                 'finished_at' => now(),
                 'status' => 'failed',
+                'duration_ms' => $log->started_at->diffInMilliseconds($finishedAt, true),
                 'error' => $e->getMessage(),
             ]);
 
@@ -101,6 +103,13 @@ class KirimKonversiCommand extends Command
         }
 
         try {
+
+            $log_nominal = CronLog::create([
+                'name' => $this->signature . ' nominal',
+                'type' => 'command',
+                'started_at' => now(),
+                'status' => 'running',
+            ]);
 
             // get rekap form
             $rekapFormServices = app()->make(RekapFormServices::class);
@@ -124,12 +133,28 @@ class KirimKonversiCommand extends Command
                     }
                 }
             } else {
-                // Log::info('[CRON] kirim-konversi:sync-vdnet nominal NO REKAP FORM');
+                Log::info('[CRON] kirim-konversi:sync-vdnet nominal NO REKAP FORM');
             }
+
+            $finishedAt = now();
+            $log_nominal->update([
+                'finished_at' => $finishedAt,
+                'duration_ms' => $log_nominal->started_at->diffInMilliseconds($finishedAt, true),
+                'status' => 'success',
+                'result' => json_encode($rekapForms, JSON_PRETTY_PRINT),
+            ]);
         } catch (\Exception $e) {
             Log::error('[CRON] kirim-konversi:sync-vdnet nominal FAILED', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
+            ]);
+
+            $finishedAt = now();
+            $log_nominal->update([
+                'finished_at' => now(),
+                'status' => 'failed',
+                'duration_ms' => $log_nominal->started_at->diffInMilliseconds($finishedAt, true),
+                'error' => $e->getMessage(),
             ]);
 
             return self::FAILURE;
