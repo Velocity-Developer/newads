@@ -56,7 +56,7 @@ class KirimKonversiService
 
         try {
             $response = Http::timeout(5)->withHeaders([
-                'Authorization' => 'Bearer ' . $this->secret_key,
+                'Authorization' => 'Bearer '.$this->secret_key,
                 'X-Time' => $this->time,
             ])->post($this->api_url, $data);
 
@@ -65,7 +65,7 @@ class KirimKonversiService
                 $dataRes = $response->json();
                 $success = $dataRes['success'] ?? false;
             } else {
-                $errorMsg = 'HTTP ' . $response->status();
+                $errorMsg = 'HTTP '.$response->status();
                 $dataRes = $response->json() ?? [];
             }
         } catch (\Throwable $e) {
@@ -188,7 +188,7 @@ class KirimKonversiService
         // pertahankan format Y-m-d H:i
         $tz = new DateTimeZone('Asia/Jakarta');
         $conversionDt = new DateTime($conversion_time, $tz);
-        $conversionDt->modify('+' . $kelipatan_waktu . ' minutes');
+        $conversionDt->modify('+'.$kelipatan_waktu.' minutes');
         $now = new DateTime('now', $tz);
 
         // validasi conversion_time tidak boleh melebihi waktu saat ini + 5 minutes
@@ -314,8 +314,9 @@ class KirimKonversiService
                         ->first();
 
                     if ($sudah_kirim_konversi) {
-                        //jika sudah ada kirim_konversi dengan status success, skip
+                        // jika sudah ada kirim_konversi dengan status success, skip
                         $COUNT_SUCCESS++;
+
                         continue;
                     }
 
@@ -331,7 +332,7 @@ class KirimKonversiService
                     // pertahankan format Y-m-d H:i
                     $tz = new DateTimeZone('Asia/Jakarta');
                     $conversionDt = new DateTime($conversion_time, $tz);
-                    $conversionDt->modify('+' . $kelipatan_waktu . ' minutes');
+                    $conversionDt->modify('+'.$kelipatan_waktu.' minutes');
                     $now = new DateTime('now', $tz);
 
                     // validasi conversion_time tidak boleh melebihi waktu saat ini + 5 minutes

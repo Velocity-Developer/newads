@@ -2,10 +2,7 @@
 
 namespace App\Services\Velocity;
 
-use DateTime;
-use DateTimeZone;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 
 class BuatIklanResponsifService
 {
@@ -22,7 +19,7 @@ class BuatIklanResponsifService
         $this->time = time();
     }
 
-    //buat iklan
+    // buat iklan
     public function send($term, $group_name)
     {
         $success = false;
@@ -33,11 +30,11 @@ class BuatIklanResponsifService
 
             $data = [
                 'term' => $term,
-                'group_name' => $group_name
+                'group_name' => $group_name,
             ];
 
             $response = Http::timeout(5)->withHeaders([
-                'Authorization' => 'Bearer ' . $this->secret_key,
+                'Authorization' => 'Bearer '.$this->secret_key,
                 'X-Time' => $this->time,
             ])->post($this->api_url, $data);
 
@@ -46,7 +43,7 @@ class BuatIklanResponsifService
                 $dataRes = $response->json();
                 $success = $dataRes['success'] ?? false;
             } else {
-                $errorMsg = 'HTTP ' . $response->status();
+                $errorMsg = 'HTTP '.$response->status();
                 $dataRes = $response->json() ?? [];
             }
         } catch (\Exception $e) {
@@ -56,7 +53,7 @@ class BuatIklanResponsifService
             return [
                 'succes' => $success,
                 'error' => $errorMsg,
-                'results' => $dataRes
+                'results' => $dataRes,
             ];
         }
     }

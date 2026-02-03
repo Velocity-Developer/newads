@@ -15,10 +15,10 @@ class IklanResponsifController extends Controller
         if ($request->filled('q')) {
             $searchTerm = $request->input('q');
             $query->where(function ($q) use ($searchTerm) {
-                $q->where('group_iklan', 'like', '%' . $searchTerm . '%')
-                  ->orWhere('kata_kunci', 'like', '%' . $searchTerm . '%')
-                  ->orWhere('nomor_group_iklan', 'like', '%' . $searchTerm . '%')
-                  ->orWhere('nomor_kata_kunci', 'like', '%' . $searchTerm . '%');
+                $q->where('group_iklan', 'like', '%'.$searchTerm.'%')
+                    ->orWhere('kata_kunci', 'like', '%'.$searchTerm.'%')
+                    ->orWhere('nomor_group_iklan', 'like', '%'.$searchTerm.'%')
+                    ->orWhere('nomor_kata_kunci', 'like', '%'.$searchTerm.'%');
             });
         }
 

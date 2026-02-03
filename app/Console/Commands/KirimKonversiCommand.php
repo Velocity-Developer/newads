@@ -105,7 +105,7 @@ class KirimKonversiCommand extends Command
         try {
 
             $log_nominal = CronLog::create([
-                'name' => $this->signature . ' nominal',
+                'name' => $this->signature.' nominal',
                 'type' => 'command',
                 'started_at' => now(),
                 'status' => 'running',

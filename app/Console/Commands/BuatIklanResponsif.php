@@ -2,11 +2,11 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use App\Models\SearchTerm;
 use App\Models\CronLog;
 use App\Models\IklanResponsif;
+use App\Models\SearchTerm;
 use App\Services\Velocity\BuatIklanResponsifService;
+use Illuminate\Console\Command;
 
 class BuatIklanResponsif extends Command
 {
@@ -46,25 +46,25 @@ class BuatIklanResponsif extends Command
                 ->where('check_ai', 'RELEVAN')
                 ->where('failure_count', '<', 3)->first();
 
-            //jika kosong
-            if (!$searchTerms) {
+            // jika kosong
+            if (! $searchTerms) {
                 throw new \Exception('Tidak ada search term yang relevan dan belum dibuat iklan');
             }
 
             $service = new BuatIklanResponsifService;
-            $groupName = 'ai1 - ' . $searchTerms->term;
+            $groupName = 'ai1 - '.$searchTerms->term;
             $result = $service->send($searchTerms->term, $groupName);
 
-            if (!empty($result['succes'])) {
+            if (! empty($result['succes'])) {
                 $dataRes = $result['results'] ?? [];
 
                 IklanResponsif::create([
-                    'group_iklan'       => $dataRes['group_iklan'] ?? $groupName,
-                    'kata_kunci'        => $dataRes['kata_kunci'] ?? $searchTerms->term,
-                    'search_term_id'    => $searchTerms->id,
+                    'group_iklan' => $dataRes['group_iklan'] ?? $groupName,
+                    'kata_kunci' => $dataRes['kata_kunci'] ?? $searchTerms->term,
+                    'search_term_id' => $searchTerms->id,
                     'nomor_group_iklan' => $dataRes['data']['ad_group_id'] ?? $dataRes['data']['ad_group_id'] ?? null,
-                    'nomor_kata_kunci'  => $dataRes['data']['criterion_id'] ?? $dataRes['data']['criterion_id'] ?? null,
-                    'status'            => 'sudah',
+                    'nomor_kata_kunci' => $dataRes['data']['criterion_id'] ?? $dataRes['data']['criterion_id'] ?? null,
+                    'status' => 'sudah',
                 ]);
 
                 $searchTerms->update(['iklan_dibuat' => true]);
@@ -77,11 +77,11 @@ class BuatIklanResponsif extends Command
             $error = $e->getMessage();
         } finally {
             $log->update([
-                'finished_at'   => now(),
-                'status'        => $status,
-                'error'         => $error,
-                'result'        => $result,
-                'duration_ms'   => $log->started_at->diffInMilliseconds(now(), true),
+                'finished_at' => now(),
+                'status' => $status,
+                'error' => $error,
+                'result' => $result,
+                'duration_ms' => $log->started_at->diffInMilliseconds(now(), true),
             ]);
         }
     }
