@@ -3,6 +3,7 @@
 namespace App\Services\NewVDnet;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class RekapFormServices
 {
@@ -113,8 +114,9 @@ class RekapFormServices
     // update_failed
     public function update_failed(int $id, int $failed)
     {
+
         $url = $this->rekapApiUrl . '/rekap-form-update-failed';
-        $payload['data'] = [
+        $payload = [
             'id' => $id,
             'failed' => $failed,
         ];
