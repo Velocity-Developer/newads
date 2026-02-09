@@ -105,7 +105,7 @@ class KirimKonversiCommand extends Command
         try {
 
             $log_nominal = CronLog::create([
-                'name' => $this->signature.' nominal',
+                'name' => $this->signature . ' nominal',
                 'type' => 'command',
                 'started_at' => now(),
                 'status' => 'running',
@@ -115,9 +115,12 @@ class KirimKonversiCommand extends Command
             $rekapFormServices = app()->make(RekapFormServices::class);
             $rekapForms = $rekapFormServices->get_list_kategori_nominal([
                 'per_page' => 1,
+                'pagination' => 0,
             ]);
             // jika rekap form ada, kirim konversi
             if ($rekapForms['data'] && $rekapForms['total'] > 0) {
+
+                Log::info('[CRON] kirim-konversi:sync-vdnet nominal count ' . count($rekapForms['data']));
 
                 // loop kirim konversi
                 foreach ($rekapForms['data'] as $rekapForm) {
