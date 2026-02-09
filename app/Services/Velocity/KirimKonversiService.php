@@ -113,6 +113,14 @@ class KirimKonversiService
 
             // tambahkan ke respon
             $dataRes['kirim_konversi'] = $datakirim;
+
+            //jika tidak success, update rekap form failed
+            if (!$success) {
+                $count_failed = KirimKonversi::where('rekap_form_id', $datarekapform['id'])
+                    ->where('status', 'failed')->count();
+                $rekapFormServices = app()->make(RekapFormServices::class);
+                $rekapFormServices->update_failed($datarekapform['id'], $count_failed);
+            }
         }
 
         return $dataRes;
@@ -211,6 +219,13 @@ class KirimKonversiService
                 'rekap_form_source' => $rekapform['source'] ?? null,
                 'conversion_action_id' => $conversion_action_id ?? null,
             ]);
+
+            // update rekap form failed
+            $count_failed = KirimKonversi::where('rekap_form_id', $rekapform['id'])
+                ->where('status', 'failed')->count();
+            $rekapFormServices = app()->make(RekapFormServices::class);
+            $rekapFormServices->update_failed($rekapform['id'], $count_failed);
+
 
             throw new \Exception('Conversion time tidak boleh melebihi waktu saat ini');
         }

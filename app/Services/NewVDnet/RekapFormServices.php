@@ -109,4 +109,21 @@ class RekapFormServices
 
         return $response->json();
     }
+
+    // update_failed
+    public function update_failed(int $id, int $failed)
+    {
+        $url = $this->rekapApiUrl . '/rekap-form-update-failed';
+        $payload['data'] = [
+            'id' => $id,
+            'failed' => $failed,
+        ];
+
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $this->apiToken,
+            'Accept' => 'application/json',
+        ])->post($url, $payload);
+
+        return $response->json();
+    }
 }
