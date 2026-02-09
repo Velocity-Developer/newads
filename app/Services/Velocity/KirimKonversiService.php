@@ -193,6 +193,25 @@ class KirimKonversiService
 
         // validasi conversion_time tidak boleh melebihi waktu saat ini + 5 minutes
         if ($conversionDt > $now) {
+
+            //create log di KirimKonversi
+            KirimKonversi::create([
+                'gclid' => $gclid ?? null,
+                'jobid' => null,
+                'waktu' => $conversion_time,
+                'status' => 'failed',
+                'response' => [
+                    'conversionDt' => $conversionDt,
+                    'time' => $now,
+                    'error' => 'Conversion time tidak boleh melebihi waktu saat ini',
+                ],
+                'source' => 'greetingads',
+                'tercatat' => 0,
+                'rekap_form_id' => $rekapform['id'] ?? null,
+                'rekap_form_source' => $rekapform['source'] ?? null,
+                'conversion_action_id' => $conversion_action_id ?? null,
+            ]);
+
             throw new \Exception('Conversion time tidak boleh melebihi waktu saat ini');
         }
 
