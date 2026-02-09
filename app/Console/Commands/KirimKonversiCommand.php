@@ -114,7 +114,7 @@ class KirimKonversiCommand extends Command
             // get rekap form
             $rekapFormServices = app()->make(RekapFormServices::class);
             $rekapForms = $rekapFormServices->get_list_kategori_nominal([
-                'per_page' => 1,
+                'per_page' => 3,
                 'pagination' => 0,
             ]);
             // jika rekap form ada, kirim konversi
