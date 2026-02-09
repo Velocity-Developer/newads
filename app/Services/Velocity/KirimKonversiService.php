@@ -333,10 +333,11 @@ class KirimKonversiService
                             $rekapFormServices = new RekapFormServices;
                             $rekapFormServices->update_cek_konversi([[
                                 'id' => $rekapform['id'],
-                                'jobid' => $dataRes['result']['jobId'],
-                                'kirim_konversi_id' => $dataRes['kirim_konversi']['id'] ?? null,
-                                'conversion_action_id' => $dataRes['kirim_konversi']['conversion_action_id'] ?? null,
+                                // 'jobid' => $dataRes['result']['jobId'],
+                                // 'kirim_konversi_id' => $dataRes['kirim_konversi']['id'] ?? null,
+                                // 'conversion_action_id' => $dataRes['kirim_konversi']['conversion_action_id'] ?? null,
                                 'cek_konversi_nominal' => true,
+                                'cek_konversi_ads' => true,
                             ]]);
                         }
 
@@ -391,21 +392,22 @@ class KirimKonversiService
                                 ]);
                             $cek_konversi_nominal = true;
 
-                            // update ke Vdnet melalui RekapFormServices
-                            $rekapFormServices = new RekapFormServices;
-                            $rekapFormServices->update_cek_konversi([[
-                                'id' => $rekapform['id'],
-                                'jobid' => $dataRes['result']['jobId'],
-                                'kirim_konversi_id' => $dataRes['kirim_konversi']['id'] ?? null,
-                                'conversion_action_id' => $dataRes['kirim_konversi']['conversion_action_id'] ?? null,
-                                'cek_konversi_nominal' => $cek_konversi_nominal,
-                            ]]);
-
                             Log::info('[KONVERSI] semua nominal sudah di kirim', [
                                 'kategori' => $kategori_konversi_nominal,
                                 'rekap_form_id' => $rekapform['id'] ?? null,
                             ]);
                         }
+
+                        // update log ke Vdnet melalui RekapFormServices
+                        $rekapFormServices = new RekapFormServices;
+                        $rekapFormServices->update_cek_konversi([[
+                            'id' => $rekapform['id'],
+                            'jobid' => $dataRes['result']['jobId'],
+                            'kirim_konversi_id' => $dataRes['kirim_konversi']['id'] ?? null,
+                            'conversion_action_id' => $dataRes['kirim_konversi']['conversion_action_id'] ?? null,
+                            'cek_konversi_nominal' => $cek_konversi_nominal,
+                            'cek_konversi_ads' => true,
+                        ]]);
                     } else {
                         Log::error('[KONVERSI] nominal failed', [
                             'kategori' => $kategori_konversi_nominal,
