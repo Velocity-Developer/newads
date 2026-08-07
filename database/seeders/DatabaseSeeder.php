@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\UserRole;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -34,7 +35,7 @@ class DatabaseSeeder extends Seeder
         if ($email) {
             $demo = User::updateOrCreate(
                 ['email' => $email],
-                ['name' => 'Admin', 'password' => $password]
+                ['name' => 'Admin', 'password' => $password, 'role' => UserRole::Admin]
             );
             $demo->forceFill([
                 'email_verified_at' => $demo->email_verified_at ?? now(),
@@ -43,5 +44,16 @@ class DatabaseSeeder extends Seeder
                 'two_factor_confirmed_at' => null,
             ])->save();
         }
+
+        // idempotent: buat/update Read-Only Admin
+        User::updateOrCreate(
+            ['email' => 'readonly@example.com'],
+            ['name' => 'Read Only Admin', 'password' => 'password', 'role' => UserRole::ReadOnlyAdmin]
+        )->forceFill([
+            'email_verified_at' => now(),
+            'two_factor_secret' => null,
+            'two_factor_recovery_codes' => null,
+            'two_factor_confirmed_at' => null,
+        ])->save();
     }
 }
