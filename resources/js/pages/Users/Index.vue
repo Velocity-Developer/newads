@@ -12,9 +12,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Head, Link, router, useForm } from '@inertiajs/vue3';
-import { ref, watch } from 'vue';
-import type { BreadcrumbItem, User } from '@/types';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
+import { computed, ref, watch } from 'vue';
+import type { AppPageProps, BreadcrumbItem, User } from '@/types';
 import { Pencil, Trash2, Plus } from 'lucide-vue-next';
 
 interface Paginator<T> {
@@ -34,6 +34,9 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
+const { auth } = usePage<AppPageProps>().props;
+const canManage = computed(() => auth.user.role !== 'read-only-admin');
 
 const breadcrumbs: BreadcrumbItem[] = [
   { title: 'Users', href: '/users' },
@@ -127,7 +130,7 @@ const deleteUser = (user: User) => {
         <CardHeader>
           <div class="flex items-center justify-between">
             <CardTitle>Daftar Users</CardTitle>
-            <Button @click="openAddDialog">
+            <Button v-if="canManage" @click="openAddDialog">
               <Plus/> Tambah User
             </Button>
           </div>
@@ -193,7 +196,7 @@ const deleteUser = (user: User) => {
                     </span>
                   </td>
                   <td class="p-2 text-right">
-                    <div class="flex justify-end gap-2">
+                    <div v-if="canManage" class="flex justify-end gap-2">
                       <Button variant="outline" size="icon" @click="openEditDialog(u)">
                         <Pencil class="h-4 w-4" />
                       </Button>

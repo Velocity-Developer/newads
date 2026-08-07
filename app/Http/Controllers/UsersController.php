@@ -42,16 +42,22 @@ class UsersController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        if ($request->user()?->role === UserRole::ReadOnlyAdmin) {
+            abort(403, 'Read-only admin tidak diizinkan membuat user.');
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
+            'role' => ['required', Rule::enum(UserRole::class)],
         ]);
 
         User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
+            'role' => $validated['role'],
         ]);
 
         return redirect()->back()->with('success', 'User created successfully.');
@@ -59,6 +65,10 @@ class UsersController extends Controller
 
     public function update(Request $request, User $user): RedirectResponse
     {
+        if ($request->user()?->role === UserRole::ReadOnlyAdmin) {
+            abort(403, 'Read-only admin tidak diizinkan mengubah user.');
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
@@ -79,8 +89,12 @@ class UsersController extends Controller
         return redirect()->back()->with('success', 'User updated successfully.');
     }
 
-    public function destroy(User $user): RedirectResponse
+    public function destroy(Request $request, User $user): RedirectResponse
     {
+        if ($request->user()?->role === UserRole::ReadOnlyAdmin) {
+            abort(403, 'Read-only admin tidak diizinkan menghapus user.');
+        }
+
         $user->delete();
 
         return redirect()->back()->with('success', 'User deleted successfully.');
