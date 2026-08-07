@@ -50,7 +50,14 @@ const form = useForm({
   email: '',
   password: '',
   password_confirmation: '',
+  role: '',
 });
+
+const roleOptions = [
+  { value: 'admin', label: 'Admin' },
+  { value: 'user', label: 'User' },
+  { value: 'read-only-admin', label: 'Read Only Admin' },
+];
 
 watch(searchQuery, (val) => {
   const params: Record<string, any> = { search: val, per_page: perPage.value };
@@ -72,6 +79,7 @@ const openAddDialog = () => {
   editingUserId.value = null;
   form.reset();
   form.clearErrors();
+  form.role = 'user';
   isDialogOpen.value = true;
 };
 
@@ -158,6 +166,7 @@ const deleteUser = (user: User) => {
                   <th class="text-left p-2 font-medium">ID</th>
                   <th class="text-left p-2 font-medium">Nama</th>
                   <th class="text-left p-2 font-medium">Email</th>
+                  <th class="text-left p-2 font-medium">Role</th>
                   <th class="text-left p-2 font-medium">Verifikasi Email</th>
                   <th class="text-left p-2 font-medium">Dibuat</th>
                   <th class="text-right p-2 font-medium">Aksi</th>
@@ -168,6 +177,11 @@ const deleteUser = (user: User) => {
                   <td class="p-2">{{ u.id }}</td>
                   <td class="p-2">{{ u.name }}</td>
                   <td class="p-2">{{ u.email }}</td>
+                  <td class="p-2">
+                    <span v-if="u.role === 'admin'" class="text-sm font-medium text-blue-600">Admin</span>
+                    <span v-else-if="u.role === 'read-only-admin'" class="text-sm font-medium text-amber-600">Read Only Admin</span>
+                    <span v-else class="text-sm font-medium text-gray-600">User</span>
+                  </td>
                   <td class="p-2">
                     <span class="text-sm" :class="u.email_verified_at ? 'text-green-600' : 'text-red-600'">
                       {{ u.email_verified_at ? 'Terverifikasi' : 'Belum' }}
@@ -286,6 +300,22 @@ const deleteUser = (user: User) => {
                   v-model="form.password_confirmation"
                   class="col-span-3"
                 />
+              </div>
+            </div>
+            <div class="grid grid-cols-4 items-center gap-4">
+              <Label for="role" class="text-right">
+                Role
+              </Label>
+              <div class="col-span-3">
+                <select
+                  id="role"
+                  v-model="form.role"
+                  class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  :class="{ 'border-red-500': form.errors.role }"
+                >
+                  <option v-for="opt in roleOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+                </select>
+                <div v-if="form.errors.role" class="text-red-500 text-xs mt-1">{{ form.errors.role }}</div>
               </div>
             </div>
             <DialogFooter>
